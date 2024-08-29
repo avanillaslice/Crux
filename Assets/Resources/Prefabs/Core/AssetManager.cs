@@ -103,22 +103,10 @@ public static class AssetManager
         SpecialWeaponUnlockedPrefab = Resources.Load<GameObject>("Prefabs/UI/SpecialWeaponUnlocked");
         PauseMenuPrefab = Resources.Load<GameObject>("Prefabs/UI/PauseMenu");
         InterStageUIPrefab = Resources.Load<GameObject>("Prefabs/UI/InterStageUI");
-        if (ShipSelectionUIPrefab == null)
-        {
-            Debug.LogError("Failed to load ShipSelectionUIPrefab!");
-        }
-        if (PickupMessagePrefab == null)
-        {
-            Debug.LogError("Failed to load PickupMessagePrefab!");
-        }
-        if (SpecialWeaponUnlockedPrefab == null)
-        {
-            Debug.LogError("Failed to load SpecialWeaponUnlockedPrefab!");
-        }
-        if (PauseMenuPrefab == null)
-        {
-            Debug.LogError("Failed to load PauseMenuPrefab!");
-        }
+        if (ShipSelectionUIPrefab == null) Debug.LogError("Failed to load ShipSelectionUIPrefab!");
+        if (PickupMessagePrefab == null) Debug.LogError("Failed to load PickupMessagePrefab!");
+        if (SpecialWeaponUnlockedPrefab == null) Debug.LogError("Failed to load SpecialWeaponUnlockedPrefab!");
+        if (PauseMenuPrefab == null) Debug.LogError("Failed to load PauseMenuPrefab!");
     }
 
     private static void CacheAudioAssets()
@@ -140,10 +128,7 @@ public static class AssetManager
             SoundEffects[fileName] = audioClip;
         }
 
-        if (SoundEffects.Count == 0)
-        {
-            Debug.LogError("No audio files found in the Audio/SoundEffects directory.");
-        }
+        if (SoundEffects.Count == 0) Debug.LogError("No audio files found in the Audio/SoundEffects directory.");
     }
 
     private static void CacheBackgroundMusic()
@@ -158,10 +143,7 @@ public static class AssetManager
             BackgroundMusic[fileName] = audioClip;
         }
 
-        if (BackgroundMusic.Count == 0)
-        {
-            Debug.LogError("No audio files found in the Audio/BackgroundMusic directory.");
-        }
+        if (BackgroundMusic.Count == 0) Debug.LogError("No audio files found in the Audio/BackgroundMusic directory.");
     }
 
     private static void CacheBossMusic()
@@ -176,10 +158,7 @@ public static class AssetManager
             BossMusic[fileName] = audioClip;
         }
 
-        if (BossMusic.Count == 0)
-        {
-            Debug.LogError("No audio files found in the Audio/BackgroundMusic/Boss directory.");
-        }
+        if (BossMusic.Count == 0) Debug.LogError("No audio files found in the Audio/BackgroundMusic/Boss directory.");
     }
 
     private static void CacheShipPrefabs()
@@ -199,18 +178,9 @@ public static class AssetManager
                 Debug.LogError($"Failed to load EnemyShip {shipName} prefab!");
             }
         }
-        if (PlayerPrefab == null)
-        {
-            Debug.LogError("Failed to load Player prefab!");
-        }
-        if (ShieldDronePrefab == null)
-        {
-            Debug.LogError("Failed to load ShieldDrone Prefab!");
-        }
-        if (AttackDronePrefab == null)
-        {
-            Debug.LogError("Failed to load ShieldDrone Prefab!");
-        }
+        if (PlayerPrefab == null) Debug.LogError("Failed to load Player prefab!");
+        if (ShieldDronePrefab == null) Debug.LogError("Failed to load ShieldDrone Prefab!");
+        if (AttackDronePrefab == null) Debug.LogError("Failed to load ShieldDrone Prefab!");
     }
 
     private static void CacheWeaponPrefabs()
@@ -249,72 +219,35 @@ public static class AssetManager
     {
         // CORE
         WavePrefab = Resources.Load<Wave>("Prefabs/Game/Wave");
-        if (WavePrefab == null)
-        {
-            Debug.LogError("Failed to load Wave prefab!");
-        }
+        if (WavePrefab == null) Debug.LogError("Failed to load Wave prefab!");
 
         // GAME
         ItemDropPrefab = Resources.Load<ItemDrop>("Prefabs/Game/ItemDrop");
-        if (ItemDropPrefab == null)
-        {
-            Debug.LogError("Failed to load ItemDrop prefab!");
-        }
+        if (ItemDropPrefab == null) Debug.LogError("Failed to load ItemDrop prefab!");
     }
 
     private static void CacheBackgroundAssets()
     {
         // UI
-        StarMapPrefab = Resources.Load<GameObject>("Prefabs/UI/StarMap");
-        LifeIconPrefab = Resources.Load<GameObject>("Prefabs/UI/ShipIcon");
-        WeaponSlotPrefab = Resources.Load<GameObject>("Prefabs/UI/WeaponSlot");
-        if (LifeIconPrefab == null)
-        {
-            Debug.LogError("Failed to load ShipIcon prefab!");
-        }
-        if (WeaponSlotPrefab == null)
-        {
-            Debug.LogError("Failed to load WeaponSlot prefab!");
-        }
-        if (StarMapPrefab == null)
-        {
-            Debug.LogError("Failed to load StarMap prefab!");
-        }
+        StarMapPrefab = Resources.Load<GameObject>("Prefabs/UI/Background/StarMap");
+        LifeIconPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/ShipIcon");
+        if (LifeIconPrefab == null) Debug.LogError("Failed to load ShipIcon prefab!");
+        if (StarMapPrefab == null) Debug.LogError("Failed to load StarMap prefab!");
 
         // Distant Object
-        DistantStarPrefab = Resources.Load<GameObject>("Prefabs/UI/DistantStar");
-        DistantPlanetPrefab = Resources.Load<GameObject>("Prefabs/UI/DistantPlanet");
-        if (DistantStarPrefab == null)
-        {
-            Debug.LogError("Failed to load DistantStarPrefab!");
-        }
-        if (DistantPlanetPrefab == null)
-        {
-            Debug.LogError("Failed to load DistantPlanetPrefab!");
-        }
-
-        PlanetPrefab = Resources.Load<GameObject>("Prefabs/UI/Planet");
-        if (PlanetPrefab == null)
-        {
-            Debug.LogError("Failed to load PlanetPrefab!");
-        }
+        DistantStarPrefab = Resources.Load<GameObject>("Prefabs/UI/Background/DistantStar");
+        DistantPlanetPrefab = Resources.Load<GameObject>("Prefabs/UI/Background/DistantPlanet");
+        PlanetPrefab = Resources.Load<GameObject>("Prefabs/UI/Background/Planet");
+        if (DistantStarPrefab == null) Debug.LogError("Failed to load DistantStarPrefab!");
+        if (DistantPlanetPrefab == null) Debug.LogError("Failed to load DistantPlanetPrefab!");
+        if (PlanetPrefab == null) Debug.LogError("Failed to load PlanetPrefab!");
 
         // Load all sprites from the specified directories
         DistantStarSprites.AddRange(Resources.LoadAll<Sprite>("Sprites/SPACE/DistantStars"));
         DistantPlanetSprites.AddRange(Resources.LoadAll<Sprite>("Sprites/SPACE/DistantPlanets"));
         PlanetSprites.AddRange(Resources.LoadAll<Sprite>("Sprites/SPACE/Planets"));
-        if (DistantStarSprites.Count == 0)
-        {
-            Debug.LogError("No distant star sprites found in the specified directory.");
-        }
-
-        if (DistantPlanetSprites.Count == 0)
-        {
-            Debug.LogError("No distant planet sprites found in the specified directory.");
-        }
-        if (PlanetSprites.Count == 0)
-        {
-            Debug.LogError("No planet sprites found in the specified directory.");
-        }
+        if (DistantStarSprites.Count == 0) Debug.LogError("No distant star sprites found in the specified directory.");
+        if (DistantPlanetSprites.Count == 0) Debug.LogError("No distant planet sprites found in the specified directory.");
+        if (PlanetSprites.Count == 0) Debug.LogError("No planet sprites found in the specified directory.");
     }
 }
