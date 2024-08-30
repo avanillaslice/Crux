@@ -97,17 +97,27 @@ public static class GameManager
 
     public static async void HandleStageCompleted()
     {
-        // TransitionToInterStage();
+        GameInputHandler.Inst.DisableGameplayControls();
         await PlayerManager.Inst.FlyOutOfScene();
+        TransitionToInterStage();
         // await LoadSceneAsync("MainMenu");
     }
 
     public static void TransitionToInterStage()
     {
-        GameInputHandler.Inst.DisableGameplayControls();
         HUDManager.Inst.DisableGameplayUI();
         HUDManager.Inst.EnableInterStageUI();
         GameInputHandler.Inst.EnableMenuNavigationControls();
+    }
+
+    public static async void HandleInterStageCompleted()
+    {
+        GameInputHandler.Inst.DisableMenuNavigationControls();
+        HUDManager.Inst.DisableInterStageUI();
+        HUDManager.Inst.EnableGameplayUI();
+        await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
+        GameInputHandler.Inst.EnableGameplayControls();
+        StageManager.StartStage(0);
     }
 
     public static Task LoadSceneAsync(string sceneName)

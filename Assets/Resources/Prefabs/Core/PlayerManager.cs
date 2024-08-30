@@ -115,11 +115,17 @@ public class PlayerManager : MonoBehaviour
     {
         Vector3 spawnPosition = initialSpawn ? new Vector3(0, -7, 10) : new Vector3(0, -4, 10);
 
-        ActivePlayerShip = Instantiate(AssetManager.PlayerPrefab, spawnPosition, Quaternion.identity);
-        // Sets the players ship for each still and attemps activation (if not already)
-        ShipSkillManager.AssignShipToSkills(ActiveSkills, ActivePlayerShip);
-        // Reattach saved weapon prefabs
-        ReattachWeapons();
+        if (ActivePlayerShip != null) {
+            ActivePlayerShip.transform.position = spawnPosition;
+        }
+        else
+        {
+            ActivePlayerShip = Instantiate(AssetManager.PlayerPrefab, spawnPosition, Quaternion.identity);
+            // Sets the players ship for each still and attemps activation (if not already)
+            ShipSkillManager.AssignShipToSkills(ActiveSkills, ActivePlayerShip);
+            // Reattach saved weapon prefabs
+            ReattachWeapons();
+        }
 
         if (initialSpawn) await FlyIntoScene();
     }

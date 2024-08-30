@@ -16,6 +16,7 @@ public class HUDManager : MonoBehaviour
     public GameObject GameplayUICanvas;
     public GameObject InterStageUICanvas;
     private GameObject PauseMenuUI;
+    private GameObject InterStageUI;
     private GameObject SpecialWeaponUnlockedUI;
 
     private Coroutine scoreUpdateCoroutine;
@@ -141,18 +142,23 @@ public class HUDManager : MonoBehaviour
 
     public void EnableInterStageUI()
     {
-        // InterStageUI = Instantiate(AssetManager.InterStageUIPrefab, InterStageUICanvas.transform);
+        if (InterStageUI == null) InterStageUI = Instantiate(AssetManager.InterStageUIPrefab, InterStageUICanvas.transform);
+        else InterStageUI.SetActive(true);
     }
 
     public void DisableInterStageUI()
     {
-        // if (InterStageUI == null) return;
-        // else Destroy(InterStageUI);
+        if (InterStageUI == null) return;
+        else InterStageUI.SetActive(false);
     }
 
     public void DisableGameplayUI()
     {
         GameplayUICanvas.SetActive(false);
+    }
+    public void EnableGameplayUI()
+    {
+        GameplayUICanvas.SetActive(true);
     }
 
     public void DisableSpecialWeaponUnlockedUI()
