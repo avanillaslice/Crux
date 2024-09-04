@@ -38,14 +38,14 @@ public static class GameManager
 
     private static void PauseGame()
     {
-        HUDManager.Inst.EnablePauseMenu();
+        UIManager.Inst.EnablePauseMenu();
         Time.timeScale = 0f;
         IsPaused = true;
     }
 
     private static void UnPauseGame()
     {
-        HUDManager.Inst.DisablePauseMenu();
+        UIManager.Inst.DisablePauseMenu();
         Time.timeScale = 1f;
         IsPaused = false;
     }
@@ -53,7 +53,7 @@ public static class GameManager
     public static void HandleSpecialWeaponUnlock()
     {
         if (HasDisplayedFirstSpecialWeaponUI) return;
-        HUDManager.Inst.EnableSpecialWeaponUnlockedUI();
+        UIManager.Inst.EnableSpecialWeaponUnlockedUI();
         Time.timeScale = 0f;
         DisplayingFirstSpecialWeaponUI = true;
         HasDisplayedFirstSpecialWeaponUI = true;
@@ -63,7 +63,7 @@ public static class GameManager
     public static void DisableFirstSpecialWeaponUI()
     {
         if (!DisplayingFirstSpecialWeaponUI) return;
-        HUDManager.Inst.DisableSpecialWeaponUnlockedUI();
+        UIManager.Inst.DisableSpecialWeaponUnlockedUI();
         Time.timeScale = 1f;
         DisplayingFirstSpecialWeaponUI = false;
         IsPaused = false;
@@ -105,16 +105,16 @@ public static class GameManager
 
     public static void TransitionToInterStage()
     {
-        HUDManager.Inst.DisableGameplayUI();
-        HUDManager.Inst.EnableInterStageUI();
+        HUDManager.Inst.DisableHUD();
+        UIManager.Inst.EnableInterStageUI();
         GameInputHandler.Inst.EnableMenuNavigationControls();
     }
 
     public static async void HandleInterStageCompleted()
     {
         GameInputHandler.Inst.DisableMenuNavigationControls();
-        HUDManager.Inst.DisableInterStageUI();
-        HUDManager.Inst.EnableGameplayUI();
+        UIManager.Inst.DisableInterStageUI();
+        HUDManager.Inst.EnableHUD();
         await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
         GameInputHandler.Inst.EnableGameplayControls();
         StageManager.StartStage(0);

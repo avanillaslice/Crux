@@ -27,7 +27,6 @@ public class ShipSelection : MonoBehaviour
 
     public void MoveCursorLeft()
     {
-        Debug.Log("[ShipSelection] MoveCursorLeft");
         if (Ships == null || Ships.Count == 0)
         {
             Debug.LogError("Ships list is not set.");
@@ -40,7 +39,6 @@ public class ShipSelection : MonoBehaviour
 
     public void MoveCursorRight()
     {
-        Debug.Log("[ShipSelection] MoveCursorRight");
         if (Ships == null || Ships.Count == 0)
         {
             Debug.LogError("Ships list is not set.");

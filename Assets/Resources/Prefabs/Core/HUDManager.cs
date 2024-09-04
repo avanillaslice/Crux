@@ -10,14 +10,8 @@ public class HUDManager : MonoBehaviour
     public Slider shieldBar;
     public TextMeshProUGUI ScoreDisplay;
     public Transform LivesDisplay;
-    // public Transform WeaponSlotsDisplay;
-    // private float WeaponSlotSpacing = 105f;
     private float LifeIconSpacing = 35f;
-    public GameObject GameplayUICanvas;
-    public GameObject InterStageUICanvas;
-    private GameObject PauseMenuUI;
-    private GameObject InterStageUI;
-    private GameObject SpecialWeaponUnlockedUI;
+    public GameObject HUDCanvas;
 
     private Coroutine scoreUpdateCoroutine;
     private float currentDisplayedScore;
@@ -39,6 +33,16 @@ public class HUDManager : MonoBehaviour
         healthBar.maxValue = 100; // percentage
         shieldBar.maxValue = 100; // percentage
         UpdateLivesDisplay();
+    }
+
+    public void EnableHUD()
+    {
+        HUDCanvas.SetActive(true);
+    }
+
+    public void DisableHUD()
+    {
+        HUDCanvas.SetActive(false);
     }
 
     public void UpdateHealthBar()
@@ -110,59 +114,5 @@ public class HUDManager : MonoBehaviour
 
         // Destroy the message object after the animation duration
         Destroy(messageObj, 1.25f); // Adjust the duration to match your animation length
-    }
-
-    public void EnablePauseMenu()
-    {
-        if (PauseMenuUI == null) PauseMenuUI = Instantiate(AssetManager.PauseMenuPrefab, GameplayUICanvas.transform);
-        else PauseMenuUI.SetActive(true);
-    }
-
-    public void DisablePauseMenu()
-    {
-        if (PauseMenuUI == null) return;
-        else PauseMenuUI.SetActive(false);
-    }
-
-    public void EnableSpecialWeaponUnlockedUI()
-    {
-        SpecialWeaponUnlockedUI = Instantiate(AssetManager.SpecialWeaponUnlockedPrefab, GameplayUICanvas.transform);
-
-        // Find the Animator component in the child GameObject
-        Animator animator = SpecialWeaponUnlockedUI.GetComponentInChildren<Animator>();
-        if (animator != null)
-        {
-            animator.updateMode = AnimatorUpdateMode.UnscaledTime;
-        }
-        else
-        {
-            Debug.LogWarning("Animator component not found in the SpecialWeaponUnlockedUI prefab.");
-        }
-    }
-
-    public void EnableInterStageUI()
-    {
-        if (InterStageUI == null) InterStageUI = Instantiate(AssetManager.InterStageUIPrefab, InterStageUICanvas.transform);
-        else InterStageUI.SetActive(true);
-    }
-
-    public void DisableInterStageUI()
-    {
-        if (InterStageUI == null) return;
-        else InterStageUI.SetActive(false);
-    }
-
-    public void DisableGameplayUI()
-    {
-        GameplayUICanvas.SetActive(false);
-    }
-    public void EnableGameplayUI()
-    {
-        GameplayUICanvas.SetActive(true);
-    }
-
-    public void DisableSpecialWeaponUnlockedUI()
-    {
-        Destroy(SpecialWeaponUnlockedUI);
     }
 }

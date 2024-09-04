@@ -2,13 +2,18 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    // ! Can probably not inherit from MonoBehaviour
-    // ! Setup an Instantiate function and then sceneLock the functionality
-    // ! This allows the pauseMenu to be loaded and also not be active in the editor
     public static UIManager Inst { get; private set; }
-    // private bool GameIsActive = false;
+
+    // CANVAS
+    public GameObject GameplayOverlayCanvas;
+    public GameObject InterStageUICanvas;
+
+    // UI PREFABS
     public GameObject MainMenuUI;
     private GameObject ShipSelectionUI;
+    private GameObject PauseMenuUI;
+    private GameObject InterStageUI;
+    private GameObject SpecialWeaponUnlockedUI;
 
     void Awake()
     {
@@ -38,6 +43,52 @@ public class UIManager : MonoBehaviour
         ShipSelectionUI.SetActive(true);
     }
 
+    public void EnablePauseMenu()
+    {
+        if (PauseMenuUI == null) PauseMenuUI = Instantiate(AssetManager.PauseMenuPrefab, GameplayOverlayCanvas.transform);
+        else PauseMenuUI.SetActive(true);
+    }
+
+    public void DisablePauseMenu()
+    {
+        if (PauseMenuUI == null) return;
+        else PauseMenuUI.SetActive(false);
+    }
+
+    public void EnableSpecialWeaponUnlockedUI()
+    {
+        SpecialWeaponUnlockedUI = Instantiate(AssetManager.SpecialWeaponUnlockedPrefab, GameplayOverlayCanvas.transform);
+
+        // Find the Animator component in the child GameObject
+        Animator animator = SpecialWeaponUnlockedUI.GetComponentInChildren<Animator>();
+        if (animator != null)
+        {
+            animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+        }
+        else
+        {
+            Debug.LogWarning("Animator component not found in the SpecialWeaponUnlockedUI prefab.");
+        }
+    }
+
+    public void DisableSpecialWeaponUnlockedUI()
+    {
+        Destroy(SpecialWeaponUnlockedUI);
+    }
+
+    public void EnableInterStageUI()
+    {
+        if (InterStageUI == null) InterStageUI = Instantiate(AssetManager.InterStageUIPrefab, InterStageUICanvas.transform);
+        else InterStageUI.SetActive(true);
+    }
+
+    public void DisableInterStageUI()
+    {
+        if (InterStageUI == null) return;
+        else InterStageUI.SetActive(false);
+    }
+
+    // Menu Controls...
     public void HandleMoveUp()
     {
 
