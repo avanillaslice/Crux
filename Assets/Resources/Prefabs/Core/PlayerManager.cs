@@ -13,6 +13,7 @@ public class PlayerManager : MonoBehaviour
     public int Lives { get; set; }
     public PlayerShip ActivePlayerShip { get; set; }
     private AudioSource AudioSource;
+    public bool IsRespawning { get; set; }
 
     // Relevant GameObjects
     public GameObject BottomPlayerBoundary;
@@ -73,6 +74,7 @@ public class PlayerManager : MonoBehaviour
     public void RespawnPlayer()
     {
         Debug.Log("Player destroyed. Respawning in 2 seconds...");
+        IsRespawning = true;
         StartCoroutine(DelayedRespawn(GameConfig.RespawnTimer)); // 2 seconds delay
     }
 
@@ -85,11 +87,28 @@ public class PlayerManager : MonoBehaviour
 
     public async Task FlyOutOfScene()
     {
+        if (ActivePlayerShip == null) await AwaitPlayerRespawn();
         TopPlayerBoundary.SetActive(false);
         var tcs = new TaskCompletionSource<bool>();
         StartCoroutine(MoveOutOfSceneWithAcceleration(ActivePlayerShip.transform, 3.0f, 1f, tcs));
         await tcs.Task; // Wait for the movement to complete
         TopPlayerBoundary.SetActive(true);
+    }
+
+    private async Task AwaitPlayerRespawn()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+        StartCoroutine(WaitForPlayerRespawn(tcs));
+        await tcs.Task;
+    }
+
+    private IEnumerator WaitForPlayerRespawn(TaskCompletionSource<bool> tcs)
+    {
+        while (ActivePlayerShip == null)
+        {
+            yield return null;
+        }
+        tcs.SetResult(true);
     }
 
     private IEnumerator MoveOutOfSceneWithAcceleration(Transform transform, float initialSpeed, float acceleration, TaskCompletionSource<bool> tcs)
@@ -128,6 +147,7 @@ public class PlayerManager : MonoBehaviour
         }
 
         if (initialSpawn) await FlyIntoScene();
+        IsRespawning = false;
     }
 
     public async Task FlyIntoScene()

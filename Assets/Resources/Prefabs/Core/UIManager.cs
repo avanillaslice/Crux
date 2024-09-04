@@ -89,6 +89,10 @@ public class UIManager : MonoBehaviour
     }
 
     // Menu Controls...
+    /*
+    Could potentially have it attempt to send HandleMove to all menus
+    Only the active one will receive. Although could cause annoying issues..
+    */
     public void HandleMoveUp()
     {
 
