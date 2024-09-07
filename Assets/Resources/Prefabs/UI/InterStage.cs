@@ -7,17 +7,12 @@ public class InterStage : MonoBehaviour
         GameManager.HandleInterStageCompleted();
     }
 
-    public void OpenOptions()
+    public void Loadout()
     {
-        // Assuming you have an options menu scene or a way to show options
-        Debug.Log("Open options here.");
-        // GameManager.NavigateToOptions();
-        // Implement your options menu functionality here, e.g., GameManager.LoadScene("OptionsMenu");
+        UIManager.Inst.TransitionToLoadout();
     }
 
-    public void ExitGame()
+    public void Skills()
     {
-        // Exit the application
-        Application.Quit();
     }
 }

@@ -136,6 +136,7 @@ MonoBehaviour:
   BaseFireRate: 1
   SlotType: 1
   WeaponType: 0
+  WeaponName: Homing Missile
   WeaponIcon: {fileID: 21300000, guid: 820539e1357884a449d918a00361028d, type: 3}
 --- !u!50 &3445493918662094056
 Rigidbody2D:

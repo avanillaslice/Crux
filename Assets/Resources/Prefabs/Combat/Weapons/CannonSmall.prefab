@@ -79,6 +79,7 @@ MonoBehaviour:
   BaseFireRate: 10
   SlotType: 1
   WeaponType: 0
+  WeaponName: Cannon MK1
   WeaponIcon: {fileID: 21300000, guid: bcb4be6604a8fc4459c39121d27070c9, type: 3}
 --- !u!1 &1236918301431211634
 GameObject:

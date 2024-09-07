@@ -174,3 +174,5 @@ MonoBehaviour:
   BaseFireRate: 0
   SlotType: 2
   WeaponType: 2
+  WeaponName: Drone Shield
+  WeaponIcon: {fileID: 0}

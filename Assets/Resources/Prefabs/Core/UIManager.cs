@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     private GameObject ShipSelectionUI;
     private GameObject PauseMenuUI;
     private GameObject InterStageUI;
+    private GameObject LoadoutUI;
     private GameObject SpecialWeaponUnlockedUI;
 
     void Awake()
@@ -43,16 +44,10 @@ public class UIManager : MonoBehaviour
         ShipSelectionUI.SetActive(true);
     }
 
-    public void EnablePauseMenu()
+    public void TransitionToLoadout()
     {
-        if (PauseMenuUI == null) PauseMenuUI = Instantiate(AssetManager.PauseMenuPrefab, GameplayOverlayCanvas.transform);
-        else PauseMenuUI.SetActive(true);
-    }
-
-    public void DisablePauseMenu()
-    {
-        if (PauseMenuUI == null) return;
-        else PauseMenuUI.SetActive(false);
+        DisableInterStageUI();
+        EnableLoadoutUI();
     }
 
     public void EnableSpecialWeaponUnlockedUI()
@@ -86,6 +81,18 @@ public class UIManager : MonoBehaviour
     {
         if (InterStageUI == null) return;
         else InterStageUI.SetActive(false);
+    }
+
+    private void EnableLoadoutUI()
+    {
+        if (LoadoutUI == null) LoadoutUI = Instantiate(AssetManager.LoadoutUIPrefab, InterStageUICanvas.transform);
+        else LoadoutUI.SetActive(true);
+    }
+
+    private void DisableLoadoutUI()
+    {
+        if (LoadoutUI == null) return;
+        else LoadoutUI.SetActive(false);
     }
 
     // Menu Controls...
@@ -126,5 +133,17 @@ public class UIManager : MonoBehaviour
         {
             ShipSelectionUI.GetComponent<ShipSelection>().SelectShip();
         }
+    }
+
+    public void EnablePauseMenu()
+    {
+        if (PauseMenuUI == null) PauseMenuUI = Instantiate(AssetManager.PauseMenuPrefab, GameplayOverlayCanvas.transform);
+        else PauseMenuUI.SetActive(true);
+    }
+
+    public void DisablePauseMenu()
+    {
+        if (PauseMenuUI == null) return;
+        else PauseMenuUI.SetActive(false);
     }
 }

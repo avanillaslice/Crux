@@ -78,6 +78,7 @@ MonoBehaviour:
   BaseFireRate: 0
   SlotType: 2
   WeaponType: 2
+  WeaponName: Electro Shield
   WeaponIcon: {fileID: 2135384176, guid: 62331c40eb3b2d047b3feeb7086c7df2, type: 3}
   InitialCharge: 10
   InitialHealth: 300

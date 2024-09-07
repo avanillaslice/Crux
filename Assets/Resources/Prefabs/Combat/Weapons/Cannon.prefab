@@ -52,6 +52,7 @@ MonoBehaviour:
   BaseFireRate: 5
   SlotType: 1
   WeaponType: 0
+  WeaponName: Cannon MK2
   WeaponIcon: {fileID: 21300000, guid: 1eceeaac854ade1409f54b92ac69a9a9, type: 3}
 --- !u!50 &8890908432663946412
 Rigidbody2D:

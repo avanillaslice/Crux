@@ -19,6 +19,7 @@ public class WeaponSlot
     public SlotType Type;
     public WeaponType WeaponType;
     public Sprite WeaponIcon;
+    public string WeaponName;
     public List<AttachPoint> AttachPoints;
 }
 
@@ -216,6 +217,7 @@ public abstract class ShipBase : MonoBehaviour
                     {
                         weaponSlot.WeaponType = weaponBase.WeaponType;
                         weaponSlot.PrefabName = weaponBase.GetType().Name; // Set the PrefabName to the class name
+                        weaponSlot.WeaponName = weaponBase.WeaponName;
                     }
                     weaponSlot.IsEmpty = false;
                 }
@@ -382,6 +384,7 @@ public abstract class ShipBase : MonoBehaviour
         {
             attachPoint.AttachWeapon(weaponPrefab, true);
             weaponSlot.WeaponType = attachPoint.AttachedWeapon.GetComponent<WeaponBase>().WeaponType;
+            weaponSlot.WeaponName = attachPoint.AttachedWeapon.GetComponent<WeaponBase>().WeaponName;
         }
         weaponSlot.IsEmpty = false;
         // play audio here

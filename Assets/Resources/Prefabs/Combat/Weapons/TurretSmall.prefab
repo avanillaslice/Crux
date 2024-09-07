@@ -79,6 +79,7 @@ MonoBehaviour:
   BaseFireRate: 10
   SlotType: 1
   WeaponType: 0
+  WeaponName: Small Auto Turret
   WeaponIcon: {fileID: 21300000, guid: 920e28e9fb1a1ea40bd7a530ff517223, type: 3}
   rotationSpeed: 10
   MaxTargetRange: 8
