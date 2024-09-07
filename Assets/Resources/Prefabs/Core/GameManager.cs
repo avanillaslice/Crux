@@ -97,8 +97,8 @@ public static class GameManager
 
     public static async void HandleStageCompleted()
     {
-        GameInputHandler.Inst.DisableGameplayControls();
         await PlayerManager.Inst.FlyOutOfScene();
+        GameInputHandler.Inst.DisableGameplayControls();
         TransitionToInterStage();
         // await LoadSceneAsync("MainMenu");
     }

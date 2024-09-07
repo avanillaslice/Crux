@@ -14,4 +14,4 @@ Stages:
                 Amt: 4
               - ShipType: SF2
                 Amt: 4
-            Drops: []
+            Drops: [ElectroShield]
