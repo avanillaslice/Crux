@@ -3,10 +3,14 @@ using UnityEngine;
 
 public class InventorySlotButton : MonoBehaviour
 {
+    public Color DefaultColor;
+    public Color HighlightedColor;
     private GameObject WeaponPrefab;
     public SlotType SlotType;
     public TextMeshProUGUI WeaponName;
     public bool IsEmpty = true;
+    public bool IsSelected;
+    public int ListIndex;
 
     public void SetWeapon(GameObject weaponPrefab)
     {
@@ -23,10 +27,18 @@ public class InventorySlotButton : MonoBehaviour
         IsEmpty = true;
     }
 
-    public void Select(){
-        // Set Selected UI
+    public void HandlePointerEnter()
+    {
+        Loadout.Inst.SetSelectedInventorySlotButton(ListIndex);
+    }
+
+    public void Select()
+    {
+        WeaponName.color = HighlightedColor;
+        IsSelected = true;
     }
     public void Deselect(){
-        // Set Deselected UI
+        WeaponName.color = DefaultColor;
+        IsSelected = false;
     }
 }

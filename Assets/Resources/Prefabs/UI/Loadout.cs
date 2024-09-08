@@ -2,19 +2,27 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Loadout : MonoBehaviour
 {
     public static Loadout Inst { get; private set; }
 
+    // WEAPON SLOTS
     public GameObject WeaponSlotContainer;
     private List<WeaponSlotButton> WeaponSlotButtons;
     private WeaponSlotButton CurrentWeaponSlotButton;
     private int CurrentWeaponSlotButtonIndex;
 
+    // INVENTORY
     public GameObject InventorySlotContainer;
     private List<InventorySlotButton> InventorySlotButtons;
-    private int CurrentWeaponNameIndex;
+    private InventorySlotButton CurrentInventorySlotButton;
+    private int CurrentInventorySlotButtonIndex;
+
+    // UTILITY
+    private string ActiveContainer = "WeaponSlots";
+    private List<GameObject> Inventory;
 
     void Awake()
     {
@@ -42,22 +50,6 @@ public class Loadout : MonoBehaviour
         ClearInventorySlots();
     }
 
-    private void ClearWeaponSlots()
-    {
-        foreach (WeaponSlotButton button in WeaponSlotButtons)
-        {
-            button.Clear();
-        }
-    }
-
-    private void ClearInventorySlots()
-    {
-        foreach (InventorySlotButton button in InventorySlotButtons)
-        {
-            button.Clear();
-        }
-    }
-
     public void HandleBackClicked()
     {
         UIManager.Inst.DisableLoadoutUI();
@@ -67,18 +59,26 @@ public class Loadout : MonoBehaviour
     private void InitialiseInventorySlotButtons()
     {
         InventorySlotButtons = new List<InventorySlotButton>();
+        int i = 0;
         foreach (Transform child in InventorySlotContainer.transform)
         {
+            InventorySlotButton inventorySlotButton = child.GetComponent<InventorySlotButton>();
+            inventorySlotButton.ListIndex = i;
             InventorySlotButtons.Add(child.GetComponent<InventorySlotButton>());
+            i++;
         }
     }
 
     private void InitialiseWeaponSlotButtons()
     {
         WeaponSlotButtons = new List<WeaponSlotButton>();
+        int i = 0;
         foreach (Transform child in WeaponSlotContainer.transform)
         {
-            WeaponSlotButtons.Add(child.GetComponent<WeaponSlotButton>());
+            WeaponSlotButton weaponSlotButton = child.GetComponent<WeaponSlotButton>();
+            weaponSlotButton.ListIndex = i;
+            WeaponSlotButtons.Add(weaponSlotButton);
+            i++;
         }
     }
 
@@ -109,14 +109,14 @@ public class Loadout : MonoBehaviour
 
     private void SetInventory()
     {
-        List<GameObject> inventory = LoadoutManager.GetInventory();
+        Inventory = LoadoutManager.GetInventory();
 
         int i = 0;
         foreach (InventorySlotButton inventorySlotButton in InventorySlotButtons)
         {
-            if (inventorySlotButton.IsEmpty && inventory.Count > i)
+            if (inventorySlotButton.IsEmpty && Inventory.Count > i)
             {
-                inventorySlotButton.SetWeapon(inventory[i]);
+                inventorySlotButton.SetWeapon(Inventory[i]);
                 i++;
             }
             else
@@ -126,23 +126,74 @@ public class Loadout : MonoBehaviour
         }
     }
 
-    // public void HandleMoveLeft()
-    // public void HandleMoveRight()
+    private bool EitherCurrentSlotsAreSelected()
+    {
+        if ((CurrentInventorySlotButton != null && CurrentInventorySlotButton.IsSelected)
+        || (CurrentWeaponSlotButton != null && CurrentWeaponSlotButton.IsSelected))
+        {
+            return true;
+        }
+        else return false;
+    }
+
+    public void HandleMoveLeft()
+    {
+        if (ActiveContainer == "WeaponSlots") return;
+        SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+    }
+    public void HandleMoveRight()
+    {
+        if (ActiveContainer == "Inventory") return;
+        SetSelectedInventorySlotButton(0);
+    }
     public void HandleMoveUp()
     {
-        CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
-        SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        if (ActiveContainer == "Inventory")
+        {
+            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex - 1 + Inventory.Count) % Inventory.Count;
+            SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
+        }
+        else
+        {
+            if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
+            SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        }
     }
     public void HandleMoveDown()
     {
-        CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex + 1) % WeaponSlotButtons.Count;
-        SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        if (ActiveContainer == "Inventory")
+        {
+            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex + 1) % Inventory.Count;
+            SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
+        }
+        else
+        {
+            if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex + 1) % WeaponSlotButtons.Count;
+            SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        }
     }
-    private void SetSelectedWeaponSlotButton(int index)
+
+    private void DeselectCurrentButtons()
     {
+        if (CurrentInventorySlotButton != null) CurrentInventorySlotButton.Deselect();
         if (CurrentWeaponSlotButton != null) CurrentWeaponSlotButton.Deselect();
+    }
+    public void SetSelectedWeaponSlotButton(int index)
+    {
+        DeselectCurrentButtons();
         CurrentWeaponSlotButton = WeaponSlotButtons[index];
         CurrentWeaponSlotButton.Select();
+        CurrentWeaponSlotButtonIndex = index;
+        ActiveContainer = "WeaponSlots";
+    }
+
+    public void SetSelectedInventorySlotButton(int index)
+    {
+        DeselectCurrentButtons();
+        CurrentInventorySlotButton = InventorySlotButtons[index];
+        CurrentInventorySlotButton.Select();
+        CurrentInventorySlotButtonIndex = index;
+        ActiveContainer = "Inventory";
     }
 
     public void HandleSelect()
@@ -151,5 +202,21 @@ public class Loadout : MonoBehaviour
     public void Back()
     {
 
+    }
+
+    private void ClearWeaponSlots()
+    {
+        foreach (WeaponSlotButton button in WeaponSlotButtons)
+        {
+            button.Clear();
+        }
+    }
+
+    private void ClearInventorySlots()
+    {
+        foreach (InventorySlotButton button in InventorySlotButtons)
+        {
+            button.Clear();
+        }
     }
 }

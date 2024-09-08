@@ -16,6 +16,9 @@ public class UIManager : MonoBehaviour
     private GameObject LoadoutUI;
     private GameObject SpecialWeaponUnlockedUI;
 
+    // UTILITY
+    private string ActiveWindow;
+
     void Awake()
     {
         if (Inst != null && Inst != this)
@@ -42,6 +45,7 @@ public class UIManager : MonoBehaviour
         }
         MainMenuUI.SetActive(false);
         ShipSelectionUI.SetActive(true);
+        ActiveWindow = "ShipSelection";
     }
 
     public void TransitionToLoadout()
@@ -53,6 +57,7 @@ public class UIManager : MonoBehaviour
     public void EnableSpecialWeaponUnlockedUI()
     {
         SpecialWeaponUnlockedUI = Instantiate(AssetManager.SpecialWeaponUnlockedPrefab, GameplayOverlayCanvas.transform);
+        ActiveWindow = "SpecialWeaponUnlocked";
 
         // Find the Animator component in the child GameObject
         Animator animator = SpecialWeaponUnlockedUI.GetComponentInChildren<Animator>();
@@ -69,30 +74,35 @@ public class UIManager : MonoBehaviour
     public void DisableSpecialWeaponUnlockedUI()
     {
         Destroy(SpecialWeaponUnlockedUI);
+        ActiveWindow = null;
     }
 
     public void EnableInterStageUI()
     {
         if (InterStageUI == null) InterStageUI = Instantiate(AssetManager.InterStageUIPrefab, InterStageUICanvas.transform);
         else InterStageUI.SetActive(true);
+        ActiveWindow = "InterStage";
     }
 
     public void DisableInterStageUI()
     {
         if (InterStageUI == null) return;
         else InterStageUI.SetActive(false);
+        ActiveWindow = null;
     }
 
     private void EnableLoadoutUI()
     {
         if (LoadoutUI == null) LoadoutUI = Instantiate(AssetManager.LoadoutUIPrefab, InterStageUICanvas.transform);
         else LoadoutUI.SetActive(true);
+        ActiveWindow = "Loadout";
     }
 
     public void DisableLoadoutUI()
     {
         if (LoadoutUI == null) return;
         else LoadoutUI.SetActive(false);
+        ActiveWindow = null;
     }
 
     // Menu Controls...
@@ -102,28 +112,51 @@ public class UIManager : MonoBehaviour
     */
     public void HandleMoveUp()
     {
-
+        switch (ActiveWindow)
+        {
+            case "Loadout":
+                LoadoutUI.GetComponent<Loadout>().HandleMoveUp();
+                break;
+        }
     }
 
     public void HandleMoveDown()
     {
-
+        switch (ActiveWindow)
+        {
+            case "Loadout":
+                LoadoutUI.GetComponent<Loadout>().HandleMoveDown();
+                break;
+        }
     }
 
     public void HandleMoveLeft()
     {
-        // if (SceneManager.GetActiveScene().name == "MainMenu")
-        if (ShipSelectionUI.activeSelf)
+        switch (ActiveWindow)
         {
-            ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorLeft();
+            case "Loadout":
+                LoadoutUI.GetComponent<Loadout>().HandleMoveLeft();
+                break;
+            case "ShipSelection":
+                ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorLeft();
+                break;
         }
+        // if (ShipSelectionUI.activeSelf)
+        // {
+        //     ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorLeft();
+        // }
     }
 
     public void HandleMoveRight()
     {
-        if (ShipSelectionUI.activeSelf)
+        switch (ActiveWindow)
         {
-            ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorRight();
+            case "Loadout":
+                LoadoutUI.GetComponent<Loadout>().HandleMoveRight();
+                break;
+            case "ShipSelection":
+                ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorRight();
+                break;
         }
     }
 
