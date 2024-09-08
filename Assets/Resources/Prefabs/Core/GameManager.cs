@@ -23,6 +23,7 @@ public static class GameManager
         Score = GameConfig.InitialScore;
         PlayerManager.Inst.Lives = GameConfig.InitialLives;
         PlayerManager.Inst.BuildInitialSkills();
+        LoadoutManager.InitialiseLoadout();
         MusicManager.Inst.PlayBackgroundMusic();
         await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
         GameInputHandler.Inst.EnableGameplayControls();
@@ -98,6 +99,7 @@ public static class GameManager
     public static async void HandleStageCompleted()
     {
         await PlayerManager.Inst.FlyOutOfScene();
+        ItemDropManager.Inst.DestroyAllActiveItemDrops();
         GameInputHandler.Inst.DisableGameplayControls();
         TransitionToInterStage();
         // await LoadSceneAsync("MainMenu");

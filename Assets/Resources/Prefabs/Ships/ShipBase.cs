@@ -14,7 +14,6 @@ public enum SlotType
 public class WeaponSlot
 {
     public int id;
-    public string PrefabName;
     [HideInInspector] public bool IsEmpty = true;
     public SlotType Type;
     public WeaponType WeaponType;
@@ -200,6 +199,7 @@ public abstract class ShipBase : MonoBehaviour
         IsAllowedToShoot = false;
     }
     
+    // Iterates through each weapon slot and assigns relevant data
     public void InitialiseWeaponSlots()
     {
         int i = 0;
@@ -216,7 +216,6 @@ public abstract class ShipBase : MonoBehaviour
                     if (weaponBase != null)
                     {
                         weaponSlot.WeaponType = weaponBase.WeaponType;
-                        weaponSlot.PrefabName = weaponBase.GetType().Name; // Set the PrefabName to the class name
                         weaponSlot.WeaponName = weaponBase.WeaponName;
                     }
                     weaponSlot.IsEmpty = false;

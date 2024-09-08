@@ -31,11 +31,7 @@ public class EnemyShip : ShipBase
         Explode();
         if (AssignedEffectData != null)
         {
-            // Instantiate the ItemDropPrefab at the enemy ship's position
-            var itemDrop = Instantiate(AssetManager.ItemDropPrefab, transform.position, Quaternion.identity);
-        
-            // Initialize the item drop with the assigned effect data
-            itemDrop.InitialiseItem(AssignedEffectData);
+            ItemDropManager.Inst.CreateItemDrop(transform.position, AssignedEffectData);
         }
     }
 

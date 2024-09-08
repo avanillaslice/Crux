@@ -1,5 +1,6 @@
 Weapons:
   CannonSmall: true
+  ElectroShield: false
 Skills:
   ShieldRegen: 0
   HullDurability: 0

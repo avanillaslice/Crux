@@ -35,10 +35,10 @@ public class PlayerManager : MonoBehaviour
         }
         Inst = this;
         AudioSource = GetComponent<AudioSource>();
-        SetInitialShipData();
+        InitialisePlayerData();
     }
 
-    private void SetInitialShipData()
+    private void InitialisePlayerData()
     {
         InitialShipData = GameConfig.GetInitialPlayerData();
         if (InitialShipData == null)
@@ -46,6 +46,7 @@ public class PlayerManager : MonoBehaviour
             Debug.LogError("[PlayerManager] Failed to fetch InitialPlayerData");
             return;
         }
+
     }
 
     public void HandlePlayerDestroyed()
@@ -54,7 +55,7 @@ public class PlayerManager : MonoBehaviour
         ActivePlayerShip.DisablePrimaryFire();
         ActivePlayerShip.DisableSpecialFire();
         ActivePlayerShip.DisableShooting();
-        SetWeaponSlotStates();
+        // SetWeaponSlotStates();
         SetActiveShipToNull();
 
         Lives -= 1;
@@ -143,7 +144,7 @@ public class PlayerManager : MonoBehaviour
             // Sets the players ship for each still and attemps activation (if not already)
             ShipSkillManager.AssignShipToSkills(ActiveSkills, ActivePlayerShip);
             // Reattach saved weapon prefabs
-            ReattachWeapons();
+            LoadoutManager.InitialiseWeapons();
         }
 
         if (initialSpawn) await FlyIntoScene();
@@ -212,17 +213,7 @@ public class PlayerManager : MonoBehaviour
                 continue;
             }
 
-            WeaponSlot weaponSlot = ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, false);
-            if (weaponSlot != null && !weaponSlot.IsEmpty) weaponSlot.PrefabName = weapon.Key;
-        }
-    }
-
-    private void SetWeaponSlotStates()
-    {
-        WeaponSlotStates = new Dictionary<int, string>();
-        foreach (var weaponSlot in ActivePlayerShip.WeaponSlots)
-        {
-            WeaponSlotStates[weaponSlot.id] = weaponSlot.IsEmpty ? null : weaponSlot.PrefabName;
+            ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, false);
         }
     }
 
@@ -238,8 +229,7 @@ public class PlayerManager : MonoBehaviour
                 Debug.LogError($"Weapon prefab not found for {weaponSlotState.Value}");
                 continue;
             }
-            WeaponSlot weaponSlot = ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotState.Key, weaponPrefab);
-            if (weaponSlot != null && !weaponSlot.IsEmpty) weaponSlot.PrefabName = weaponSlotState.Value;
+            ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotState.Key, weaponPrefab);
         }
     }
 

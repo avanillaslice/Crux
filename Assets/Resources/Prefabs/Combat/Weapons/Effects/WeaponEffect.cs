@@ -6,21 +6,31 @@ public class WeaponEffect : EffectBase
     public override void Activate(GameObject targetShip)
     {
         TargetShip = targetShip;
-        GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
-        if (weaponPrefab == null)
+
+        if (TargetShip.CompareTag("Player"))
         {
-           Debug.LogError("Weapon prefab not found for " + targetShip.name);
+            LoadoutManager.UnlockWeapon(SubType.ToString());
+            AssignedWeaponSlot = LoadoutManager.EquipWeapon(SubType.ToString(), false);
+
+            if (AssignedWeaponSlot != null)
+            {
+                MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
+                if (AssignedWeaponSlot.WeaponType == WeaponType.Special) GameManager.HandleSpecialWeaponUnlock();
+            }
+        }
+        else
+        {
+            GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
+            if (weaponPrefab == null)
+            {
+               Debug.LogError("Weapon prefab not found for " + targetShip.name);
+            }
+
+            ShipBase shipComponent = TargetShip.GetComponent<ShipBase>();
+            AssignedWeaponSlot = shipComponent.AttemptWeaponAttachment(weaponPrefab, false);
         }
 
-        ShipBase shipComponent = TargetShip.GetComponent<ShipBase>();
-        AssignedWeaponSlot = shipComponent.AttemptWeaponAttachment(weaponPrefab, false);
-
-        //! Handle Inventory Stuff here
         if (AssignedWeaponSlot == null) return;
-        AssignedWeaponSlot.PrefabName = SubType.ToString();
-
-        MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
-        if (AssignedWeaponSlot.WeaponType == WeaponType.Special) GameManager.HandleSpecialWeaponUnlock();
 
         if (Expiry == ExpiryType.Time && Duration > 0) {
             Debug.Log($"Expiry detected for {gameObject.name} with duration {Duration}");
@@ -28,6 +38,8 @@ public class WeaponEffect : EffectBase
         }
         Debug.Log($"Attached {SubType}");
     }
+
+    //! REQUIRES PLAYER CENTRIC - LOADOUT MANAGER LOGIC
     public override void Deactivate()
     {
         Debug.Log("Deactivating");

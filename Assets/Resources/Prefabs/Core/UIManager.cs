@@ -89,7 +89,7 @@ public class UIManager : MonoBehaviour
         else LoadoutUI.SetActive(true);
     }
 
-    private void DisableLoadoutUI()
+    public void DisableLoadoutUI()
     {
         if (LoadoutUI == null) return;
         else LoadoutUI.SetActive(false);
