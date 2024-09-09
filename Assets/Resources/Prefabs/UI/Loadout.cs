@@ -21,7 +21,7 @@ public class Loadout : MonoBehaviour
     private int CurrentInventorySlotButtonIndex;
 
     // UTILITY
-    private string ActiveContainer = "WeaponSlots";
+    public string ActiveContainer = "WeaponSlots";
     private List<GameObject> Inventory;
 
     void Awake()
@@ -84,12 +84,10 @@ public class Loadout : MonoBehaviour
 
     private void SetWeaponSlots()
     {
-        Debug.Log("Setting WeaponSlotButtons");
         List<WeaponSlot> activeWeaponSlots = PlayerManager.Inst.ActivePlayerShip.GetActiveWeaponSlots();
 
         foreach (WeaponSlot weaponSlot in activeWeaponSlots)
         {
-            Debug.Log("Attempting to SetWeaponSlotButton: " + weaponSlot.WeaponName);
             bool foundValidWeaponSlotButton = false;
 
             foreach (WeaponSlotButton weaponSlotButton in WeaponSlotButtons)
@@ -116,12 +114,14 @@ public class Loadout : MonoBehaviour
         {
             if (inventorySlotButton.IsEmpty && Inventory.Count > i)
             {
+                inventorySlotButton.gameObject.SetActive(true);
                 inventorySlotButton.SetWeapon(Inventory[i]);
                 i++;
             }
             else
             {
                 inventorySlotButton.Clear();
+                inventorySlotButton.gameObject.SetActive(false);
             }
         }
     }
@@ -157,6 +157,7 @@ public class Loadout : MonoBehaviour
         {
             if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+            // Set all inventory slots that do no match the weapon slot type to greyed out???
         }
     }
     public void HandleMoveDown()
@@ -170,6 +171,18 @@ public class Loadout : MonoBehaviour
         {
             if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex + 1) % WeaponSlotButtons.Count;
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        }
+    }
+
+    public void HandleSelect()
+    {
+        if (ActiveContainer == "Inventory")
+        {
+            SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        }
+        else
+        {
+            SetSelectedInventorySlotButton(0);
         }
     }
 
@@ -194,14 +207,6 @@ public class Loadout : MonoBehaviour
         CurrentInventorySlotButton.Select();
         CurrentInventorySlotButtonIndex = index;
         ActiveContainer = "Inventory";
-    }
-
-    public void HandleSelect()
-    {
-    }
-    public void Back()
-    {
-
     }
 
     private void ClearWeaponSlots()

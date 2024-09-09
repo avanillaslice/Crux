@@ -27,8 +27,15 @@ public class InventorySlotButton : MonoBehaviour
         IsEmpty = true;
     }
 
+    public void HandleClicked()
+    {
+        if (Loadout.Inst.ActiveContainer == "WeaponSlots") return;
+        Loadout.Inst.HandleSelect();
+    }
+
     public void HandlePointerEnter()
     {
+        if (Loadout.Inst.ActiveContainer == "WeaponSlots") return;
         Loadout.Inst.SetSelectedInventorySlotButton(ListIndex);
     }
 

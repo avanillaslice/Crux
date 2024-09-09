@@ -135,7 +135,7 @@ public class UIManager : MonoBehaviour
         switch (ActiveWindow)
         {
             case "Loadout":
-                LoadoutUI.GetComponent<Loadout>().HandleMoveLeft();
+                // LoadoutUI.GetComponent<Loadout>().HandleMoveLeft();
                 break;
             case "ShipSelection":
                 ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorLeft();
@@ -152,7 +152,7 @@ public class UIManager : MonoBehaviour
         switch (ActiveWindow)
         {
             case "Loadout":
-                LoadoutUI.GetComponent<Loadout>().HandleMoveRight();
+                // LoadoutUI.GetComponent<Loadout>().HandleMoveRight();
                 break;
             case "ShipSelection":
                 ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorRight();
@@ -162,9 +162,14 @@ public class UIManager : MonoBehaviour
 
     public void HandleSelect()
     {
-        if (ShipSelectionUI.activeSelf)
+        switch (ActiveWindow)
         {
-            ShipSelectionUI.GetComponent<ShipSelection>().SelectShip();
+            case "Loadout":
+                LoadoutUI.GetComponent<Loadout>().HandleSelect();
+                break;
+            case "ShipSelection":
+                ShipSelectionUI.GetComponent<ShipSelection>().SelectShip();
+                break;
         }
     }
 
