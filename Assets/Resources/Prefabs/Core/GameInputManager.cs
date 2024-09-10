@@ -85,31 +85,26 @@ public class GameInputHandler : MonoBehaviour
 
     private void MoveUp()
     {
-        Debug.Log("[GameInputManager] MoveUp");
         UIManager.Inst.HandleMoveUp();
     }
 
     private void MoveDown()
     {
-        Debug.Log("[GameInputManager] MoveDown");
         UIManager.Inst.HandleMoveDown();
     }
 
     private void MoveLeft()
     {
-        Debug.Log("[GameInputManager] MoveLeft");
         UIManager.Inst.HandleMoveLeft();
     }
 
     private void MoveRight()
     {
-        Debug.Log("[GameInputManager] MoveRight");
         UIManager.Inst.HandleMoveRight();
     }
 
     private void Select()
     {
-        Debug.Log("[GameInputManager] Select");
         UIManager.Inst.HandleSelect();
     }
 }

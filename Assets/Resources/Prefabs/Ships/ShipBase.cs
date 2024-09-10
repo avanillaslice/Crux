@@ -254,6 +254,17 @@ public abstract class ShipBase : MonoBehaviour
         }
         return activeWeaponSlots;
     }
+
+    public List<WeaponSlot> GetWeaponSlots()
+    {
+        List<WeaponSlot> activeWeaponSlots = new List<WeaponSlot>();
+        foreach (WeaponSlot weaponSlot in WeaponSlots)
+        {
+            activeWeaponSlots.Add(weaponSlot);
+        }
+        return activeWeaponSlots;
+    }
+
     public WeaponSlot GetWeaponSlot(SlotType type)
     {
         foreach (WeaponSlot weaponSlot in WeaponSlots)

@@ -68,7 +68,7 @@ public class AttackDrone : DroneShip
             currentTarget = FindClosestEnemy();
             if (currentTarget != null)
             {
-                Debug.Log($"New target acquired: {currentTarget.name}");
+                // Debug.Log($"New target acquired: {currentTarget.name}");
             }
         }
     

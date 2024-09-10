@@ -92,11 +92,16 @@ public static class LoadoutManager
     }
 
     // Equips the weaponPrefab to the player ship, does not add to inventory
-    public static WeaponSlot EquipWeapon(string weaponPrefabName, bool force)
+    public static WeaponSlot EquipWeapon(GameObject weaponPrefab, bool force)
     {
-        GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponPrefabName);
-        if (weaponPrefab == null) return null;
         WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, force);
+        if (weaponSlot == null) return null;
+        AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
+        return weaponSlot;
+    }
+    public static WeaponSlot EquipWeaponToSlot(GameObject weaponPrefab, int weaponSlotId)
+    {
+        WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotId, weaponPrefab);
         if (weaponSlot == null) return null;
         AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
         return weaponSlot;

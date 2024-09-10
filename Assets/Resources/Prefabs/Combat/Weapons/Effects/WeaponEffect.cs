@@ -10,7 +10,11 @@ public class WeaponEffect : EffectBase
         if (TargetShip.CompareTag("Player"))
         {
             LoadoutManager.UnlockWeapon(SubType.ToString());
-            AssignedWeaponSlot = LoadoutManager.EquipWeapon(SubType.ToString(), false);
+
+            GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
+            if (weaponPrefab == null) return;
+
+            AssignedWeaponSlot = LoadoutManager.EquipWeapon(weaponPrefab, false);
 
             if (AssignedWeaponSlot != null)
             {
@@ -36,7 +40,6 @@ public class WeaponEffect : EffectBase
             Debug.Log($"Expiry detected for {gameObject.name} with duration {Duration}");
             CoroutineManager.Inst.DeactivateEffectAfterDelay(this, Duration);
         }
-        Debug.Log($"Attached {SubType}");
     }
 
     //! REQUIRES PLAYER CENTRIC - LOADOUT MANAGER LOGIC

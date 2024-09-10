@@ -17,12 +17,13 @@ public class Loadout : MonoBehaviour
     // INVENTORY
     public GameObject InventorySlotContainer;
     private List<InventorySlotButton> InventorySlotButtons;
+    private List<InventorySlotButton> ActiveInventorySlotButtons;
+    private List<InventorySlotButton> ValidInventorySlotButtons;
     private InventorySlotButton CurrentInventorySlotButton;
     private int CurrentInventorySlotButtonIndex;
 
     // UTILITY
     public string ActiveContainer = "WeaponSlots";
-    private List<GameObject> Inventory;
 
     void Awake()
     {
@@ -84,16 +85,16 @@ public class Loadout : MonoBehaviour
 
     private void SetWeaponSlots()
     {
-        List<WeaponSlot> activeWeaponSlots = PlayerManager.Inst.ActivePlayerShip.GetActiveWeaponSlots();
+        List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.GetWeaponSlots();
 
-        foreach (WeaponSlot weaponSlot in activeWeaponSlots)
+        foreach (WeaponSlot weaponSlot in weaponSlots)
         {
             bool foundValidWeaponSlotButton = false;
 
             foreach (WeaponSlotButton weaponSlotButton in WeaponSlotButtons)
             {
                 if (!weaponSlotButton.IsEmpty || weaponSlotButton.SlotType != weaponSlot.Type) continue;
-                weaponSlotButton.SetWeapon(weaponSlot.WeaponName);
+                weaponSlotButton.SetWeaponSlot(weaponSlot);
                 foundValidWeaponSlotButton = true;
                 break;
             }
@@ -107,15 +108,17 @@ public class Loadout : MonoBehaviour
 
     private void SetInventory()
     {
-        Inventory = LoadoutManager.GetInventory();
+        ActiveInventorySlotButtons = new List<InventorySlotButton>();
+        List<GameObject> inventory = LoadoutManager.GetInventory();
 
         int i = 0;
         foreach (InventorySlotButton inventorySlotButton in InventorySlotButtons)
         {
-            if (inventorySlotButton.IsEmpty && Inventory.Count > i)
+            if (inventorySlotButton.IsEmpty && inventory.Count > i)
             {
                 inventorySlotButton.gameObject.SetActive(true);
-                inventorySlotButton.SetWeapon(Inventory[i]);
+                inventorySlotButton.SetWeapon(inventory[i]);
+                ActiveInventorySlotButtons.Add(inventorySlotButton);
                 i++;
             }
             else
@@ -150,21 +153,20 @@ public class Loadout : MonoBehaviour
     {
         if (ActiveContainer == "Inventory")
         {
-            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex - 1 + Inventory.Count) % Inventory.Count;
+            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex - 1 + ValidInventorySlotButtons.Count) % ValidInventorySlotButtons.Count;
             SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
         }
         else
         {
             if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-            // Set all inventory slots that do no match the weapon slot type to greyed out???
         }
     }
     public void HandleMoveDown()
     {
         if (ActiveContainer == "Inventory")
         {
-            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex + 1) % Inventory.Count;
+            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex + 1) % ValidInventorySlotButtons.Count;
             SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
         }
         else
@@ -178,11 +180,57 @@ public class Loadout : MonoBehaviour
     {
         if (ActiveContainer == "Inventory")
         {
+            DoTheThing();
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+            ValidateAllInventorySlotButtons();
         }
         else
         {
+            SetValidInventorySlotButtons(CurrentWeaponSlotButton.SlotType);
+            if (ValidInventorySlotButtons.Count == 0)
+            {
+                ValidateAllInventorySlotButtons();
+                return;
+            }
             SetSelectedInventorySlotButton(0);
+        }
+    }
+
+    private void DoTheThing()
+    {
+        LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
+        ClearWeaponSlots();
+        SetWeaponSlots();
+    }
+
+    private void SetValidInventorySlotButtons(SlotType slotType)
+    {
+        ValidInventorySlotButtons = new List<InventorySlotButton>();
+
+        foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
+        {
+            if (inventorySlotButton.SlotType == SlotType.Dual && (slotType == SlotType.Dual || slotType == SlotType.Single))
+            {
+                inventorySlotButton.Validate();
+                ValidInventorySlotButtons.Add(inventorySlotButton);
+            }
+            else if (inventorySlotButton.SlotType == slotType)
+            {
+                inventorySlotButton.Validate();
+                ValidInventorySlotButtons.Add(inventorySlotButton);
+            }
+            else
+            {
+                inventorySlotButton.Invalidate();
+            }
+        }
+    }
+
+    private void ValidateAllInventorySlotButtons()
+    {
+        foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
+        {
+            inventorySlotButton.Validate();
         }
     }
 
@@ -202,8 +250,9 @@ public class Loadout : MonoBehaviour
 
     public void SetSelectedInventorySlotButton(int index)
     {
+        if (ValidInventorySlotButtons.Count == 0) return;
         DeselectCurrentButtons();
-        CurrentInventorySlotButton = InventorySlotButtons[index];
+        CurrentInventorySlotButton = ValidInventorySlotButtons[index];
         CurrentInventorySlotButton.Select();
         CurrentInventorySlotButtonIndex = index;
         ActiveContainer = "Inventory";

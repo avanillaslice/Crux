@@ -150,10 +150,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DefaultColor: {r: 1, g: 1, b: 1, a: 1}
   HighlightedColor: {r: 1, g: 0.6117647, b: 0, a: 1}
+  InvalidColor: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
   SlotType: 0
   WeaponName: {fileID: 8809223500042470733}
   IsEmpty: 1
   IsSelected: 0
+  IsValid: 0
   ListIndex: 0
 --- !u!114 &170615527563842821
 MonoBehaviour:

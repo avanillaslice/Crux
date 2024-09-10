@@ -26,31 +26,26 @@ public class MainMenuInputHandler : MonoBehaviour
 
     private void MoveUp()
     {
-        Debug.Log("[MainMenuInputHandler] MoveUp");
         UIManager.Inst.HandleMoveUp();
     }
 
     private void MoveDown()
     {
-        Debug.Log("[MainMenuInputHandler] MoveDown");
         UIManager.Inst.HandleMoveDown();
     }
 
     private void MoveLeft()
     {
-        Debug.Log("[MainMenuInputHandler] MoveLeft");
         UIManager.Inst.HandleMoveLeft();
     }
 
     private void MoveRight()
     {
-        Debug.Log("[MainMenuInputHandler] MoveRight");
         UIManager.Inst.HandleMoveRight();
     }
 
     private void Select()
     {
-        Debug.Log("[MainMenuInputHandler] Select");
         UIManager.Inst.HandleSelect();
     }
 }

@@ -26,7 +26,6 @@ public class ItemDropManager : MonoBehaviour
 
   public void DestroyAllActiveItemDrops()
   {
-    Debug.Log("ActiveItemDrops.Count: " + ActiveItemDrops.Count);
     foreach (GameObject itemDrop in ActiveItemDrops)
     {
       if (itemDrop != null) Destroy(itemDrop);

@@ -46,7 +46,6 @@ public class ElectroShieldEffect : ShieldEffectBase
         Health -= damage;
         if (Health <= 0)
         {
-            Debug.Log("Shield broken!");
             // Do shield break stuff
             // Play break sound
             ElectroShieldComponent.AttemptCeaseFire();

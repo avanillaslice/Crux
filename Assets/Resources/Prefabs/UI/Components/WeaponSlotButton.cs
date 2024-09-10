@@ -6,14 +6,19 @@ public class WeaponSlotButton : MonoBehaviour
     public GameObject HighlightLayer;
     public SlotType SlotType;
     public TextMeshProUGUI WeaponName;
+    public WeaponSlot WeaponSlot;
     public bool IsEmpty = true;
     public bool IsSelected;
     public int ListIndex;
 
-    public void SetWeapon(string weaponName)
+    public void SetWeaponSlot(WeaponSlot weaponSlot)
     {
-        WeaponName.text = weaponName;
-        IsEmpty = false;
+        WeaponSlot = weaponSlot;
+        if (!weaponSlot.IsEmpty)
+        {
+            WeaponName.text = weaponSlot.WeaponName;
+            IsEmpty = false;
+        }
     }
 
     public void Clear()
