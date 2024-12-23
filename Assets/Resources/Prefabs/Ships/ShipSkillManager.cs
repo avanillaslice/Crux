@@ -1,9 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class ShipSkillManager
+public static class ShipSkillFactory
 {
-    public static List<SkillBase> BuildSkillList(InitialShipData initialShipData, ShipBase targetShip)
+    public class SkillList
+    {
+        public List<SkillBase> Skills;
+
+        public SkillList(List<SkillBase> skills)
+        {
+            Skills = skills;
+        }
+
+        public void AssignShip(ShipBase targetShip)
+        {
+            if (Skills.Count == 0 || targetShip == null) return;
+
+            foreach (SkillBase skill in Skills)
+            {
+                skill.AttemptActivation(targetShip);
+            }
+        }
+
+        public SkillBase FetchSkill(string skillName)
+        {
+            foreach (var skill in Skills)
+            {
+                if (skill.SkillName == skillName)
+                {
+                    return skill;
+                }
+            }
+            return null;
+        }
+    }
+
+    public static SkillList BuildSkillList(InitialShipData initialShipData, ShipBase targetShip)
     {
         List<SkillBase> _skills = new List<SkillBase>();
         var skills = initialShipData.Skills;
@@ -18,17 +50,7 @@ public static class ShipSkillManager
                 _skills.Add(skill);
             }
         }
-        return _skills;
-    }
-
-    public static void AssignShipToSkills(List<SkillBase> skills, ShipBase targetShip)
-    {
-        if (skills.Count == 0 || targetShip == null) return;
-
-        foreach (SkillBase skill in skills)
-        {
-            skill.AttemptActivation(targetShip);
-        }
+        return new SkillList(_skills);
     }
 
     private static SkillBase CreateSkillInstance(string skillName, int level)

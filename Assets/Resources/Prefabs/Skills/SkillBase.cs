@@ -17,7 +17,12 @@ public abstract class SkillBase
     {
         if (Level > MaxLevel)
         {
-            Debug.LogError("Cannot activate skill, level too high");
+            Debug.LogError("Cannot activate skill: " + SkillName + ",  level too high");
+            return;
+        }
+        if (Level == 0)
+        {
+            Debug.LogError("Cannot activate skill: " + SkillName + " at level zero");
             return;
         }
 

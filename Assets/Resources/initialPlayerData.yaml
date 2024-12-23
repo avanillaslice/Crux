@@ -2,7 +2,7 @@ Weapons:
   CannonSmall: true
   ElectroShield: false
 Skills:
-  ShieldRegen: 0
+  ShieldRegen: 1
   HullDurability: 0
   ShieldCapacity: 0
   Damage: 0
@@ -11,7 +11,7 @@ Skills:
   Speed: 0
   Evasion: 0
   CriticalHit: 0
-  ShieldDrones: 0
+  ShieldDrones: 1
   AttackDrones: 0
   DroneFireRate: 0
   DroneChargeRate: 0

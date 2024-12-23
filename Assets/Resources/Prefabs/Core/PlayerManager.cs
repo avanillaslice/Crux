@@ -23,7 +23,7 @@ public class PlayerManager : MonoBehaviour
     private Dictionary<int, string> WeaponSlotStates = new Dictionary<int, string>();
 
     // Store Unlocked Skills
-    private List<SkillBase> ActiveSkills = new List<SkillBase>();
+    private ShipSkillFactory.SkillList ActiveSkills;
 
     void Awake()
     {
@@ -135,14 +135,15 @@ public class PlayerManager : MonoBehaviour
     {
         Vector3 spawnPosition = initialSpawn ? new Vector3(0, -7, 10) : new Vector3(0, -4, 10);
 
-        if (ActivePlayerShip != null) {
+        if (ActivePlayerShip != null)
+        {
             ActivePlayerShip.transform.position = spawnPosition;
         }
         else
         {
             ActivePlayerShip = Instantiate(AssetManager.PlayerPrefab, spawnPosition, Quaternion.identity);
             // Sets the players ship for each still and attemps activation (if not already)
-            ShipSkillManager.AssignShipToSkills(ActiveSkills, ActivePlayerShip);
+            ActiveSkills.AssignShip(ActivePlayerShip);
             // Reattach saved weapon prefabs
             LoadoutManager.InitialiseWeapons();
         }
@@ -163,11 +164,11 @@ public class PlayerManager : MonoBehaviour
     private IEnumerator MoveToPositionWithDeceleration(Transform transform, Vector3 targetPosition, float initialSpeed, float decelerationDistance, TaskCompletionSource<bool> tcs)
     {
         float currentSpeed = initialSpeed;
-    
+
         while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
         {
             float distanceRemaining = Vector3.Distance(transform.position, targetPosition);
-    
+
             // If within deceleration distance, reduce speed
             if (distanceRemaining < decelerationDistance)
             {
@@ -183,12 +184,12 @@ public class PlayerManager : MonoBehaviour
 
     public void BuildInitialSkills()
     {
-        ActiveSkills = ShipSkillManager.BuildSkillList(InitialShipData, null);
+        ActiveSkills = ShipSkillFactory.BuildSkillList(InitialShipData, null);
     }
 
     private void ReattachWeapons()
     {
-        if (WeaponSlotStates.Count == 0) 
+        if (WeaponSlotStates.Count == 0)
         {
             // Needs to use the list of strings to fetch prefabs and attach to first available slot
             AttachWeaponsFromInitialPlayerData();
