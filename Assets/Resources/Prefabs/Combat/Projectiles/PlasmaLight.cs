@@ -7,6 +7,6 @@ public class PlasmaLight : ProjectileBase
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
         // Set the velocity of the projectile
-        rb.velocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
+        rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
     }
 }

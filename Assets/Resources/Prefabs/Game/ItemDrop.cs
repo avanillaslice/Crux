@@ -13,7 +13,7 @@ public class ItemDrop : MonoBehaviour
     void Start()
     {
       rb = GetComponent<Rigidbody2D>();
-      rb.velocity = new Vector2(0, -Speed); // Set the initial downward velocity
+      rb.linearVelocity = new Vector2(0, -Speed); // Set the initial downward velocity
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

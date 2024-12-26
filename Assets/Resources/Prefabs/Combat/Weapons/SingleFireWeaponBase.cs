@@ -64,7 +64,7 @@ public abstract class SingleFireWeaponBase : WeaponBase
             if (projectileScript != null)
             {
                 // Use ship's current velocity as the initial velocity of the projectile
-                Vector2 initialVelocity = rb != null ? rb.velocity : Vector2.zero;
+                Vector2 initialVelocity = rb != null ? rb.linearVelocity : Vector2.zero;
                 projectileScript.Initialize(isEnemy, ParentShip.BulletSpeedModifier, ParentShip.DamageModifier, ParentShip.PiercingModifier, ParentShip.CriticalHitChanceModifier, initialVelocity, Side);
             }
             else

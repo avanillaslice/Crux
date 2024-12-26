@@ -20,7 +20,7 @@ public class PlasmaHeavy : ProjectileBase
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
         // Set the velocity of the projectile
-        rb.velocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
+        rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
 
         // Start the coroutine for splitting
         StartCoroutine(SplitAfterDelay());
@@ -31,7 +31,7 @@ public class PlasmaHeavy : ProjectileBase
         yield return new WaitForSeconds(SplitTime);
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        Vector2 currentDirection = rb.velocity.normalized;
+        Vector2 currentDirection = rb.linearVelocity.normalized;
         float angleStep = 90f / (PlasmaCount - 1); // Maximum 45 degrees on each side
 
         for (int i = 0; i < PlasmaCount; i++)
@@ -44,7 +44,7 @@ public class PlasmaHeavy : ProjectileBase
             
             if (plasmaScript != null)
             {
-                Vector2 initialVelocity = rb != null ? rb.velocity : Vector2.zero;
+                Vector2 initialVelocity = rb != null ? rb.linearVelocity : Vector2.zero;
                 // ! Replace with shrapnel projectile to prevent speed modifier conflicts
                 plasmaScript.Initialize(FiredByEnemy, 0.75f, DamageModifier, PiercingModifier, CriticalHitChanceModifier, initialVelocity, AttachPoint.RelativeSide.Center, newDirection);
             }

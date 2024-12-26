@@ -77,7 +77,7 @@ public class AttackDrone : DroneShip
             Rigidbody2D targetRigidbody = currentTarget.GetComponent<Rigidbody2D>();
             if (targetRigidbody != null)
             {
-                Vector3 targetVelocity = targetRigidbody.velocity;
+                Vector3 targetVelocity = targetRigidbody.linearVelocity;
                 float timeToTarget = Vector3.Distance(transform.position, currentTarget.transform.position) / MovementSpeedModifier;
                 Vector3 futurePosition = currentTarget.transform.position + targetVelocity * timeToTarget;
     

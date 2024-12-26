@@ -64,7 +64,7 @@ public class TurretSmall : SingleFireWeaponBase
 
     private Vector3 PredictTargetPosition()
     {
-        Vector3 targetVelocity = targetRigidbody.velocity;
+        Vector3 targetVelocity = targetRigidbody.linearVelocity;
         return target.position + targetVelocity * LeadTime;
     }
 }

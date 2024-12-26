@@ -10,10 +10,10 @@ public class Plasma : ProjectileBase
         Vector2 finalDirection = direction ?? (Vector2)transform.up;
     
         // Set the velocity of the projectile
-        rb.velocity = initialVelocity + (finalDirection * BaseSpeed * SpeedModifier);
+        rb.linearVelocity = initialVelocity + (finalDirection * BaseSpeed * SpeedModifier);
     
         // Calculate the angle to rotate the projectile
-        float angle = Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg;
+        float angle = Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg;
     
         // Rotate the projectile to face its movement direction
         transform.rotation = Quaternion.AngleAxis(angle - 90f, Vector3.forward);

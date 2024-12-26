@@ -36,7 +36,7 @@ public class Missile : ProjectileBase
         float elapsedTime = 0f;
         while (elapsedTime < sideDuration)
         {
-            rb.velocity = initialVelocity + sideDirection * BaseSideSpeed * SpeedModifier * (elapsedTime / sideDuration);
+            rb.linearVelocity = initialVelocity + sideDirection * BaseSideSpeed * SpeedModifier * (elapsedTime / sideDuration);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
@@ -47,12 +47,12 @@ public class Missile : ProjectileBase
         {
             float sideMomentum = BaseSideSpeed * SpeedModifier * (1 - (elapsedTime / sideEaseDuration));
             float forwardMomentum = BaseSpeed * SpeedModifier * Mathf.Min(1, elapsedTime / sideEaseDuration); // Accelerate faster
-            rb.velocity = initialVelocity + sideDirection * sideMomentum + (Vector2)(transform.up * forwardMomentum);
+            rb.linearVelocity = initialVelocity + sideDirection * sideMomentum + (Vector2)(transform.up * forwardMomentum);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
         // Ensure the missile continues moving forward at full speed after acceleration
-        rb.velocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
+        rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
     }
 }

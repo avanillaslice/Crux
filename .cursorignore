@@ -1,0 +1,31 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+*.prefab
+*.shader
+*.shadergraph
+*.inputactions
+*.md
+*.conf
+*.txt
+*.unity
+*.anim
+*.meta
+*.asset
+*.controller
+*.0
+*.mat
+.plastic/
+.vscode/
+Assets/Art/
+Assets/Fonts/
+Assets/GameInputControllerIconsFree/
+Assets/Pixel Spaceships for SHMUP/
+Assets/Scenes/
+Assets/SimplePixelUI/
+Assets/SpaceGameIconSet/
+Assets/TextMesh Pro/
+Assets/YamlDotNet/
+Packages/
+GlobalSuppressions.cs
+Assets/Resources/Audio/
+Assets/Resources/Sprites/
+ProjectSettings/

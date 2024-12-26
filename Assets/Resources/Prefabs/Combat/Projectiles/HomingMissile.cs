@@ -24,13 +24,13 @@ public class HomingMissile : ProjectileBase
         // Determine the initial direction based on the side and initial angle
         float angle = (side == AttachPoint.RelativeSide.Left) ? initialAngle : -initialAngle;
         Vector2 initialDirection = Quaternion.Euler(0, 0, angle) * Vector2.up;
-        rb.velocity = initialVelocity + initialDirection * BaseSpeed * SpeedModifier;
+        rb.linearVelocity = initialVelocity + initialDirection * BaseSpeed * SpeedModifier;
 
         // Initial rotation
         float distanceTraveled = 0f;
         while (distanceTraveled < lockOnDistance)
         {
-            distanceTraveled += rb.velocity.magnitude * Time.deltaTime;
+            distanceTraveled += rb.linearVelocity.magnitude * Time.deltaTime;
             transform.Rotate(0, 0, initialRotationSpeed * Time.deltaTime);
             yield return null;
         }
@@ -49,12 +49,12 @@ public class HomingMissile : ProjectileBase
             {
                 // Move towards the target in a curved path
                 Vector2 directionToTarget = (target.position - transform.position).normalized;
-                Vector2 newVelocity = Vector2.Lerp(rb.velocity, directionToTarget * BaseSpeed * SpeedModifier, curveSpeed * Time.deltaTime);
-                rb.velocity = newVelocity;
+                Vector2 newVelocity = Vector2.Lerp(rb.linearVelocity, directionToTarget * BaseSpeed * SpeedModifier, curveSpeed * Time.deltaTime);
+                rb.linearVelocity = newVelocity;
             }
 
             // Rotate to face the direction of movement
-            float currentAngle = Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg;
+            float currentAngle = Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, currentAngle - 90)); // Adjust angle to match the missile's orientation
 
             elapsedTime += Time.deltaTime;
