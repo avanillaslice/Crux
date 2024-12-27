@@ -2,7 +2,7 @@ public class DefensiveFormations : SkillBase
 {
     public DefensiveFormations(int level) : base(level)
     {
-        MaxLevel = 3;
+        MaxLevel = 1;
         SkillName = "DefensiveFormations";
     }
 

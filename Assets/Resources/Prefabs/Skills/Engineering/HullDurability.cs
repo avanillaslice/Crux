@@ -2,11 +2,13 @@ using UnityEngine;
 
 public class HullDurability : SkillBase
 {
-    public HullDurability(int level) : base(level)
-    {
-        MaxLevel = 3;
-        SkillName = "HullDurability";
-    }
+    public override string SkillName => "Hull Durability";
+    public override string Description => "Increases the maximum health of the ship.";
+    public override int MaxLevel => 3;
+
+    // NOW DO THIS FOR ALL SKILLS
+
+    public HullDurability(int level) : base(level) {}
 
     public override void Activate()
     {

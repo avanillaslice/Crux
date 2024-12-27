@@ -180,7 +180,9 @@ public class Loadout : MonoBehaviour
     {
         if (ActiveContainer == "Inventory")
         {
-            DoTheThing();
+            LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
+            ClearWeaponSlots();
+            SetWeaponSlots();
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
             ValidateAllInventorySlotButtons();
         }
@@ -194,13 +196,6 @@ public class Loadout : MonoBehaviour
             }
             SetSelectedInventorySlotButton(0);
         }
-    }
-
-    private void DoTheThing()
-    {
-        LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
-        ClearWeaponSlots();
-        SetWeaponSlots();
     }
 
     private void SetValidInventorySlotButtons(SlotType slotType)

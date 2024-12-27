@@ -2,11 +2,11 @@ using UnityEngine;
 public abstract class SkillBase
 {
     public int Level;
-    public string SkillName;
-    protected virtual int MaxLevel { get; set; }
+    public abstract string SkillName { get; }
+    public abstract string Description { get; }
+    public abstract int MaxLevel { get; }
     public ShipBase TargetShip;
     public bool IsActive;
-
 
     public SkillBase(int level)
     {

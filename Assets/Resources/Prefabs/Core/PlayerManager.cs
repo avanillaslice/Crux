@@ -23,7 +23,7 @@ public class PlayerManager : MonoBehaviour
     private Dictionary<int, string> WeaponSlotStates = new Dictionary<int, string>();
 
     // Store Unlocked Skills
-    private ShipSkillFactory.SkillList ActiveSkills;
+    private ShipSkillFactory.ShipSkills ActiveSkills;
 
     void Awake()
     {
@@ -184,7 +184,7 @@ public class PlayerManager : MonoBehaviour
 
     public void BuildInitialSkills()
     {
-        ActiveSkills = ShipSkillFactory.BuildSkillList(InitialShipData, null);
+        ActiveSkills = ShipSkillFactory.BuildShipSkills(InitialShipData, null);
     }
 
     private void ReattachWeapons()

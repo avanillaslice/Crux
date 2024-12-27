@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Factory class to create and manage ship skills
 public static class ShipSkillFactory
 {
-    public class SkillList
+    // ShipSkills holds a list of skills and provides methods to assign them to a ship and fetch specific skills.
+    public class ShipSkills
     {
-        public List<SkillBase> Skills;
+        public Dictionary<string, SkillBase> Skills;
 
-        public SkillList(List<SkillBase> skills)
+        public ShipSkills(Dictionary<string, SkillBase> skills)
         {
             Skills = skills;
         }
@@ -16,7 +18,7 @@ public static class ShipSkillFactory
         {
             if (Skills.Count == 0 || targetShip == null) return;
 
-            foreach (SkillBase skill in Skills)
+            foreach (var skill in Skills.Values)
             {
                 skill.AttemptActivation(targetShip);
             }
@@ -24,20 +26,15 @@ public static class ShipSkillFactory
 
         public SkillBase FetchSkill(string skillName)
         {
-            foreach (var skill in Skills)
-            {
-                if (skill.SkillName == skillName)
-                {
-                    return skill;
-                }
-            }
-            return null;
+            Skills.TryGetValue(skillName, out var skill);
+            return skill;
         }
     }
 
-    public static SkillList BuildSkillList(InitialShipData initialShipData, ShipBase targetShip)
+    // BuildShipSkills creates a dictionary of skills based on the initial ship data and assigns them to the target ship if provided.
+    public static ShipSkills BuildShipSkills(InitialShipData initialShipData, ShipBase targetShip)
     {
-        List<SkillBase> _skills = new List<SkillBase>();
+        Dictionary<string, SkillBase> _skills = new Dictionary<string, SkillBase>();
         var skills = initialShipData.Skills;
         foreach (var skillEntry in skills)
         {
@@ -47,12 +44,13 @@ public static class ShipSkillFactory
             if (skill != null)
             {
                 if (targetShip != null) skill.AttemptActivation(targetShip);
-                _skills.Add(skill);
+                _skills.Add(skillEntry.Key, skill);
             }
         }
-        return new SkillList(_skills);
+        return new ShipSkills(_skills);
     }
 
+    // CreateSkillInstance creates an instance of a skill based on the skill name and level.
     private static SkillBase CreateSkillInstance(string skillName, int level)
     {
         switch (skillName)

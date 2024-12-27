@@ -2,7 +2,7 @@ public class AdvancedTargetting : SkillBase
 {
     public AdvancedTargetting(int level) : base(level)
     {
-        MaxLevel = 3;
+        MaxLevel = 1;
         SkillName = "AdvancedTargetting";
     }
 
