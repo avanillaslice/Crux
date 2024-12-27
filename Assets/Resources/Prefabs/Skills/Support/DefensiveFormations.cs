@@ -1,10 +1,10 @@
 public class DefensiveFormations : SkillBase
 {
-    public DefensiveFormations(int level) : base(level)
-    {
-        MaxLevel = 1;
-        SkillName = "DefensiveFormations";
-    }
+    public override string SkillName => "Defensive Formations";
+    public override string Description => "Enables defensive formations for increased protection.";
+    public override int MaxLevel => 1;
+
+    public DefensiveFormations(int level) : base(level) { }
 
     public override void Activate()
     {

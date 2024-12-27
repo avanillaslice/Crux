@@ -1,16 +1,24 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ShieldRegen : SkillBase
 {
+    public override string SkillName => "Shield Regen";
+    public override string Description => "Increases the shield regeneration rate.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    {
+        { 1, 0.025f }, // 2.5% per second
+        { 2, 0.05f },  // 5% per second
+        { 3, 0.1f }    // 10% per second
+    };
+
     private bool isRegenerating = false;
     private Coroutine regenCoroutine;
 
-    public ShieldRegen(int level) : base(level)
-    {
-        MaxLevel = 3;
-        SkillName = "ShieldRegen";
-    }
+    public ShieldRegen(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -20,18 +28,7 @@ public class ShieldRegen : SkillBase
 
     private float DetermineRegenRate()
     {
-        switch (Level)
-        {
-            case 1:
-                return 0.025f; // 2.5% per second
-            case 2:
-                return 0.05f; // 5% per second
-            case 3:
-                return 0.1f; // 10% per second
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 0.025f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnHit()
@@ -67,5 +64,18 @@ public class ShieldRegen : SkillBase
         // {
         //     TargetShip.StopCoroutine(regenCoroutine);
         // }
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Shield Regen level is invalid");
+            return 0.025f; // Default value or error handling
+        }
     }
 }

@@ -4,14 +4,21 @@ using UnityEngine;
 
 public class ShieldDrones : SkillBase
 {
+    public override string SkillName => "Shield Drones";
+    public override string Description => "Deploys shield drones to protect the ship.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
+    {
+        { 1, 1 },
+        { 2, 2 },
+        { 3, 3 }
+    };
+
     private List<DroneShip> ActiveDrones = new List<DroneShip>();
     private int MaxShieldDrones;
 
-    public ShieldDrones(int level) : base(level)
-    {
-        MaxLevel = 3;
-        SkillName = "ShieldDrones";
-    }
+    public ShieldDrones(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -62,18 +69,7 @@ public class ShieldDrones : SkillBase
 
     private int DetermineMaxShieldDrones()
     {
-        switch (Level)
-        {
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 3;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 1;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -105,5 +101,18 @@ public class ShieldDrones : SkillBase
     public override void Deactivate()
     {
         // Implementation for ShieldDrones deactivation
+    }
+
+    public static int GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out int effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Shield Drones level is invalid");
+            return 0; // Default value or error handling
+        }
     }
 }

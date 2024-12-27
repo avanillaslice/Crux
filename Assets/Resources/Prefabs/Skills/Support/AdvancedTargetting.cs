@@ -1,10 +1,12 @@
+using UnityEngine;
+
 public class AdvancedTargetting : SkillBase
 {
-    public AdvancedTargetting(int level) : base(level)
-    {
-        MaxLevel = 1;
-        SkillName = "AdvancedTargetting";
-    }
+    public override string SkillName => "Advanced Targetting";
+    public override string Description => "Enables advanced targetting systems for improved accuracy.";
+    public override int MaxLevel => 1;
+
+    public AdvancedTargetting(int level) : base(level) { }
 
     public override void Activate()
     {

@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DroneFireRate : SkillBase
 {
-    public DroneFireRate(int level) : base(level)
+    public override string SkillName => "Drone Fire Rate";
+    public override string Description => "Increases the fire rate of drones.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
-        MaxLevel = 3;
-        SkillName = "DroneFireRate";
-    }
+        { 1, 0.05f },
+        { 2, 0.1f },
+        { 3, 0.15f }
+    };
+
+    public DroneFireRate(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class DroneFireRate : SkillBase
 
     private float DetermineDroneFireRateModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 0.05f;
-            case 2:
-                return 0.1f;
-            case 3:
-                return 0.15f;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 0.05f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -37,5 +34,18 @@ public class DroneFireRate : SkillBase
     public override void Deactivate()
     {
         // Implementation for DroneFireRate deactivation
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Drone Fire Rate level is invalid");
+            return 0f; // Default value or error handling
+        }
     }
 }

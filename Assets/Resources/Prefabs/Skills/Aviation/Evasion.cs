@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Evasion : SkillBase
 {
-    public Evasion(int level) : base(level)
+    public override string SkillName => "Evasion";
+    public override string Description => "Increases the chance to evade enemy attacks.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
-        MaxLevel = 3;
-        SkillName = "Evasion";
-    }
+        { 1, 0.1f },
+        { 2, 0.15f },
+        { 3, 0.2f }
+    };
+
+    public Evasion(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class Evasion : SkillBase
 
     private float DetermineEvasionModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 0.1f;
-            case 2:
-                return 0.15f;
-            case 3:
-                return 0.2f;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 0.1f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -37,5 +34,18 @@ public class Evasion : SkillBase
     public override void Deactivate()
     {
         // Implementation for Evasion deactivation
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Evasion level is invalid");
+            return 0f; // Default value or error handling
+        }
     }
 }

@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Speed : SkillBase
 {
-    public Speed(int level) : base(level)
+    public override string SkillName => "Speed";
+    public override string Description => "Increases the ship's movement speed.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
-        MaxLevel = 3;
-        SkillName = "Speed";
-    }
+        { 1, 0.1f },
+        { 2, 0.15f },
+        { 3, 0.2f }
+    };
+
+    public Speed(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class Speed : SkillBase
 
     private float DetermineMovementSpeedModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 0.1f;
-            case 2:
-                return 0.15f;
-            case 3:
-                return 0.2f;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 0.05f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -37,5 +34,18 @@ public class Speed : SkillBase
     public override void Deactivate()
     {
         // Implementation for Speed deactivation
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Speed level is invalid");
+            return 0f; // Default value or error handling
+        }
     }
 }

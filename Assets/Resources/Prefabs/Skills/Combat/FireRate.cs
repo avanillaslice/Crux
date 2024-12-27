@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class FireRate : SkillBase
 {
-    public FireRate(int level) : base(level)
+    public override string SkillName => "Fire Rate";
+    public override string Description => "Increases the rate of fire for the ship's weapons.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
-        MaxLevel = 3;
-        SkillName = "FireRate";
-    }
+        { 1, 0.05f },
+        { 2, 0.1f },
+        { 3, 0.15f }
+    };
+
+    public FireRate(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class FireRate : SkillBase
 
     private float DetermineFireRateModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 0.05f;
-            case 2:
-                return 0.1f;
-            case 3:
-                return 0.15f;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 0.05f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -37,5 +34,18 @@ public class FireRate : SkillBase
     public override void Deactivate()
     {
         // Implementation for FireRate deactivation
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Fire Rate level is invalid");
+            return 0f; // Default value or error handling
+        }
     }
 }

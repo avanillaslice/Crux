@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Piercing : SkillBase
 {
-    public Piercing(int level) : base(level)
+    public override string SkillName => "Piercing Rounds";
+    public override string Description => "Increases the ability of projectiles to pierce through targets.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
     {
-        MaxLevel = 3;
-        SkillName = "Piercing";
-    }
+        { 1, 1 },
+        { 2, 2 },
+        { 3, 3 }
+    };
+
+    public Piercing(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class Piercing : SkillBase
 
     private int DeterminePiercingModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 3;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 1;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -37,5 +34,18 @@ public class Piercing : SkillBase
     public override void Deactivate()
     {
         // Implementation for Piercing deactivation
+    }
+
+    public static int GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out int effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Piercing Rounds level is invalid");
+            return 0; // Default value or error handling
+        }
     }
 }

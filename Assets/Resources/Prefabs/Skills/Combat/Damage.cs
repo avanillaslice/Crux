@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Damage : SkillBase
 {
-    public Damage(int level) : base(level)
+    public override string SkillName => "Damage";
+    public override string Description => "Increases the damage output of the ship.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
-        MaxLevel = 3;
-        SkillName = "Damage";
-    }
+        { 1, 0.15f },
+        { 2, 0.3f },
+        { 3, 0.45f }
+    };
+
+    public Damage(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class Damage : SkillBase
 
     private float DetermineDamageModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 0.15f;
-            case 2:
-                return 0.3f;
-            case 3:
-                return 0.45f;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 0.15f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -37,5 +34,18 @@ public class Damage : SkillBase
     public override void Deactivate()
     {
         // Implementation for Damage deactivation
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Damage level is invalid");
+            return 0f; // Default value or error handling
+        }
     }
 }

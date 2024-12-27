@@ -1,12 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ShieldCapacity : SkillBase
 {
-    public ShieldCapacity(int level) : base(level)
+    public override string SkillName => "Shield Capacity";
+    public override string Description => "Increases the maximum shield capacity of the ship.";
+    public override int MaxLevel => 3;
+
+    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
-        MaxLevel = 3;
-        SkillName = "ShieldCapacity";
-    }
+        { 1, 1.15f },
+        { 2, 1.3f },
+        { 3, 1.5f }
+    };
+
+    public ShieldCapacity(int level) : base(level) { }
 
     public override void Activate()
     {
@@ -15,18 +23,7 @@ public class ShieldCapacity : SkillBase
 
     private float DetermineMaxShieldModifier()
     {
-        switch (Level)
-        {
-            case 1:
-                return 1.15f;
-            case 2:
-                return 1.3f;
-            case 3:
-                return 1.5f;
-            default:
-                Debug.LogError(SkillName + " level is invalid");
-                return 1.15f;
-        }
+        return GetAmountAffected(Level);
     }
 
     private void OnSpawn()
@@ -38,5 +35,18 @@ public class ShieldCapacity : SkillBase
     public override void Deactivate()
     {
         // Implementation for ShieldCapacity deactivation
+    }
+
+    public static float GetAmountAffected(int level)
+    {
+        if (levelEffects.TryGetValue(level, out float effect))
+        {
+            return effect;
+        }
+        else
+        {
+            Debug.LogError("Shield Capacity level is invalid");
+            return 1f; // Default value or error handling
+        }
     }
 }
