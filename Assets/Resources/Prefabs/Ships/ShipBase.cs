@@ -31,6 +31,7 @@ public abstract class ShipBase : MonoBehaviour
     [SerializeField] public float Shield;
     protected float MaxCharge = 100f;
     protected float Charge;
+    public ShipSkillManager.ShipSkills ActiveSkills;
     protected GameObject DroneAnchor;
 
     // SKILL STATES

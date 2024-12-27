@@ -8,7 +8,7 @@ public class AttackDrones : SkillBase
     public override string Description => "Deploys attack drones to assist in combat.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
+    public static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
     {
         { 1, 1 },
         { 2, 2 },

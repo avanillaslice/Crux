@@ -8,7 +8,7 @@ public class ShieldRegen : SkillBase
     public override string Description => "Increases the shield regeneration rate.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
         { 1, 0.025f }, // 2.5% per second
         { 2, 0.05f },  // 5% per second

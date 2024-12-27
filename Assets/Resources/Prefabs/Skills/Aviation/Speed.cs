@@ -7,7 +7,7 @@ public class Speed : SkillBase
     public override string Description => "Increases the ship's movement speed.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
         { 1, 0.1f },
         { 2, 0.15f },

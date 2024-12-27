@@ -7,7 +7,7 @@ public class FireRate : SkillBase
     public override string Description => "Increases the rate of fire for the ship's weapons.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
         { 1, 0.05f },
         { 2, 0.1f },

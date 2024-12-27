@@ -7,7 +7,7 @@ public class Piercing : SkillBase
     public override string Description => "Increases the ability of projectiles to pierce through targets.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
+    public static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
     {
         { 1, 1 },
         { 2, 2 },

@@ -7,7 +7,7 @@ public class DroneChargeRate : SkillBase
     public override string Description => "Increases the charge rate of drones.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
         { 1, 0.1f },
         { 2, 0.2f },

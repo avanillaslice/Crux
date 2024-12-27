@@ -7,7 +7,7 @@ public class HullDurability : SkillBase
     public override string Description => "Increases the maximum health of the ship.";
     public override int MaxLevel => 3;
 
-    private static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
     {
         { 1, 1.15f },
         { 2, 1.3f },
