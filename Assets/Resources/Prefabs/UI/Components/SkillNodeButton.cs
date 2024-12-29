@@ -1,17 +1,33 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class SkillNode {
+public class SkillNode : MonoBehaviour {
 
     // Inspector
-    public SkillBase Skill;
+    public SkillType SkillType;
     public int Tier;
     public List<SkillConnection> InputConnections;
     public List<SkillConnection> OutputConnections;
-    public float XPos;
+    public Color DefaultColor;
+    public Color EnabledColor;
+    
 
     // State
-    public bool IsEnabled;
+    [HideInInspector]
+    public float XPos;
+    [HideInInspector]
+    private bool IsEnabled;
+    private bool IsSelected;
+    private Color SelectedColor = Color.white;
+    private Image imageComponent;
+
+    void Awake() {
+        imageComponent = GetComponent<Image>();
+        if (imageComponent == null) {
+            Debug.LogError("Image component not found on the GameObject.");
+        }
+    }
 
     public void AttemptSkillActivation() {
         if (IsEnabled) {
@@ -21,7 +37,7 @@ public class SkillNode {
 
         SkillConnection validSkillConnection = CheckRequirements();
         if (validSkillConnection != null) {
-            ShipSkillManager.UnlockSkill(PlayerManager.Inst.ActivePlayerShip, Skill, 1);
+            ShipSkillManager.UnlockSkill(PlayerManager.Inst.ActivePlayerShip, SkillType, 1);
             validSkillConnection.Enable();
             Enable();
         }
@@ -35,13 +51,28 @@ public class SkillNode {
         return null;
     }
 
-    private void Enable() {
-        // Set Sprite to BRIGHT
+    public void Enable() {
+        if (IsEnabled) return;
+        if (imageComponent == null) Debug.LogError("Image component not found on the GameObject: " + gameObject.name);
+        imageComponent.color = EnabledColor;
         IsEnabled = true;
     }
 
-    private void Disable() {
-        // Set Sprite to DIM
+    public void Disable() {
+        if (!IsEnabled) return;
+        imageComponent.color = IsSelected ? SelectedColor : DefaultColor;
         IsEnabled = false;
+    }
+
+    public void Select() {
+        if (IsSelected) return;
+        imageComponent.color = SelectedColor;
+        IsSelected = true;
+    }
+
+    public void Deselect() {
+        if (!IsSelected) return;
+        imageComponent.color = IsEnabled ? EnabledColor : DefaultColor;
+        IsSelected = false;
     }
 }

@@ -143,6 +143,8 @@ public class PlayerManager : MonoBehaviour
         {
             ActivePlayerShip = Instantiate(AssetManager.PlayerPrefab, spawnPosition, Quaternion.identity);
             // Sets the players ship for each still and attemps activation (if not already)
+            Debug.Log("ActiveSkills: " + ActiveSkills);
+            Debug.Log("ActivePlayerShip: " + ActivePlayerShip);
             ActiveSkills.AssignShip(ActivePlayerShip);
             // Reattach saved weapon prefabs
             LoadoutManager.InitialiseWeapons();
@@ -184,7 +186,7 @@ public class PlayerManager : MonoBehaviour
 
     public void BuildInitialSkills()
     {
-        ActiveSkills = ShipSkillManager.BuildShipSkills(InitialShipData, null);
+        ActiveSkills = ShipSkillManager.BuildShipSkills(InitialShipData);
     }
 
     private void ReattachWeapons()

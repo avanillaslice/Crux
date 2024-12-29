@@ -1,10 +1,7 @@
 using System.Collections.Generic;
-using System.ComponentModel;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class Loadout : MonoBehaviour
+public class Loadout : UIWindowBase
 {
     public static Loadout Inst { get; private set; }
 
@@ -51,7 +48,7 @@ public class Loadout : MonoBehaviour
         ClearInventorySlots();
     }
 
-    public void HandleBackClicked()
+    public override void HandleBackClicked()
     {
         UIManager.Inst.DisableLoadoutUI();
         UIManager.Inst.EnableInterStageUI();
@@ -139,17 +136,17 @@ public class Loadout : MonoBehaviour
         else return false;
     }
 
-    public void HandleMoveLeft()
+    public override void HandleMoveLeft()
     {
-        if (ActiveContainer == "WeaponSlots") return;
-        SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+        // if (ActiveContainer == "WeaponSlots") return;
+        // SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
     }
-    public void HandleMoveRight()
+    public override void HandleMoveRight()
     {
-        if (ActiveContainer == "Inventory") return;
-        SetSelectedInventorySlotButton(0);
+        // if (ActiveContainer == "Inventory") return;
+        // SetSelectedInventorySlotButton(0);
     }
-    public void HandleMoveUp()
+    public override void HandleMoveUp()
     {
         if (ActiveContainer == "Inventory")
         {
@@ -162,7 +159,7 @@ public class Loadout : MonoBehaviour
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
         }
     }
-    public void HandleMoveDown()
+    public override void HandleMoveDown()
     {
         if (ActiveContainer == "Inventory")
         {
@@ -176,7 +173,7 @@ public class Loadout : MonoBehaviour
         }
     }
 
-    public void HandleSelect()
+    public override void HandleSelect()
     {
         if (ActiveContainer == "Inventory")
         {

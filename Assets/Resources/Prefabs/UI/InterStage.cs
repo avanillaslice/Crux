@@ -7,6 +7,11 @@ public class InterStage : MonoBehaviour
         GameManager.HandleInterStageCompleted();
     }
 
+    public void SkillTree()
+    {
+        UIManager.Inst.TransitionToSkillTree();
+    }
+
     public void Loadout()
     {
         UIManager.Inst.TransitionToLoadout();

@@ -38,7 +38,7 @@ public static class AssetManager
     public static GameObject PauseMenuPrefab { get; private set; }
     public static GameObject InterStageUIPrefab { get; private set; }
     public static GameObject LoadoutUIPrefab { get; private set; }
-
+    public static GameObject SkillTreeUIPrefab { get; private set; }
     // SETTINGS
     private static List<string> WeaponPrefabsToLoad = new List<string> { "Cannon", "CannonSmall", "MissileLauncher", "HomingMissileLauncher", "ElectroShield", "ElectroShieldEffect", "DroneShield", "DroneShieldEffect", "TurretSmall" };
     private static List<string> ProjectilesToLoad = new List<string> { "Plasma", "PlasmaLight", "PlasmaHeavy", "Missile", "HomingMissile", "ElectricExplosion", "ElectricExplosionChain" };
@@ -105,11 +105,13 @@ public static class AssetManager
         PauseMenuPrefab = Resources.Load<GameObject>("Prefabs/UI/PauseMenu");
         InterStageUIPrefab = Resources.Load<GameObject>("Prefabs/UI/InterStageUI");
         LoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/LoadoutUI");
+        SkillTreeUIPrefab = Resources.Load<GameObject>("Prefabs/UI/SkillTreeUI");
         if (ShipSelectionUIPrefab == null) Debug.LogError("Failed to load ShipSelectionUIPrefab!");
         if (PickupMessagePrefab == null) Debug.LogError("Failed to load PickupMessagePrefab!");
         if (SpecialWeaponUnlockedPrefab == null) Debug.LogError("Failed to load SpecialWeaponUnlockedPrefab!");
         if (PauseMenuPrefab == null) Debug.LogError("Failed to load PauseMenuPrefab!");
         if (LoadoutUIPrefab == null) Debug.LogError("Failed to load LoadoutUIPrefab!");
+        if (SkillTreeUIPrefab == null) Debug.LogError("Failed to load SkillTreeUIPrefab!");
     }
 
     private static void CacheAudioAssets()

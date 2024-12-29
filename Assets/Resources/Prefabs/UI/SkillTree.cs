@@ -2,17 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // NODES AND CONNECTIONS WILL BE ASSIGNED VIA PROJECT INSPECTOR
-public class SkillTree : MonoBehaviour
+public class SkillTree : UIWindowBase
 {
-    // Singleton instance
     public static SkillTree Inst { get; private set; }
 
     // Inspector
     public GameObject SkillNodeContainer; // Container for skill nodes
     public List<SkillNode> SkillNodes;
+    public SkillNode InitialCursor;
 
     // State
     private Dictionary<int, List<SkillNode>> Tiers;
+    private SkillNode Cursor;
 
     void Awake()
     {
@@ -24,11 +25,14 @@ public class SkillTree : MonoBehaviour
         }
         Inst = this;
         InitializeSkillNodes();
+        RefreshSkillNodes();
+        SetCursor(InitialCursor);
     }
 
     void OnEnable()
     {
         RefreshSkillNodes();
+        SetCursor(InitialCursor);
     }
 
     void OnDisable()
@@ -60,10 +64,67 @@ public class SkillTree : MonoBehaviour
 
     private void RefreshSkillNodes()
     {
-        // Logic to refresh or update skill nodes when the window is revisited
+        ShipSkillManager.ShipSkills shipSkills = PlayerManager.Inst.ActivePlayerShip.ActiveSkills;
+        foreach (SkillNode skillNode in SkillNodes) {
+            if (shipSkills.Skills.ContainsKey(skillNode.SkillType)) {
+                skillNode.Enable();
+            } else {
+                skillNode.Disable();
+            }
+        }
+    }
+
+    public override void HandleMoveLeft()
+    {
+        SkillNode leftNode = FetchLeftSkillNode(Cursor);
+        if (leftNode != null && leftNode != Cursor) {
+            SetCursor(leftNode);
+        }
+    }
+
+    public override void HandleMoveRight()
+    {
+        SkillNode rightNode = FetchRightSkillNode(Cursor);
+        if (rightNode != null && rightNode != Cursor) {
+            SetCursor(rightNode);
+        }
+    }
+
+    public override void HandleMoveUp()
+    {
+        SkillNode upNode = FetchUpSkillNode(Cursor);
+        if (upNode != null && upNode != Cursor) {
+            SetCursor(upNode);
+        }
+    }
+
+    public override void HandleMoveDown()
+    {
+        SkillNode downNode = FetchDownSkillNode(Cursor);
+        if (downNode != null && downNode != Cursor) {
+            SetCursor(downNode);
+        }
+    }
+
+    public override void HandleSelect()
+    {
+        Cursor?.AttemptSkillActivation();
+    }
+
+    public override void HandleBackClicked()
+    {
+        UIManager.Inst.DisableSkillTreeUI();
+        UIManager.Inst.EnableInterStageUI();
     }
 
     // Methods
+    public void SetCursor(SkillNode skillNode)
+    {
+        Cursor?.Deselect();
+        Cursor = skillNode;
+        Cursor.Select();
+    }
+
     public SkillNode FetchLeftSkillNode(SkillNode skillNode)
     {
         SkillNode leftmostNode = null;

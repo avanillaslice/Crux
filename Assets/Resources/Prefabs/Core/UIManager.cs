@@ -14,10 +14,12 @@ public class UIManager : MonoBehaviour
     private GameObject PauseMenuUI;
     private GameObject InterStageUI;
     private GameObject LoadoutUI;
+    private GameObject SkillTreeUI;
     private GameObject SpecialWeaponUnlockedUI;
 
     // UTILITY
     private string ActiveWindow;
+    private UIWindowBase ActiveUIWindow;
 
     void Awake()
     {
@@ -46,6 +48,7 @@ public class UIManager : MonoBehaviour
         MainMenuUI.SetActive(false);
         ShipSelectionUI.SetActive(true);
         ActiveWindow = "ShipSelection";
+        ActiveUIWindow = ShipSelectionUI.GetComponent<UIWindowBase>();
     }
 
     public void TransitionToLoadout()
@@ -54,10 +57,17 @@ public class UIManager : MonoBehaviour
         EnableLoadoutUI();
     }
 
+    public void TransitionToSkillTree()
+    {
+        DisableInterStageUI();
+        EnableSkillTreeUI();
+    }
+
     public void EnableSpecialWeaponUnlockedUI()
     {
         SpecialWeaponUnlockedUI = Instantiate(AssetManager.SpecialWeaponUnlockedPrefab, GameplayOverlayCanvas.transform);
         ActiveWindow = "SpecialWeaponUnlocked";
+        ActiveUIWindow = SpecialWeaponUnlockedUI.GetComponent<UIWindowBase>();
 
         // Find the Animator component in the child GameObject
         Animator animator = SpecialWeaponUnlockedUI.GetComponentInChildren<Animator>();
@@ -75,6 +85,7 @@ public class UIManager : MonoBehaviour
     {
         Destroy(SpecialWeaponUnlockedUI);
         ActiveWindow = null;
+        ActiveUIWindow = null;
     }
 
     public void EnableInterStageUI()
@@ -82,6 +93,7 @@ public class UIManager : MonoBehaviour
         if (InterStageUI == null) InterStageUI = Instantiate(AssetManager.InterStageUIPrefab, InterStageUICanvas.transform);
         else InterStageUI.SetActive(true);
         ActiveWindow = "InterStage";
+        ActiveUIWindow = InterStageUI.GetComponent<UIWindowBase>();
     }
 
     public void DisableInterStageUI()
@@ -89,6 +101,7 @@ public class UIManager : MonoBehaviour
         if (InterStageUI == null) return;
         else InterStageUI.SetActive(false);
         ActiveWindow = null;
+        ActiveUIWindow = null;
     }
 
     private void EnableLoadoutUI()
@@ -96,6 +109,7 @@ public class UIManager : MonoBehaviour
         if (LoadoutUI == null) LoadoutUI = Instantiate(AssetManager.LoadoutUIPrefab, InterStageUICanvas.transform);
         else LoadoutUI.SetActive(true);
         ActiveWindow = "Loadout";
+        ActiveUIWindow = LoadoutUI.GetComponent<UIWindowBase>();
     }
 
     public void DisableLoadoutUI()
@@ -103,6 +117,23 @@ public class UIManager : MonoBehaviour
         if (LoadoutUI == null) return;
         else LoadoutUI.SetActive(false);
         ActiveWindow = null;
+        ActiveUIWindow = null;
+    }
+
+    private void EnableSkillTreeUI()
+    {
+        if (SkillTreeUI == null) SkillTreeUI = Instantiate(AssetManager.SkillTreeUIPrefab, InterStageUICanvas.transform);
+        else SkillTreeUI.SetActive(true);
+        ActiveWindow = "SkillTree";
+        ActiveUIWindow = SkillTreeUI.GetComponent<UIWindowBase>();
+    }
+
+    public void DisableSkillTreeUI()
+    {
+        if (SkillTreeUI == null) return;
+        else SkillTreeUI.SetActive(false);
+        ActiveWindow = null;
+        ActiveUIWindow = null;
     }
 
     // Menu Controls...
@@ -112,35 +143,38 @@ public class UIManager : MonoBehaviour
     */
     public void HandleMoveUp()
     {
-        switch (ActiveWindow)
-        {
-            case "Loadout":
-                LoadoutUI.GetComponent<Loadout>().HandleMoveUp();
-                break;
-        }
+        ActiveUIWindow.HandleMoveUp();
+        // switch (ActiveWindow)
+        // {
+        //     case "Loadout":
+        //         LoadoutUI.GetComponent<Loadout>().HandleMoveUp();
+        //         break;
+        // }
     }
 
     public void HandleMoveDown()
     {
-        switch (ActiveWindow)
-        {
-            case "Loadout":
-                LoadoutUI.GetComponent<Loadout>().HandleMoveDown();
-                break;
-        }
+        ActiveUIWindow.HandleMoveDown();
+        // switch (ActiveWindow)
+        // {
+        //     case "Loadout":
+        //         LoadoutUI.GetComponent<Loadout>().HandleMoveDown();
+        //         break;
+        // }
     }
 
     public void HandleMoveLeft()
     {
-        switch (ActiveWindow)
-        {
-            case "Loadout":
-                // LoadoutUI.GetComponent<Loadout>().HandleMoveLeft();
-                break;
-            case "ShipSelection":
-                ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorLeft();
-                break;
-        }
+        ActiveUIWindow.HandleMoveLeft();
+        // switch (ActiveWindow)
+        // {
+        //     case "Loadout":
+        //         // LoadoutUI.GetComponent<Loadout>().HandleMoveLeft();
+        //         break;
+        //     case "ShipSelection":
+        //         ShipSelectionUI.GetComponent<ShipSelection>().HandleMoveLeft();
+        //         break;
+        // }
         // if (ShipSelectionUI.activeSelf)
         // {
         //     ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorLeft();
@@ -149,28 +183,30 @@ public class UIManager : MonoBehaviour
 
     public void HandleMoveRight()
     {
-        switch (ActiveWindow)
-        {
-            case "Loadout":
-                // LoadoutUI.GetComponent<Loadout>().HandleMoveRight();
-                break;
-            case "ShipSelection":
-                ShipSelectionUI.GetComponent<ShipSelection>().MoveCursorRight();
-                break;
-        }
+        ActiveUIWindow.HandleMoveRight();
+        // switch (ActiveWindow)
+        // {
+        //     case "Loadout":
+        //         // LoadoutUI.GetComponent<Loadout>().HandleMoveRight();
+        //         break;
+        //     case "ShipSelection":
+        //         ShipSelectionUI.GetComponent<ShipSelection>().HandleMoveRight();
+        //         break;
+        // }
     }
 
     public void HandleSelect()
     {
-        switch (ActiveWindow)
-        {
-            case "Loadout":
-                LoadoutUI.GetComponent<Loadout>().HandleSelect();
-                break;
-            case "ShipSelection":
-                ShipSelectionUI.GetComponent<ShipSelection>().SelectShip();
-                break;
-        }
+        ActiveUIWindow.HandleSelect();
+        // switch (ActiveWindow)
+        // {
+        //     case "Loadout":
+        //         LoadoutUI.GetComponent<Loadout>().HandleSelect();
+        //         break;
+        //     case "ShipSelection":
+        //         ShipSelectionUI.GetComponent<ShipSelection>().HandleSelect();
+        //         break;
+        // }
     }
 
     public void EnablePauseMenu()

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class ShipSelection : MonoBehaviour
+public class ShipSelection : UIWindowBase
 {
     public List<GameObject> Ships;
     public GameObject Cursor;
@@ -20,12 +20,12 @@ public class ShipSelection : MonoBehaviour
         instantiatedCursor = Instantiate(Cursor, Ships[currentIndex].transform.position, Quaternion.identity);
     }
 
-    public void SelectShip()
+    public override void HandleSelect()
     {
         GameManager.InitiateGameplay(false);
     }
 
-    public void MoveCursorLeft()
+    public override void HandleMoveLeft()
     {
         if (Ships == null || Ships.Count == 0)
         {
@@ -37,7 +37,7 @@ public class ShipSelection : MonoBehaviour
         UpdateCursorPosition();
     }
 
-    public void MoveCursorRight()
+    public override void HandleMoveRight()
     {
         if (Ships == null || Ships.Count == 0)
         {
@@ -56,4 +56,19 @@ public class ShipSelection : MonoBehaviour
             instantiatedCursor.transform.position = Ships[currentIndex].transform.position;
         }
     }
+
+    public override void HandleMoveUp()
+    {
+        // Do nothing
+    }
+
+    public override void HandleMoveDown()
+    {
+        // Do nothing
+    }
+
+    public override void HandleBackClicked()
+    {
+        // Do nothing
+    }   
 }
