@@ -8,6 +8,7 @@ public class SkillNode {
     public int Tier;
     public List<SkillConnection> SkillConnectionsIN;
     public List<SkillConnection> SkillConnectionsOUT;
+    public float XPos;
 
     // State
     public bool IsEnabled;
