@@ -6,8 +6,8 @@ public class SkillNode {
     // Inspector
     public SkillBase Skill;
     public int Tier;
-    public List<SkillConnection> SkillConnectionsIN;
-    public List<SkillConnection> SkillConnectionsOUT;
+    public List<SkillConnection> InputConnections;
+    public List<SkillConnection> OutputConnections;
     public float XPos;
 
     // State
@@ -29,8 +29,8 @@ public class SkillNode {
 
     private SkillConnection CheckRequirements() {
         // If any IN Connections have a SkillNodeIN that's enabled, return true
-        foreach (SkillConnection skillConnection in SkillConnectionsIN) {
-            if (skillConnection.SkillNodeOut.IsEnabled) return skillConnection;
+        foreach (SkillConnection skillConnection in InputConnections) {
+            if (skillConnection.SkillNodeOutput.IsEnabled) return skillConnection;
         }
         return null;
     }

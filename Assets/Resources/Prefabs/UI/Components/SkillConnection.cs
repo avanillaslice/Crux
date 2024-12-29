@@ -1,8 +1,8 @@
 public class SkillConnection {
 
     // Inspector
-    public SkillNode SkillNodeIn;
-    public SkillNode SkillNodeOut;
+    public SkillNode SkillNodeInput;
+    public SkillNode SkillNodeOutput;
 
     // State
     public bool IsEnabled;
