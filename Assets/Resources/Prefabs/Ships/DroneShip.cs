@@ -19,18 +19,45 @@ public abstract class DroneShip : ShipBase
     protected float curveProgress = 1f;
     protected float curveDuration = 1.5f;
     public GameObject ParentDroneAnchor;
+    private bool IsPaused = false;
+    private bool WasAggressiveOnPause = false;
+
+    protected abstract void ActivateEffect();
+    protected abstract void MoveDrone();
 
     protected virtual void Start()
     {
         ShieldIsActive = false;
         EmitOnSpawn();
         InvokeRepeating("UpdateCharge", 0f, 1f);
+        ParentShip.OnSetPosition += ForceNewPosition;
+        StageManager.OnStageCompleted += PauseBehavior;
+        StageManager.OnStageStart += ResumeBehavior;
     }
 
     protected virtual void Update()
     {
         UpdateBehavior();
         MoveDrone();
+    }
+
+    private void PauseBehavior()
+    {
+        IsPaused = true;
+        if (CurrentBehavior == DroneBehavior.Aggressive) WasAggressiveOnPause = true;
+        SetBehavior(DroneBehavior.Passive);
+    }
+
+    private void ResumeBehavior()
+    {
+        IsPaused = false;
+        if (WasAggressiveOnPause) SetBehavior(DroneBehavior.Aggressive);
+    }
+
+    private void ForceNewPosition()
+    {
+        transform.position = ParentShip.transform.position;
+        curveProgress = 1f;
     }
 
     public void SubtractCharge(float amount)
@@ -40,14 +67,15 @@ public abstract class DroneShip : ShipBase
 
     void UpdateCharge()
     {
-        if (CurrentBehavior == DroneBehavior.Passive && Charge < MaxCharge)
+        if (CurrentBehavior == DroneBehavior.Passive && Charge < MaxCharge && !IsPaused)
         {
             Charge = Mathf.Min(MaxCharge, Charge + chargeRate * ChargeRateModifier);
         }
     }
 
-    void UpdateBehavior()
+    private void UpdateBehavior()
     {
+        if (IsPaused) return;
         if (Charge > 85)
         {
             SetBehavior(DroneBehavior.Aggressive);
@@ -58,19 +86,15 @@ public abstract class DroneShip : ShipBase
         }
     }
 
-    void SetBehavior(DroneBehavior newBehavior)
+    private void SetBehavior(DroneBehavior newBehavior)
     {
         if (CurrentBehavior != newBehavior)
         {
             CurrentBehavior = newBehavior;
-            curveProgress = 1f; // Force new target selection
+            // curveProgress = 1f; // Force new target selection
             ActivateEffect();
         }
     }
-
-    protected abstract void ActivateEffect();
-
-    protected abstract void MoveDrone();
 
     protected Vector3 PickNewRelativeLocation()
     {

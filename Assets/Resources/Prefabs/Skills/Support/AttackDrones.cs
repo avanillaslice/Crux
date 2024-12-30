@@ -1,118 +1,33 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackDrones : SkillBase
+public class AttackDrones : DroneBase
 {
     public override string SkillName => "Attack Drones";
     public override string Description => "Deploys attack drones to assist in combat.";
     public override int MaxLevel => 3;
 
-    public static readonly Dictionary<int, int> levelEffects = new Dictionary<int, int>
+    public override Dictionary<int, int> levelEffects => new Dictionary<int, int>
     {
         { 1, 1 },
         { 2, 2 },
         { 3, 3 }
     };
 
-    private List<DroneShip> ActiveDrones = new List<DroneShip>();
-    private int MaxAttackDrones;
-
     public AttackDrones(int level) : base(level) { }
 
-    public override void Activate()
-    {
-        MaxAttackDrones = DetermineMaxAttackDrones();
-        TargetShip.OnSpawn += OnSpawn;
-        TargetShip.OnDeath += OnDeath;
-    }
-
-    private IEnumerator SpawnInitialDrones()
-    {
-        while (ActiveDrones.Count < MaxAttackDrones)
-        {
-            yield return new WaitForSeconds(3f);
-            SpawnDrone();
-        }
-    }
-
-    private void RemoveDroneFromActiveList(DroneShip drone)
-    {
-        ActiveDrones.Remove(drone);
-        TargetShip.StartCoroutine(SpawnReplacementDrone());
-    }
-
-    private IEnumerator SpawnReplacementDrone()
-    {
-        yield return new WaitForSeconds(10f);
-
-        if (ActiveDrones.Count < MaxAttackDrones)
-        {
-            SpawnDrone();
-        }
-    }
-
-    private void SpawnDrone()
+    protected override void SpawnDrone()
     {
         if (TargetShip == null) return;
-        DroneShip newDrone = TargetShip.SpawnDrone(false);
-        if (newDrone != null)
+        DroneShip attackDrone = TargetShip.SpawnDrone(false);
+        if (attackDrone != null)
         {
-            ActiveDrones.Add(newDrone);
-            newDrone.OnDeath += () => RemoveDroneFromActiveList(newDrone);
+            ActiveDrones.Add(attackDrone);
+            attackDrone.OnDeath += () => HandleDroneDeath(attackDrone);
         }
         else
         {
             Debug.LogError("DroneShip component not found on instantiated drone prefab");
-        }
-    }
-
-    private int DetermineMaxAttackDrones()
-    {
-        return GetAmountAffected(Level);
-    }
-
-    private void OnSpawn()
-    {
-        TargetShip.StartCoroutine(SpawnInitialDrones());
-    }
-
-    private void OnDeath()
-    {
-        TargetShip.StopCoroutine(SpawnInitialDrones());
-        TargetShip.StopCoroutine(SpawnReplacementDrone());
-        DestroyAllDrones();
-    }
-
-    private void DestroyAllDrones()
-    {
-        for (int i = ActiveDrones.Count - 1; i >= 0; i--)
-        {
-            DroneShip droneShip = ActiveDrones[i];
-            if (droneShip != null)
-            {
-                droneShip.OnDeath -= () => RemoveDroneFromActiveList(droneShip);
-                droneShip.Explode();
-            }
-        }
-        ActiveDrones.Clear();
-    }
-
-    public override void Deactivate()
-    {
-        // Implementation for AttackDrones deactivation
-    }
-
-    public static int GetAmountAffected(int level)
-    {
-        if (levelEffects.TryGetValue(level, out int effect))
-        {
-            return effect;
-        }
-        else
-        {
-            Debug.LogError("Attack Drones level is invalid");
-            return 1; // Default value or error handling
         }
     }
 }

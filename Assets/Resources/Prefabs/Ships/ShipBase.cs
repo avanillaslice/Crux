@@ -69,6 +69,7 @@ public abstract class ShipBase : MonoBehaviour
     public event Action OnHit;
     public event Action OnUpdate;
     public event Action OnDeath;
+    public event Action OnSetPosition;
     // public event Action OnDestroy;
 
     protected virtual void EmitOnSpawn()
@@ -91,7 +92,14 @@ public abstract class ShipBase : MonoBehaviour
         UpdateDroneAnchor();
     }
 
-    void UpdateDroneAnchor()
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+        DroneAnchor.transform.position = position;
+        OnSetPosition?.Invoke();
+    }
+
+    private void UpdateDroneAnchor()
     {
         if (DroneAnchor == null) return;
         Vector3 targetPosition = transform.position;

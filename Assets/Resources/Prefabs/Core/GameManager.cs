@@ -11,6 +11,7 @@ public static class GameManager
     public static int Score { get; private set; }
     public static bool SceneIsChanging;
     public static Queue<string> BackgroundMusicQueue { get; private set; } = new Queue<string>();
+    
 
     public static async void InitiateGameplay(bool skipLoad)
     {
@@ -27,8 +28,8 @@ public static class GameManager
         MusicManager.Inst.PlayBackgroundMusic();
         await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
         GameInputHandler.Inst.EnableGameplayControls();
-        StageManager.StartStage(0);
-        // HandleStageCompleted();
+        // StageManager.StartStage(0);
+        HandleStageCompleted();
     }
 
     public static void TogglePause()
@@ -120,6 +121,7 @@ public static class GameManager
         await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
         GameInputHandler.Inst.EnableGameplayControls();
         StageManager.StartStage(0);
+
     }
 
     public static Task LoadSceneAsync(string sceneName)

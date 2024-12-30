@@ -1,7 +1,11 @@
+using System;
 using UnityEngine;
 
 public static class StageManager
 {
+    public static bool StageActive = false;
+    public static event Action OnStageStart;
+    public static event Action OnStageCompleted;
     public static void StartStage(int stageIndex)
     {
         Debug.Log($"Initializing Stage {stageIndex}");
@@ -12,6 +16,8 @@ public static class StageManager
             EndStage();
         }
         LevelManager.StartLevels(stageData);
+        StageActive = true;
+        OnStageStart?.Invoke();
     }
 
     private static bool ValidateStage(StageData stage)
@@ -32,6 +38,8 @@ public static class StageManager
     private static void EndStage()
     {
         Debug.Log("Stage Completed!");
+        StageActive = false;
+        OnStageCompleted?.Invoke();
         GameManager.HandleStageCompleted();
     }
 }

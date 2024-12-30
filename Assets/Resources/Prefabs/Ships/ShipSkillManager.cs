@@ -77,8 +77,6 @@ public static class ShipSkillManager
     // BuildShipSkills creates a dictionary of skills based on the initial ship data and assigns them to the target ship if provided.
     public static ShipSkills BuildShipSkills(InitialShipData initialShipData)
     {
-        // if (targetShip == null) return null;
-
         Dictionary<SkillType, SkillBase> _skills = new Dictionary<SkillType, SkillBase>();
 
         foreach (var skillEntry in initialShipData.Skills)
@@ -88,16 +86,21 @@ public static class ShipSkillManager
             SkillType skillType = (SkillType)Enum.Parse(typeof(SkillType), skillEntry.Key);
             SkillBase skill = CreateSkillInstance(skillType, skillEntry.Value);
             _skills.Add(skillType, skill);
-            // skill.AttemptActivation(targetShip);
         }
         return new ShipSkills(_skills);
     }
 
-    public static void UnlockSkill(ShipBase targetShip, SkillType skillType, int level)
+    public static SkillBase UnlockSkill(ShipBase targetShip, SkillType skillType, int level)
     {
-        SkillBase _skill = CreateSkillInstance(skillType, level);
-        _skill.AttemptActivation(targetShip);
-        targetShip.ActiveSkills.Skills.Add(skillType, _skill);
+        try {
+            SkillBase _skill = CreateSkillInstance(skillType, level);
+            _skill.AttemptActivation(targetShip);
+            targetShip.ActiveSkills.Skills.Add(skillType, _skill);
+            return _skill;
+        } catch (Exception e) {
+            Debug.LogError($"Failed to unlock skill {skillType}: {e.Message}");
+            return null;
+        }
     }
 
     // CreateSkillInstance creates an instance of a skill based on the SkillType and level.

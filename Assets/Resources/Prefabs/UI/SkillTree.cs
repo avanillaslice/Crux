@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// NODES AND CONNECTIONS WILL BE ASSIGNED VIA PROJECT INSPECTOR
 public class SkillTree : UIWindowBase
 {
     public static SkillTree Inst { get; private set; }
 
     // Inspector
-    public GameObject SkillNodeContainer; // Container for skill nodes
-    public List<SkillNode> SkillNodes;
+    public List<GameObject> SkillTreeContainers; // Container for skill tree nodes and connections
     public SkillNode InitialCursor;
-
+    private List<SkillNode> SkillNodes;
+    private List<SkillConnection> SkillConnections;
+    
     // State
     private Dictionary<int, List<SkillNode>> Tiers;
     private SkillNode Cursor;
@@ -19,64 +19,76 @@ public class SkillTree : UIWindowBase
     {
         if (Inst != null && Inst != this)
         {
-            Debug.Log("SkillTree already exists");
+            Debug.LogError("SkillTree already exists");
             Destroy(gameObject);
             return;
         }
         Inst = this;
-        InitializeSkillNodes();
-        RefreshSkillNodes();
-        SetCursor(InitialCursor);
+        InitializeSkillTrees();
     }
 
     void OnEnable()
     {
-        RefreshSkillNodes();
         SetCursor(InitialCursor);
     }
 
-    void OnDisable()
-    {
-        // Any cleanup if necessary
-    }
-
-    private void InitializeSkillNodes()
+    private void InitializeSkillTrees()
     {
         SkillNodes = new List<SkillNode>();
+        SkillConnections = new List<SkillConnection>();
         Tiers = new Dictionary<int, List<SkillNode>>();
 
-        foreach (Transform child in SkillNodeContainer.transform)
-        {
-            SkillNode skillNode = child.GetComponent<SkillNode>();
-            if (skillNode != null)
+        foreach (GameObject skillTreeContainer in SkillTreeContainers) {
+            // Temporary lists to hold relevant SkillConnections and SkillNodes
+            List<SkillConnection> skillTreeConnections = new List<SkillConnection>();
+            List<SkillNode> skillTreeNodes = new List<SkillNode>();
+
+            // Fetch all relevant SkillNodes and SkillConnections
+            foreach (Transform child in skillTreeContainer.transform)
             {
-                skillNode.XPos = child.localPosition.x; // Set XPos based on local position
-                SkillNodes.Add(skillNode);
+                SkillNode skillNode = child.GetComponent<SkillNode>();
 
-                if (!Tiers.ContainsKey(skillNode.Tier))
-                {
-                    Tiers[skillNode.Tier] = new List<SkillNode>();
+                if (skillNode != null) {
+                    skillTreeNodes.Add(skillNode);
+                    continue;
                 }
-                Tiers[skillNode.Tier].Add(skillNode);
+                SkillConnection skillConnection = child.GetComponent<SkillConnection>();
+                if (skillConnection != null) {
+                    skillTreeConnections.Add(skillConnection);
+                    continue;
+                }
             }
-        }
-    }
 
-    private void RefreshSkillNodes()
-    {
-        ShipSkillManager.ShipSkills shipSkills = PlayerManager.Inst.ActivePlayerShip.ActiveSkills;
-        foreach (SkillNode skillNode in SkillNodes) {
-            if (shipSkills.Skills.ContainsKey(skillNode.SkillType)) {
-                skillNode.Enable();
-            } else {
-                skillNode.Disable();
+            // Initialize relevant SkillNodes
+            foreach (SkillNode skillNode in skillTreeNodes) {
+                    skillNode.Initialize();
+
+                    // Add to SkillNodes for Refreshing
+                    SkillNodes.Add(skillNode);
+
+                    // Add to Tiers for left/right navigation
+                    if (!Tiers.ContainsKey(skillNode.Tier)) Tiers[skillNode.Tier] = new List<SkillNode>();
+                    Tiers[skillNode.Tier].Add(skillNode);
             }
+
+            // Initialize relevant SkillConnections
+            foreach (SkillConnection skillConnection in skillTreeConnections) {
+                skillConnection.Initialize(skillTreeNodes);
+
+                // Add to SkillConnections for Refreshing
+                SkillConnections.Add(skillConnection);
+
+                // Assign SkillConnections to SkillNodes
+                skillConnection.Input.OutputConnections.Add(skillConnection);
+                skillConnection.Output.InputConnections.Add(skillConnection);
+            }
+
         }
     }
 
     public override void HandleMoveLeft()
     {
-        SkillNode leftNode = FetchLeftSkillNode(Cursor);
+        SkillNode leftNode = DetermineAppropriateHorizontalNode(true);
         if (leftNode != null && leftNode != Cursor) {
             SetCursor(leftNode);
         }
@@ -84,7 +96,7 @@ public class SkillTree : UIWindowBase
 
     public override void HandleMoveRight()
     {
-        SkillNode rightNode = FetchRightSkillNode(Cursor);
+        SkillNode rightNode = DetermineAppropriateHorizontalNode(false);
         if (rightNode != null && rightNode != Cursor) {
             SetCursor(rightNode);
         }
@@ -92,7 +104,7 @@ public class SkillTree : UIWindowBase
 
     public override void HandleMoveUp()
     {
-        SkillNode upNode = FetchUpSkillNode(Cursor);
+        SkillNode upNode = FetchUpSkillNode();
         if (upNode != null && upNode != Cursor) {
             SetCursor(upNode);
         }
@@ -100,7 +112,7 @@ public class SkillTree : UIWindowBase
 
     public override void HandleMoveDown()
     {
-        SkillNode downNode = FetchDownSkillNode(Cursor);
+        SkillNode downNode = FetchDownSkillNode();
         if (downNode != null && downNode != Cursor) {
             SetCursor(downNode);
         }
@@ -108,7 +120,12 @@ public class SkillTree : UIWindowBase
 
     public override void HandleSelect()
     {
-        Cursor?.AttemptSkillActivation();
+        if (Cursor == null) {
+            Debug.LogError("Cursor is null");
+            return;
+        };
+
+        Cursor.AttemptSkillActivationOrUpgrade();
     }
 
     public override void HandleBackClicked()
@@ -125,92 +142,70 @@ public class SkillTree : UIWindowBase
         Cursor.Select();
     }
 
-    public SkillNode FetchLeftSkillNode(SkillNode skillNode)
+    private SkillNode FetchUpSkillNode()
     {
-        SkillNode leftmostNode = null;
-        foreach (SkillNode node in Tiers[skillNode.Tier])
+        // No output connections
+        if (Cursor.OutputConnections == null || Cursor.OutputConnections.Count == 0) return null; 
+
+        // Combine all potential nodes
+        List<SkillNode> potentialNodes = new List<SkillNode>();
+        foreach (SkillConnection connection in Cursor.OutputConnections)
         {
-            if (node.XPos < skillNode.XPos)
-            {
-                if (leftmostNode == null || node.XPos < leftmostNode.XPos)
-                {
-                    leftmostNode = node;
-                }
-            }
+            potentialNodes.Add(connection.Output);
         }
-        return leftmostNode;
+
+        return DetermineAppropriateVerticalNode(potentialNodes);
     }
 
-    public SkillNode FetchRightSkillNode(SkillNode skillNode)
+    private SkillNode FetchDownSkillNode()
     {
-        SkillNode rightmostNode = null;
-        foreach (SkillNode node in Tiers[skillNode.Tier])
+        // No input connections
+        if (Cursor.InputConnections == null || Cursor.InputConnections.Count == 0) return null;
+
+        // Combine all potential nodes
+        List<SkillNode> potentialNodes = new List<SkillNode>();
+        foreach (SkillConnection connection in Cursor.InputConnections)
         {
-            if (node.XPos > skillNode.XPos)
-            {
-                if (rightmostNode == null || node.XPos > rightmostNode.XPos)
-                {
-                    rightmostNode = node;
-                }
-            }
+            potentialNodes.Add(connection.Input);
         }
-        return rightmostNode;
+        return DetermineAppropriateVerticalNode(potentialNodes);
     }
 
-    public SkillNode FetchUpSkillNode(SkillNode skillNode)
-    {
-        if (Tiers.ContainsKey(skillNode.Tier + 1))
+    private SkillNode DetermineAppropriateHorizontalNode(bool left) {
+        SkillNode appropriateNode = null;
+        float minDistance = float.MaxValue;
+
+        foreach (SkillNode potentialNode in Tiers[Cursor.Tier])
         {
-            SkillNode leftmostNode = null;
-            foreach (SkillNode node in Tiers[skillNode.Tier + 1])
+            if ((left && potentialNode.XPos < Cursor.XPos) || (!left && potentialNode.XPos > Cursor.XPos))
             {
-                if (leftmostNode == null || node.XPos < leftmostNode.XPos)
+                float distance = left ? Cursor.XPos - potentialNode.XPos : potentialNode.XPos - Cursor.XPos;
+                if (distance < minDistance)
                 {
-                    leftmostNode = node;
+                    minDistance = distance;
+                    appropriateNode = potentialNode;
                 }
             }
-            return leftmostNode;
         }
-        return null;
+        return appropriateNode;
     }
 
-    public SkillNode FetchDownSkillNode(SkillNode skillNode)
-    {
-        if (Tiers.ContainsKey(skillNode.Tier - 1))
-        {
-            SkillNode leftmostNode = null;
-            foreach (SkillNode node in Tiers[skillNode.Tier - 1])
-            {
-                if (leftmostNode == null || node.XPos < leftmostNode.XPos)
-                {
-                    leftmostNode = node;
-                }
+    private SkillNode DetermineAppropriateVerticalNode(List<SkillNode> potentialNodes) {
+        SkillNode appropriateNode = null;
+        foreach(SkillNode potentialNode in potentialNodes) {
+            if (appropriateNode == null) appropriateNode = potentialNode;
+
+            // If the node is vertically aligned, return it
+            if (potentialNode.XPos == Cursor.XPos) {
+                appropriateNode = potentialNode;
+                break;
             }
-            return leftmostNode;
+
+            // Choose the leftmost node
+            if (potentialNode.XPos < appropriateNode.XPos) {
+                appropriateNode = potentialNode;
+            }
         }
-        return null;
+        return appropriateNode;
     }
 }
-
-// Inspector
-//public List<SkillTree> SkillTrees;
-
-// SkillTree
-//private SkillNode Cursor;
-//private List
-
-
-// OnAwake & OnEnable will be used to SetState of nodes and connections
-// It will also be used to fetch/assign Descriptions and EffectAmounts for each skill
-// It will also set the default cursor position, unsure of best way to do this
-
-// HandleMoveUp, HandleMoveDown, HandleMoveLeft, HandleMoveRight, and HandleSelect will exist
-
-// HandleSelect will trigger skill requirement verification, fetch the PlayerSkillTree, and then attempt to activate the skill
-
-// HandleMoveLeft will subtract 1 from the current cursor row... do i need to fetch coords?
-// If another node on the same tier AND in the same SkillTree
-// If this node is to the left (A.XPOS > B.XPOS)
-
-// HandleMoveUp will add 1 to the current teir and check if any nodes exist
-// If one or more nodes exist, move to the leftmost

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 public abstract class SkillBase
 {
@@ -15,38 +16,22 @@ public abstract class SkillBase
 
     public void AttemptActivation(ShipBase targetShip)
     {
-        if (Level > MaxLevel)
-        {
-            Debug.LogError("Cannot activate skill: " + SkillName + ",  level too high");
-            return;
-        }
-        if (Level == 0)
-        {
-            Debug.LogError("Cannot activate skill: " + SkillName + " at level zero");
-            return;
-        }
+        if (Level > MaxLevel) throw new Exception("Cannot activate skill: " + SkillName + ",  level too high");
+        if (Level == 0) throw new Exception("Cannot activate skill: " + SkillName + " at level zero");
 
         // Override TargetShip if provided
         if (targetShip != null) TargetShip = targetShip;
+        if (TargetShip == null) throw new Exception("Cannot activate skill: " + SkillName + ", target ship is null");
 
-        if (TargetShip != null) 
-        {
-            Activate();
-            Debug.Log(SkillName + " ACTIVATED AT LEVEL: " + Level);
-            return;
-        }
-
-        Debug.LogError("Cannot activate skill, TargetShip is null");
+        Activate();
+        Debug.Log(SkillName + " ACTIVATED AT LEVEL: " + Level);
     }
 
     public void Upgrade()
     {
-        if (Level == MaxLevel)
-        {
-            Debug.LogError("Cannot upgrade skill, level is maxed");
-            return;
-        }
+        if (Level == MaxLevel) throw new Exception("Cannot upgrade skill, level is maxed");
         Level += 1;
+        Debug.Log(SkillName + " UPGRADED TO LEVEL: " + Level);
     }
 
     public abstract void Activate();

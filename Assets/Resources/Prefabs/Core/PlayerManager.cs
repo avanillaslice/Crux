@@ -138,6 +138,7 @@ public class PlayerManager : MonoBehaviour
         if (ActivePlayerShip != null)
         {
             ActivePlayerShip.transform.position = spawnPosition;
+            ActivePlayerShip.SetPosition(spawnPosition);
         }
         else
         {

@@ -164,9 +164,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1232e6c5b8ba8b547bcf17bf92649273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SkillType: 0
   Tier: 0
   InputConnections: []
   OutputConnections: []
   DefaultColor: {r: 0.65882355, g: 0.65882355, b: 0.65882355, a: 1}
   EnabledColor: {r: 0.7529412, g: 0.3529412, b: 0, a: 1}
   XPos: 0
+  BaseColorComponent: {fileID: 6024788403527821290}
