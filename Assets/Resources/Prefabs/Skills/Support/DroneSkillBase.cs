@@ -2,20 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class DroneBase : SkillBase
+public abstract class DroneSkillBase : SkillBase
 {
-    public DroneBase(int level) : base(level) { }
+    public DroneSkillBase(int level) : base(level) { }
     private bool IsSpawningInitialDrones = false;
     private bool IsSpawningReplacementDrones = false;
     private int DronesToReplace = 0;
-    protected List<DroneShip> ActiveDrones = new List<DroneShip>();
+    public List<DroneShip> ActiveDrones = new List<DroneShip>();
     private int MaxDrones;
 
     public abstract Dictionary<int, int> levelEffects { get; }
 
     public override void Activate()
     {
-        MaxDrones = DetermineMaxDrones();
         TargetShip.OnSpawn += OnSpawn;
         TargetShip.OnDeath += OnDeath;
         StageManager.OnStageStart += OnStageStart;
@@ -24,6 +23,7 @@ public abstract class DroneBase : SkillBase
 
     private IEnumerator SpawnInitialDrones()
     {
+        MaxDrones = DetermineMaxDrones();
         IsSpawningInitialDrones = true;
         int dronesToSpawn = MaxDrones - ActiveDrones.Count;
         int spawnedDrones = 0;
@@ -91,7 +91,6 @@ public abstract class DroneBase : SkillBase
     }
     private void OnStageStart()
     {
-        MaxDrones = DetermineMaxDrones();
         if (IsSpawningInitialDrones) return;
         TargetShip.StartCoroutine(SpawnInitialDrones());
     }

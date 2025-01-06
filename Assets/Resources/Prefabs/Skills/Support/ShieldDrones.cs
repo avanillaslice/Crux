@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShieldDrones : DroneBase
+public class ShieldDrones : DroneSkillBase
 {
     public override string SkillName => "Shield Drones";
     public override string Description => "Deploys shield drones to protect the ship.";
