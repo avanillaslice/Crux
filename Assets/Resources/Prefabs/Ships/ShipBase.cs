@@ -318,6 +318,7 @@ public abstract class ShipBase : MonoBehaviour
             {
                 foreach (AttachPoint attachPoint in weaponSlot.AttachPoints)
                 {
+                    if (attachPoint == null) return;
                     WeaponBase attachedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
                     if (attachedWeapon.WeaponType != weaponType) continue;
                     attachedWeapon.AttemptCeaseFire();

@@ -63,8 +63,10 @@ public abstract class DroneSkillBase : SkillBase
 
     private void StopSpawningDrones()
     {
-        TargetShip.StopCoroutine(SpawnInitialDrones());
-        TargetShip.StopCoroutine(SpawnReplacementDrones());
+        if (TargetShip != null) {
+            TargetShip.StopCoroutine(SpawnInitialDrones());
+            TargetShip.StopCoroutine(SpawnReplacementDrones());
+        }
         IsSpawningInitialDrones = false;
         IsSpawningReplacementDrones = false;
     }

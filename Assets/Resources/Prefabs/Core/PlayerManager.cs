@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,6 +15,9 @@ public class PlayerManager : MonoBehaviour
     public PlayerShip ActivePlayerShip { get; set; }
     private AudioSource AudioSource;
     public bool IsRespawning { get; set; }
+    public Vector3 FlyIntoSceneSpawnTarget = new Vector3(0, -7, 10);
+    public Vector3 FlyIntoSceneTarget = new Vector3(0, -3, 10);
+    public Vector3 DefaultSpawnTarget = new Vector3(0, -4, 10);
 
     // Relevant GameObjects
     public GameObject BottomPlayerBoundary;
@@ -24,6 +28,9 @@ public class PlayerManager : MonoBehaviour
 
     // Store Unlocked Skills
     private ShipSkillManager.ShipSkills ActiveSkills;
+
+    // Events
+    public event Action OnFlyIntoSceneEnd;
 
     void Awake()
     {
@@ -131,9 +138,9 @@ public class PlayerManager : MonoBehaviour
         tcs.SetResult(true); // Signal that the movement is complete
     }
 
-    public async Task SpawnPlayerAsync(bool initialSpawn = false)
+    public async Task SpawnPlayerAsync(bool flyIntoScene = false)
     {
-        Vector3 spawnPosition = initialSpawn ? new Vector3(0, -7, 10) : new Vector3(0, -4, 10);
+        Vector3 spawnPosition = flyIntoScene ? FlyIntoSceneSpawnTarget : DefaultSpawnTarget;
 
         if (ActivePlayerShip != null)
         {
@@ -151,7 +158,7 @@ public class PlayerManager : MonoBehaviour
             LoadoutManager.InitialiseWeapons();
         }
 
-        if (initialSpawn) await FlyIntoScene();
+        if (flyIntoScene) await FlyIntoScene();
         IsRespawning = false;
     }
 
@@ -159,9 +166,10 @@ public class PlayerManager : MonoBehaviour
     {
         BottomPlayerBoundary.SetActive(false);
         var tcs = new TaskCompletionSource<bool>();
-        StartCoroutine(MoveToPositionWithDeceleration(ActivePlayerShip.transform, new Vector3(0, -3, 10), 3.0f, 1f, tcs));
+        StartCoroutine(MoveToPositionWithDeceleration(ActivePlayerShip.transform, FlyIntoSceneTarget, 3.0f, 1f, tcs));
         await tcs.Task; // Wait for the movement to complete
         BottomPlayerBoundary.SetActive(true);
+        OnFlyIntoSceneEnd?.Invoke();
     }
 
     private IEnumerator MoveToPositionWithDeceleration(Transform transform, Vector3 targetPosition, float initialSpeed, float decelerationDistance, TaskCompletionSource<bool> tcs)
