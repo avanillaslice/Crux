@@ -62,6 +62,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -99,7 +102,7 @@ SpriteRenderer:
   m_SpriteSortPoint: 0
 --- !u!50 &1393700098035129223
 Rigidbody2D:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -110,8 +113,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 1
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0
+  m_LinearDamping: 0
+  m_AngularDamping: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -147,6 +150,7 @@ PolygonCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2435132200891281843}
   m_Enabled: 1
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -170,7 +174,8 @@ PolygonCollider2D:
     m_Bits: 4294967295
   m_IsTrigger: 1
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
@@ -201,6 +206,7 @@ PolygonCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2435132200891281843}
   m_Enabled: 1
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -224,7 +230,8 @@ PolygonCollider2D:
     m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
@@ -280,40 +287,41 @@ MonoBehaviour:
   ShieldGlowMaterial: {fileID: 2100000, guid: 239b2a9f8fbbb8d469b6aa6d5b7a1502, type: 2}
   WeaponSlots:
   - id: 0
-    PrefabName: 
     IsEmpty: 0
     Type: 0
     WeaponType: 0
     WeaponIcon: {fileID: 0}
+    WeaponName: 
     AttachPoints:
     - {fileID: 8262282640515556916}
   - id: 0
-    PrefabName: 
     IsEmpty: 0
     Type: 1
     WeaponType: 0
     WeaponIcon: {fileID: 0}
+    WeaponName: 
     AttachPoints:
     - {fileID: 7558957778143088505}
     - {fileID: 7975341754432945662}
   - id: 0
-    PrefabName: 
     IsEmpty: 0
     Type: 1
     WeaponType: 0
     WeaponIcon: {fileID: 0}
+    WeaponName: 
     AttachPoints:
     - {fileID: 3655100284684669810}
     - {fileID: 3102627931846489602}
   - id: 0
-    PrefabName: 
     IsEmpty: 0
     Type: 2
     WeaponType: 0
     WeaponIcon: {fileID: 0}
+    WeaponName: 
     AttachPoints:
     - {fileID: 4353434679015148768}
   UICanvas: {fileID: 4580554685161965111}
+  CameraAnchor: {fileID: 0}
 --- !u!1 &5782541952518708812
 GameObject:
   m_ObjectHideFlags: 0
