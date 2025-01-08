@@ -3,6 +3,29 @@ using UnityEngine;
 public class PlayerShip : ShipBase
 {
     public Canvas UICanvas;
+    public GameObject CameraAnchor;
+
+    protected override void Awake() {
+        base.Awake(); // Call the base class Awake method
+        if (GameConfig.CameraMovementEnabled) InitialiseCameraAnchor();
+    }
+
+    protected override void Update() {
+        base.Update(); // Call the base class Update method
+        UpdateCameraAnchor();
+    }
+
+    private void InitialiseCameraAnchor() {
+        if (CameraAnchor == null) return;
+        CameraAnchor = new GameObject("CameraAnchor");
+        CameraAnchor.transform.position = transform.position;
+    }
+
+    private void UpdateCameraAnchor() {
+        if (CameraAnchor == null) return;
+        Vector3 targetPosition = transform.position;
+        CameraAnchor.transform.position = Vector3.Lerp(CameraAnchor.transform.position, targetPosition, Time.deltaTime * 5f);
+    }
 
     void Start()
     {

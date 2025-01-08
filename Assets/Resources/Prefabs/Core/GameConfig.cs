@@ -20,6 +20,7 @@ public static class GameConfig
     public static int InitialLives = 3;
     public static int InitialScore = 0;
     public static float RespawnTimer = 2;
+    public static bool CameraMovementEnabled = false;
 
     public static void Initialise()
     {

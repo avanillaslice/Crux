@@ -2,27 +2,30 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public static CameraController Instance { get; private set; } // Singleton instance
-    private readonly bool CameraMovementEnabled = true;
+    public static CameraController Inst { get; private set; } // Singleton Inst
 
     public GameObject PlayerBoundary; // Reference to the PlayerBoundary game object
 
     private float LeftBorder, RightBorder, TopBorder, BottomBorder;
+
+    // Movement
     private Vector3 TargetPosition;
     private float TotalDistance;
     private bool IsResetting = false;
     private bool HasReset = false;
+    private float RequiredSpeed;
+    private float Midpoint;
 
     void Start()
     {
         // Singleton pattern implementation
-        if (Instance != null && Instance != this)
+        if (Inst != null && Inst != this)
         {
-            Debug.LogWarning("Multiple instances of CameraController detected. Destroying duplicate.");
+            Debug.LogWarning("Multiple Insts of CameraController detected. Destroying duplicate.");
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+        Inst = this;
 
         // Initialize boundary positions
         if (PlayerBoundary != null)
@@ -45,7 +48,7 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!CameraMovementEnabled) return;
+        if (!GameConfig.CameraMovementEnabled) return;
         
         if (IsResetting || PlayerManager.Inst.ActivePlayerShip == null) {
             ResetCamera();
@@ -63,7 +66,7 @@ public class CameraController : MonoBehaviour
 
     private void UpdateCameraPos()
     {
-        Vector3 newPosition = PlayerManager.Inst.ActivePlayerShip.transform.position;
+        Vector3 newPosition = PlayerManager.Inst.ActivePlayerShip.CameraAnchor.transform.position;
         newPosition.z = transform.position.z; // Keep the camera's z position constant
 
         // Clamp the camera's position within the defined borders
@@ -84,27 +87,21 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        // Calculate the required speed to reach the target before the respawn timer ends
-        float requiredSpeed = TotalDistance / GameConfig.RespawnTimer;
-
-        // Calculate the midpoint
-        float midpoint = TotalDistance / 2;
-
         // Determine the speed factor based on the distance to the midpoint
         float speedFactor;
-        if (currentDistance > midpoint)
+        if (currentDistance > Midpoint)
         {
             // Accelerate towards the midpoint
-            speedFactor = 1 - ((currentDistance - midpoint) / midpoint);
+            speedFactor = 1 - ((currentDistance - Midpoint) / Midpoint);
         }
         else
         {
             // Decelerate after passing the midpoint
-            speedFactor = currentDistance / midpoint;
+            speedFactor = currentDistance / Midpoint;
         }
 
         // Adjust the speed based on the speed factor
-        float speed = requiredSpeed * (1 + speedFactor); // Adjust the range as needed
+        float speed = RequiredSpeed * (1 + speedFactor); // Adjust the range as needed
 
         transform.position = Vector3.MoveTowards(transform.position, TargetPosition, speed * Time.deltaTime);
     }
@@ -113,6 +110,11 @@ public class CameraController : MonoBehaviour
         TargetPosition = PlayerManager.Inst.DefaultSpawnTarget;
         TargetPosition.z = transform.position.z; // Ensure z position remains constant
         TotalDistance = Vector3.Distance(transform.position, TargetPosition); // Calculate total distance
+
+        // Calculate the required speed to reach the target before the respawn timer ends
+        RequiredSpeed = TotalDistance / GameConfig.RespawnTimer;
+
+        Midpoint = TotalDistance / 2;
         IsResetting = true;
     }
     

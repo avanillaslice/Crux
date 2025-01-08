@@ -77,7 +77,7 @@ public abstract class ShipBase : MonoBehaviour
         OnSpawn?.Invoke();
     }
 
-    void Awake()
+    protected virtual void Awake()
     {
         InitialiseWeaponSlots();
         PrimaryFireEnabled = false;
@@ -86,7 +86,7 @@ public abstract class ShipBase : MonoBehaviour
         IsAllowedToShoot = true;
     }
 
-    void Update()
+    protected virtual void Update()
     {
         OnUpdate?.Invoke();
         UpdateDroneAnchor();
