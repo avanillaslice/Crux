@@ -78,12 +78,9 @@ Potential Bugs
   public GameObject InitialWeaponSlotNodeCursor;
 
   // Data
+  private float WeaponSlotSelectorDistance = 4f;
   private List<WeaponSlotNode> WeaponSlotNodes;
-  // private List<WeaponSlotSelector> WeaponSlotSelectors;
-
   private WeaponSlotNode WeaponSlotNodeCursor;
-  // private WeaponSlotNode WeaponSlotSelectorCursor;
-
   public List<WeaponBase> LightWeapons;
   public List<WeaponBase> MediumWeapons;
   public List<WeaponBase> HeavyWeapons;
@@ -98,13 +95,92 @@ Potential Bugs
   }
 
   private void InitialiseLoadoutUI() {
-    SetWeaponSlotNodes();
-    // SetWeaponSlotSelectors();
+    InstantiateWeaponSlotNodes();
+    if (WeaponSlotNodes.Count == 0) {
+      Debug.LogError("NO NODES FOUND")
+      return;
+    }
+    InitialiseWeaponSlotSelectors()
     UpdateAvailableWeapons();
   }
 
-  private void SetWeaponSlotNodes() {
-    // Find all Nodes, set to WeaponSlotNodes
+  // Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
+  private void InstantiateWeaponSlotNodes() {
+    // Find all AttachPoints from PlayerShip
+    List<GameObject> attachPoints = PlayerManager.Inst.ActivePlayerShip.Find("AttachPoint");
+    // Sort attachPoints by YPOS (what kind of list do I use for static order?)
+    foreach (GameObject attachPoint in attachPoints) {
+      WeaponSlotNode weaponSlotNode = Instantiate(AssetManager.WeaponSlotNode, attachPoint.transform.position, ROTATION STUFF);
+      WeaponSlotNodes.Add(weaponSlotNode); // Dunno why, just in case
+      if (weaponSlotNode.transform.position.x > 0) LeftWeaponSlotNodes.Add(weaponSlotNode);
+      else if (weaponSlotNode.transform.position.x < 0) RightWeaponSlotNodes.Add(weaponSlotNode);
+      else CentralWeaponSlotNodes.Add(weaponSlotNode); // Maybe? Just felt weird it not being in a list
+    }
+  }
+
+  private void InitialiseWeaponSlotSelectors() {
+    List<Vector3> WeaponSlotSelectorPositions = DetermineWeaponSlotSelectorPositions();
+    InstantiateWeaponSlotSelectors(WeaponSlotSelectorPositions);
+  }
+  
+  private List<Vector3> DetermineWeaponSlotSelectorPositions()
+  {
+    List<Vector3> WeaponSlotSelectorPositions = new List<Vector3>();
+
+    // Angle between each WeaponSlotSelector
+    float anglePerSelector = 360 / WeaponSlotNodes.Count;
+
+    // Determine first WeaponSlotSelector position
+    Vector3 FirstWeaponSlotSelectorPosition;
+    if (WeaponSlotNodes[0].YPos == 0) {
+      FirstWeaponSlotSelectorPosition = CalculateLocalPosition(0)
+    } else {
+      FirstWeaponSlotSelectorPosition = CalculateLocalPosition(anglePerSelector / 2);
+    }
+
+    // Calculate each position and add to list
+    int i = 0;
+    while (i < WeaponSlotNodes.Count)
+    {
+      if (i == 0) WeaponSlotSelectorPositions.Add(FirstWeaponSlotSelectorPostition);
+      else {
+        Vector3 newPosition = CalculateLocalPosition(anglePerSelector * i);
+        WeaponSlotSelectorPositions.Add(newPosition);
+      }
+    }
+
+    return WeaponSlotSelectorPositions;
+  }
+
+  private void InstantiateWeaponSlotSelectors(List<Vector3> weaponSlotSelectorPositions) {
+    if (ListIsEmpty) {
+      Debug.LogError("No weaponSlotSelectorPositions");
+      return;
+    }
+
+    foreach(Vector3 weaponslotSelectorPosition in weaponSlotSelectorPositions)
+    {
+      GameObject weaponSlotSelector = Instantiate(AssetManager.WeaponSlotSelector, weaponSlotSelectorPostion, ROTATIONSTUFF);
+      WeaponSlotSelectors.Add(weaponSlotSelector);
+    }
+  }
+
+  Vector3 CalculateLocalPosition(float angleDegrees)
+  {
+      // Convert angle to radians
+      float angleRadians = angleDegrees * Mathf.Deg2Rad;
+
+      // Calculate offsets
+      float offsetX = Mathf.Cos(angleRadians) * WeaponSlotSelectorDistance;
+      float offsetY = Mathf.Sin(angleRadians) * WeaponSlotSelectorDistance;
+
+      // Create the new position vector
+      Vector3 offset = new Vector3(offsetX, offsetY, 0);
+
+      // Transform the offset to local coordinates
+      Vector3 localPosition = PlayerManager.Inst.ActivePlayerShip.transform.localPosition + offset;
+
+      return localPosition;
   }
 
   // private void SetWeaponSlotSelectors() {
@@ -113,8 +189,8 @@ Potential Bugs
 
   private void SetInitialCursor()
   {
-    WeaponSlotNodeCursor = InitialWeaponSlotNodeCursor.GetComponent("WeaponSlotNode");
-    
+    weaponSlotNode = InitialWeaponSlotNodeCursor.GetComponent("WeaponSlotNode");
+    SetCursor(weaponSlotNode);
   }
 
   private void SetCursor(WeaponSlotNode weaponSlotNode) {
@@ -130,12 +206,12 @@ Potential Bugs
   }
 
   HandleSelect() {
-    if (!WeaponSlotCursor.Selected) WeaponSlotCursor.Select();
-    else WeaponSlotCursor.WeaponSlotSelector.HandleSelect();
+    if (WeaponSlotCursor != null) WeaponSlotCursor.HandleSelect();
   }
 
   HandleBack() {
-    if (WeaponSlotCursor.Selected) 
+    if (WeaponSlotCursor.Selected) WeaponSlotCursor.Deselect();
+    else // Trigger termination animations and return to InterScene
   }
 
   HandleMoveLeft() {
@@ -176,6 +252,49 @@ Potential Bugs
 ```
 
 #### WeaponSlotNode
+A polyganal border, designed to center on top of an AttachPoint and link to a WeaponSlotSelector.
+
+```c#
+  // Inspector
+  public GameObject WeaponSlotSelector;
+  public Color HighlightedColor;
+  public Color SelectedColor;
+
+  // Data
+  public bool IsSelected;
+  public bool IsHighlighted;
+  private Color DefaultColor;
+  private Image ColorComponent;
+
+  void Awake() {
+    ColorComponent = GetComponent<Image>();
+    // Fetch current Color from ColorComponent and set as DefaultColor
+  }
+
+  void Highlight() {
+    if (IsHighlighted || IsSelected) return;
+    // Set Color of GameObject to HighlightedColor
+    IsHighlighted = true;
+  }
+
+  void Deselect() {
+    if (!IsSelected || !IsHighlighted) return;
+    WeaponSlotSelector.HandleDeselect();
+    IsSelected = false;
+  }
+
+  void HandleSelect() {
+    if (IsSelected) {
+      // Pass select on if already selected
+      WeaponSlotSelector.HandleSelect()
+      return;
+    }
+
+    WeaponSlotSelector.Activate()
+    IsSelected = true;
+  }
+```
+
 GameObject
   - White square
       - Highlighted color
@@ -186,26 +305,6 @@ Animations
     - Some kind of pop in or lock-on
   - Terminate
     - Fade out or unlock-on
-
-Functions
-```c#
-HandleSelect() {
-  if (IsSelected) {
-    // Pass select on if already selected
-    WeaponSlotSelector.HandleSelect()
-    return;
-  }
-
-  WeaponSlotSelector.Activate()
-  IsSelected = true;
-}
-
-
-```
-  - HandleSelect
-    - WeaponSlotSelector.Activate()
-    - HandleUp/Down/Left/Right is now sent to WeaponSlotSelector
-      - This will make more sense being directed by Loadout.cs
 
 #### WeaponSlotSelector
 GameObject
@@ -261,7 +360,6 @@ Functions
       - LeftBorder, RightBorder, TopBorder, BottomBorder
     - Functions
       - public UpdateCameraPos()
-        - 
         - If PlayerManager.ActivePlayerShip != null, center on ship
       - private UpdateBorderContacts
 
