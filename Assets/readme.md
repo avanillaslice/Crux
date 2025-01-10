@@ -79,8 +79,12 @@ Potential Bugs
 
   // Data
   private float WeaponSlotSelectorDistance = 4f;
+  private bool FirstWeaponSlotNodeIsCentered = true;
   private List<WeaponSlotNode> WeaponSlotNodes;
+  private List<List<WeaponSlotNodes>> WeaponSlotNodeGroups;
+
   private WeaponSlotNode WeaponSlotNodeCursor;
+
   public List<WeaponBase> LightWeapons;
   public List<WeaponBase> MediumWeapons;
   public List<WeaponBase> HeavyWeapons;
@@ -96,7 +100,7 @@ Potential Bugs
 
   private void InitialiseLoadoutUI() {
     InstantiateWeaponSlotNodes();
-    if (WeaponSlotNodes.Count == 0) {
+    if (WeaponSlotNodeGroups.Count == 0) {
       Debug.LogError("NO NODES FOUND")
       return;
     }
@@ -107,20 +111,53 @@ Potential Bugs
   // Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
   private void InstantiateWeaponSlotNodes() {
     // Find all AttachPoints from PlayerShip
-    List<GameObject> attachPoints = PlayerManager.Inst.ActivePlayerShip.Find("AttachPoint");
+    List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.WeaponSlots;
+
     // Sort attachPoints by YPOS (what kind of list do I use for static order?)
-    foreach (GameObject attachPoint in attachPoints) {
-      WeaponSlotNode weaponSlotNode = Instantiate(AssetManager.WeaponSlotNode, attachPoint.transform.position, ROTATION STUFF);
-      WeaponSlotNodes.Add(weaponSlotNode); // Dunno why, just in case
-      if (weaponSlotNode.transform.position.x > 0) LeftWeaponSlotNodes.Add(weaponSlotNode);
-      else if (weaponSlotNode.transform.position.x < 0) RightWeaponSlotNodes.Add(weaponSlotNode);
-      else CentralWeaponSlotNodes.Add(weaponSlotNode); // Maybe? Just felt weird it not being in a list
+    foreach (WeaponSlot weaponSlot in weaponSlots) {
+      List<WeaponSlotNode> relatedWeaponSlotNodes = new List<WeaponSlotNode>();
+
+      // Odd amounts of AttachPoints (besides 1), will be problematic to start...
+      if (weaponSlot.AttachPoints.Count > 2 && weaponSlot.AttachPoints.Count % 2 != 0) {
+        Debug.LogWarning("Found WeaponSlot with an odd amount of AttachPoints!");
+        continue;
+      }
+
+      // Instantiate and group WeaponSlotNodes
+      foreach (AttachPoint attachPoint in weaponSlot.AttachPoints) {
+        // FetchGameObject for transform position
+        WeaponSlotNode weaponSlotNode = Instantiate(AssetManager.WeaponSlotNode, attachPoint.transform.position, ROTATION STUFF);
+        weaponSlotNode.AttachPoint = attachPoint;
+        weaponSlotNode.XPos = attachPoint.transform.position.x;
+        weaponSlotNode.YPos = attachPoint.transform.position.y;
+
+        // Add to group
+        relatedWeaponSlotNodes.Add(weaponSlotNode);
+        WeaponSlotNodes.Add(weaponSlotNode);
+
+        // Not sure if I need this now that they are partnered up
+        if (weaponSlotNode.transform.position.x > 0) LeftWeaponSlotNodes.Add(weaponSlotNode);
+        else if (weaponSlotNode.transform.position.x < 0) RightWeaponSlotNodes.Add(weaponSlotNode);
+        else CentralWeaponSlotNodes.Add(weaponSlotNode); // Maybe? Just felt weird it not being in a list
+      }
+
+      // Assign related nodes to each group
+      foreach(WeaponSlotNode weaponSlotNode in relatedWeaponSlotNodes) {
+        weaponSlotNode.SetRelatedNodes(relatedWeaponSlotNodes);
+        WeaponSlotNodeGroups.Add(relatedWeaponSlotNodes);
+      }
     }
+
+    // Sort WeaponSlotNodes by YPos
+    // Does this mean I dont need to for WeaponSlotNodeGroups?
+    WeaponSlotNodes.Sort((x, y) => x.YPos.CompareTo(y.YPos));
+    WeaponSlotNodeGroups.Sort((listA, listB) => listA[0].YPos.CompareTo(listB.[0]YPos));
   }
 
   private void InitialiseWeaponSlotSelectors() {
     List<Vector3> WeaponSlotSelectorPositions = DetermineWeaponSlotSelectorPositions();
     InstantiateWeaponSlotSelectors(WeaponSlotSelectorPositions);
+    LinkNodesToSelectors();
   }
   
   private List<Vector3> DetermineWeaponSlotSelectorPositions()
@@ -132,9 +169,11 @@ Potential Bugs
 
     // Determine first WeaponSlotSelector position
     Vector3 FirstWeaponSlotSelectorPosition;
-    if (WeaponSlotNodes[0].YPos == 0) {
+    if (WeaponSlotNodes[0].XPos == 0) {
+      FirstWeaponSlotNodeIsCentered = true;
       FirstWeaponSlotSelectorPosition = CalculateLocalPosition(0)
     } else {
+      FirstWeaponSlotNodeIsCentered = false;
       FirstWeaponSlotSelectorPosition = CalculateLocalPosition(anglePerSelector / 2);
     }
 
@@ -147,14 +186,16 @@ Potential Bugs
         Vector3 newPosition = CalculateLocalPosition(anglePerSelector * i);
         WeaponSlotSelectorPositions.Add(newPosition);
       }
+      i++;
     }
 
     return WeaponSlotSelectorPositions;
   }
 
   private void InstantiateWeaponSlotSelectors(List<Vector3> weaponSlotSelectorPositions) {
-    if (ListIsEmpty) {
-      Debug.LogError("No weaponSlotSelectorPositions");
+    if (weaponSlotSelectorPositions.Count == 0) {
+      Debug.LogError("No weaponSlotSelectorPositions have been set");
+      // This should throw error to cease other functions
       return;
     }
 
@@ -162,6 +203,20 @@ Potential Bugs
     {
       GameObject weaponSlotSelector = Instantiate(AssetManager.WeaponSlotSelector, weaponSlotSelectorPostion, ROTATIONSTUFF);
       WeaponSlotSelectors.Add(weaponSlotSelector);
+    }
+  }
+
+  private void LinkNodesToSelectors() {
+    // WeaponSlotNodeGroups and WeaponSlotNodes have been sorted by YPos
+    int i = 0;
+    while (i < WeaponSlotNodes.Count) {
+      // Handle first WeaponSlotNodeGroup
+      if (i == 0 && FirstWeaponSlotNodeIsCentered) {
+        WeaponSlotNode[i].AssignSelector(WeaponSlotSelector[i]);
+        i++
+      } else {
+        
+      }
     }
   }
 

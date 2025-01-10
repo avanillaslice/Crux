@@ -13,12 +13,12 @@ public enum SlotType
 [Serializable]
 public class WeaponSlot
 {
-    public int id;
+    [HideInInspector] public int id;
     [HideInInspector] public bool IsEmpty = true;
     public SlotType Type;
-    public WeaponType WeaponType;
-    public Sprite WeaponIcon;
-    public string WeaponName;
+    [HideInInspector] public WeaponType WeaponType;
+    [HideInInspector] public Sprite WeaponIcon;
+    [HideInInspector] public string WeaponName;
     public List<AttachPoint> AttachPoints;
 }
 
