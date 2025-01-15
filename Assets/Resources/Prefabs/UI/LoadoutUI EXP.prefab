@@ -422,15 +422,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -556,15 +558,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -909,15 +913,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -1043,15 +1049,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -1254,15 +1262,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -1388,15 +1398,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -1512,6 +1524,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1530,9 +1546,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8309844231243631495}
     m_Modifications:
+    - target: {fileID: 1991503198614855766, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     - target: {fileID: 2943926849158604300, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_Name
       value: WeaponSlotButton1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 8622425171221320190, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_Pivot.x
@@ -1732,6 +1756,10 @@ PrefabInstance:
       propertyPath: m_text
       value: BACK
       objectReference: {fileID: 0}
+    - target: {fileID: 8435611782798115846, guid: 45499aca86f65aa42bdc1627b94acbf7, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1839,6 +1867,10 @@ PrefabInstance:
       value: 'Slot 4
 
 '
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1948,6 +1980,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2056,6 +2092,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2161,6 +2201,10 @@ PrefabInstance:
     - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
       propertyPath: m_text
       value: Slot 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2284,6 +2328,10 @@ PrefabInstance:
       propertyPath: m_text
       value: Slot 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2392,6 +2440,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2410,6 +2462,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8309844231243631495}
     m_Modifications:
+    - target: {fileID: 1991503198614855766, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     - target: {fileID: 2943926849158604300, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_Name
       value: WeaponSlotButton2
@@ -2417,6 +2473,10 @@ PrefabInstance:
     - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_text
       value: DUAL
+      objectReference: {fileID: 0}
+    - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 7644607840281944303, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: SlotType
@@ -2520,6 +2580,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8309844231243631495}
     m_Modifications:
+    - target: {fileID: 1991503198614855766, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     - target: {fileID: 2943926849158604300, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_Name
       value: WeaponSlotButton
@@ -2527,6 +2591,10 @@ PrefabInstance:
     - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_text
       value: SYSTEM
+      objectReference: {fileID: 0}
+    - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 7644607840281944303, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: SlotType
@@ -2720,6 +2788,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2828,6 +2900,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2846,13 +2922,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8309844231243631495}
     m_Modifications:
+    - target: {fileID: 1991503198614855766, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
+    - target: {fileID: 2547734524551519999, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2943926849158604300, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_Name
       value: WeaponSlotButton3
       objectReference: {fileID: 0}
+    - target: {fileID: 4331110863641766534, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: m_text
       value: Dual
+      objectReference: {fileID: 0}
+    - target: {fileID: 6609528604338370044, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 7644607840281944303, guid: 40edc74342f53364d9d1f53fde055e0c, type: 3}
       propertyPath: SlotType
@@ -3046,6 +3138,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3153,6 +3249,10 @@ PrefabInstance:
       value: 'Slot 9
 
 '
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809223500042470733, guid: a59e9c4eba5b48d4ab482856d17746e6, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

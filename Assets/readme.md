@@ -117,12 +117,6 @@ Potential Bugs
     foreach (WeaponSlot weaponSlot in weaponSlots) {
       List<WeaponSlotNode> relatedWeaponSlotNodes = new List<WeaponSlotNode>();
 
-      // Odd amounts of AttachPoints (besides 1), will be problematic to start...
-      if (weaponSlot.AttachPoints.Count > 2 && weaponSlot.AttachPoints.Count % 2 != 0) {
-        Debug.LogWarning("Found WeaponSlot with an odd amount of AttachPoints!");
-        continue;
-      }
-
       // Instantiate and group WeaponSlotNodes
       foreach (AttachPoint attachPoint in weaponSlot.AttachPoints) {
         // FetchGameObject for transform position
@@ -208,15 +202,31 @@ Potential Bugs
 
   private void LinkNodesToSelectors() {
     // WeaponSlotNodeGroups and WeaponSlotNodes have been sorted by YPos
-    int i = 0;
-    while (i < WeaponSlotNodes.Count) {
+    int nodeCounter = 0;
+    int nodeGroupCounter = 0;
+    WeaponSlotNode RearAsymmetricalWeaponSlotNode;
+    while (nodeCounter < WeaponSlotNodes.Count) {
       // Handle first WeaponSlotNodeGroup
-      if (i == 0 && FirstWeaponSlotNodeIsCentered) {
-        WeaponSlotNode[i].AssignSelector(WeaponSlotSelector[i]);
-        i++
+      if (nodeCounter == 0 && FirstWeaponSlotNodeIsCentered) {
+        WeaponSlotNodes[0].AssignSelector(WeaponSlotSelector[0]);
+        nodeCounter++
       } else {
-        
+        foreach (WeaponSlotNode weaponSlotNode in WeaponSlotNodeGroups[nodeGroupCounter])
+        {
+          if (weaponSlotNode.XPos > 0) { // On the right
+            weaponSlotNode.AssignSelector(WeaponSlotSelector[nodeCounter]);
+          }
+          else if (weaponSlotNode.XPos < 0) { // On the left
+            weaponSlotNode.AssignSelector(WeaponSlotSelector[WeaponSlotNodes.Count - nodeCounter]);
+          }
+          else { // Centered
+            // Needs to save it until last, OR divide the total count by two to get the lowest selector...
+            // Log error if already set, can only have one of these...
+          }
+          nodeCounter++;
+        }
       }
+      nodeGroupCounter++;
     }
   }
 

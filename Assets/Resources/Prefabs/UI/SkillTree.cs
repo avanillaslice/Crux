@@ -135,6 +135,8 @@ public class SkillTree : UIWindowBase
         UIManager.Inst.EnableInterStageUI();
     }
 
+    public override void HandleBack() {}
+
     // Methods
     public void SetCursor(SkillNode skillNode)
     {

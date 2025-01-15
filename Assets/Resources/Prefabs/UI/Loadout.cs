@@ -3,266 +3,281 @@ using UnityEngine;
 
 public class Loadout : UIWindowBase
 {
-    public static Loadout Inst { get; private set; }
+	// Inspector
+	public GameObject WeaponSlotUIContainer;
+	public GameObject InitialWeaponSlotCursor;
 
-    // WEAPON SLOTS
-    public GameObject WeaponSlotContainer;
-    private List<WeaponSlotButton> WeaponSlotButtons;
-    private WeaponSlotButton CurrentWeaponSlotButton;
-    private int CurrentWeaponSlotButtonIndex;
+	// Data
+	private float WeaponSlotSelectorDistance = 4f;
+	private bool FirstWeaponSlotNodeIsCentered = true;
+	private List<WeaponSlotNode> WeaponSlotNodes;
+	private List<WeaponSlotSelector> WeaponSlotSelectors;
+	private List<List<WeaponSlotNode>> WeaponSlotNodeGroups;
 
-    // INVENTORY
-    public GameObject InventorySlotContainer;
-    private List<InventorySlotButton> InventorySlotButtons;
-    private List<InventorySlotButton> ActiveInventorySlotButtons;
-    private List<InventorySlotButton> ValidInventorySlotButtons;
-    private InventorySlotButton CurrentInventorySlotButton;
-    private int CurrentInventorySlotButtonIndex;
+	private WeaponSlotNode WeaponSlotCursor;
 
-    // UTILITY
-    public string ActiveContainer = "WeaponSlots";
+	public List<WeaponBase> LightWeapons;
+	public List<WeaponBase> MediumWeapons;
+	public List<WeaponBase> HeavyWeapons;
 
-    void Awake()
-    {
-        if (Inst != null && Inst != this)
-        {
-            Debug.Log("Loadout already exists");
-            Destroy(gameObject);
-            return;  // Ensure no further code execution in this instance
-        }
-        Inst = this;
-        InitialiseWeaponSlotButtons();
-        InitialiseInventorySlotButtons();
-    }
+	void Awake()
+	{
+		InitialiseLoadoutUI();
+	}
 
-    void OnEnable()
-    {
-        SetWeaponSlots();
-        SetInventory();
-        SetSelectedWeaponSlotButton(0);
-    }
+	void Enable()
+	{
+		UpdateAvailableWeapons();
+		SetInitialCursor();
+	}
 
-    void OnDisable()
-    {
-        ClearWeaponSlots();
-        ClearInventorySlots();
-    }
+	private void InitialiseLoadoutUI()
+	{
+		InstantiateWeaponSlotNodes();
+		if (WeaponSlotNodeGroups.Count == 0)
+		{
+			Debug.LogError("NO NODES FOUND");
+			return;
+		}
+		InitialiseWeaponSlotSelectors();
+		UpdateAvailableWeapons();
+	}
 
-    public override void HandleBackClicked()
-    {
-        UIManager.Inst.DisableLoadoutUI();
-        UIManager.Inst.EnableInterStageUI();
-    }
+	// Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
+	private void InstantiateWeaponSlotNodes()
+	{
+		// Find all AttachPoints from PlayerShip
+		List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.WeaponSlots;
 
-    private void InitialiseInventorySlotButtons()
-    {
-        InventorySlotButtons = new List<InventorySlotButton>();
-        int i = 0;
-        foreach (Transform child in InventorySlotContainer.transform)
-        {
-            InventorySlotButton inventorySlotButton = child.GetComponent<InventorySlotButton>();
-            inventorySlotButton.ListIndex = i;
-            InventorySlotButtons.Add(child.GetComponent<InventorySlotButton>());
-            i++;
-        }
-    }
+		// Sort attachPoints by YPOS (what kind of list do I use for static order?)
+		foreach (WeaponSlot weaponSlot in weaponSlots)
+		{
+			List<WeaponSlotNode> relatedWeaponSlotNodes = new List<WeaponSlotNode>();
 
-    private void InitialiseWeaponSlotButtons()
-    {
-        WeaponSlotButtons = new List<WeaponSlotButton>();
-        int i = 0;
-        foreach (Transform child in WeaponSlotContainer.transform)
-        {
-            WeaponSlotButton weaponSlotButton = child.GetComponent<WeaponSlotButton>();
-            weaponSlotButton.ListIndex = i;
-            WeaponSlotButtons.Add(weaponSlotButton);
-            i++;
-        }
-    }
+			// Instantiate and group WeaponSlotNodes
+			foreach (AttachPoint attachPoint in weaponSlot.AttachPoints)
+			{
+				// FetchGameObject for transform position
+				WeaponSlotNode weaponSlotNode = Instantiate(AssetManager.WeaponSlotNode, attachPoint.transform.position, Quaternion.identity);
+				weaponSlotNode.Init(attachPoint, weaponSlot);
 
-    private void SetWeaponSlots()
-    {
-        List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.GetWeaponSlots();
+				// Add to group
+				relatedWeaponSlotNodes.Add(weaponSlotNode);
+				WeaponSlotNodes.Add(weaponSlotNode);
 
-        foreach (WeaponSlot weaponSlot in weaponSlots)
-        {
-            bool foundValidWeaponSlotButton = false;
+				// Not sure if I need this now that they are partnered up
+				// if (weaponSlotNode.transform.position.x > 0) LeftWeaponSlotNodes.Add(weaponSlotNode);
+				// else if (weaponSlotNode.transform.position.x < 0) RightWeaponSlotNodes.Add(weaponSlotNode);
+				// else CentralWeaponSlotNodes.Add(weaponSlotNode); // Maybe? Just felt weird it not being in a list
+			}
 
-            foreach (WeaponSlotButton weaponSlotButton in WeaponSlotButtons)
-            {
-                if (!weaponSlotButton.IsEmpty || weaponSlotButton.SlotType != weaponSlot.Type) continue;
-                weaponSlotButton.SetWeaponSlot(weaponSlot);
-                foundValidWeaponSlotButton = true;
-                break;
-            }
+			// Assign related nodes to each group
+			foreach (WeaponSlotNode weaponSlotNode in relatedWeaponSlotNodes)
+			{
+				weaponSlotNode.SetRelatedNodes(relatedWeaponSlotNodes);
+				WeaponSlotNodeGroups.Add(relatedWeaponSlotNodes);
+			}
+		}
 
-            if (!foundValidWeaponSlotButton)
-            {
-                Debug.Log("Unable to find WeaponSlotButton for weapon slot of type: " + weaponSlot.Type);
-            }
-        }
-    }
+		// Sort WeaponSlotNodes by YPos
+		// Does this mean I dont need to for WeaponSlotNodeGroups?
+		WeaponSlotNodes.Sort((x, y) => x.YPos.CompareTo(y.YPos));
+		WeaponSlotNodeGroups.Sort((listA, listB) => listA[0].YPos.CompareTo(listB[0].YPos));
+	}
 
-    private void SetInventory()
-    {
-        ActiveInventorySlotButtons = new List<InventorySlotButton>();
-        List<GameObject> inventory = LoadoutManager.GetInventory();
+	private void InitialiseWeaponSlotSelectors()
+	{
+		List<Vector3> WeaponSlotSelectorPositions = DetermineWeaponSlotSelectorPositions();
+		InstantiateWeaponSlotSelectors(WeaponSlotSelectorPositions);
+		LinkNodesToSelectors();
+	}
 
-        int i = 0;
-        foreach (InventorySlotButton inventorySlotButton in InventorySlotButtons)
-        {
-            if (inventorySlotButton.IsEmpty && inventory.Count > i)
-            {
-                inventorySlotButton.gameObject.SetActive(true);
-                inventorySlotButton.SetWeapon(inventory[i]);
-                ActiveInventorySlotButtons.Add(inventorySlotButton);
-                i++;
-            }
-            else
-            {
-                inventorySlotButton.Clear();
-                inventorySlotButton.gameObject.SetActive(false);
-            }
-        }
-    }
+	private List<Vector3> DetermineWeaponSlotSelectorPositions()
+	{
+		List<Vector3> WeaponSlotSelectorPositions = new List<Vector3>();
 
-    private bool EitherCurrentSlotsAreSelected()
-    {
-        if ((CurrentInventorySlotButton != null && CurrentInventorySlotButton.IsSelected)
-        || (CurrentWeaponSlotButton != null && CurrentWeaponSlotButton.IsSelected))
-        {
-            return true;
-        }
-        else return false;
-    }
+		// Angle between each WeaponSlotSelector
+		float anglePerSelector = 360 / WeaponSlotNodes.Count;
 
-    public override void HandleMoveLeft()
-    {
-        // if (ActiveContainer == "WeaponSlots") return;
-        // SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-    }
-    public override void HandleMoveRight()
-    {
-        // if (ActiveContainer == "Inventory") return;
-        // SetSelectedInventorySlotButton(0);
-    }
-    public override void HandleMoveUp()
-    {
-        if (ActiveContainer == "Inventory")
-        {
-            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex - 1 + ValidInventorySlotButtons.Count) % ValidInventorySlotButtons.Count;
-            SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
-        }
-        else
-        {
-            if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
-            SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-        }
-    }
-    public override void HandleMoveDown()
-    {
-        if (ActiveContainer == "Inventory")
-        {
-            if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex + 1) % ValidInventorySlotButtons.Count;
-            SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
-        }
-        else
-        {
-            if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex + 1) % WeaponSlotButtons.Count;
-            SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-        }
-    }
+		// Determine first WeaponSlotSelector position
+		Vector3 FirstWeaponSlotSelectorPosition;
+		if (WeaponSlotNodes[0].XPos == 0)
+		{
+			FirstWeaponSlotNodeIsCentered = true;
+			FirstWeaponSlotSelectorPosition = CalculateLocalPosition(0);
+		}
+		else
+		{
+			FirstWeaponSlotNodeIsCentered = false;
+			FirstWeaponSlotSelectorPosition = CalculateLocalPosition(anglePerSelector / 2);
+		}
 
-    public override void HandleSelect()
-    {
-        if (ActiveContainer == "Inventory")
-        {
-            LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
-            ClearWeaponSlots();
-            SetWeaponSlots();
-            SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-            ValidateAllInventorySlotButtons();
-        }
-        else
-        {
-            SetValidInventorySlotButtons(CurrentWeaponSlotButton.SlotType);
-            if (ValidInventorySlotButtons.Count == 0)
-            {
-                ValidateAllInventorySlotButtons();
-                return;
-            }
-            SetSelectedInventorySlotButton(0);
-        }
-    }
+		// Calculate each position and add to list
+		int i = 0;
+		while (i < WeaponSlotNodes.Count)
+		{
+			if (i == 0) WeaponSlotSelectorPositions.Add(FirstWeaponSlotSelectorPosition);
+			else
+			{
+				Vector3 newPosition = CalculateLocalPosition(anglePerSelector * i);
+				WeaponSlotSelectorPositions.Add(newPosition);
+			}
+			i++;
+		}
 
-    private void SetValidInventorySlotButtons(SlotType slotType)
-    {
-        ValidInventorySlotButtons = new List<InventorySlotButton>();
+		return WeaponSlotSelectorPositions;
+	}
 
-        foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
-        {
-            if (inventorySlotButton.SlotType == SlotType.Dual && (slotType == SlotType.Dual || slotType == SlotType.Single))
-            {
-                inventorySlotButton.Validate();
-                ValidInventorySlotButtons.Add(inventorySlotButton);
-            }
-            else if (inventorySlotButton.SlotType == slotType)
-            {
-                inventorySlotButton.Validate();
-                ValidInventorySlotButtons.Add(inventorySlotButton);
-            }
-            else
-            {
-                inventorySlotButton.Invalidate();
-            }
-        }
-    }
+	private void InstantiateWeaponSlotSelectors(List<Vector3> weaponSlotSelectorPositions)
+	{
+		if (weaponSlotSelectorPositions.Count == 0)
+		{
+			Debug.LogError("No weaponSlotSelectorPositions have been set");
+			// This should throw error to cease other functions
+			return;
+		}
 
-    private void ValidateAllInventorySlotButtons()
-    {
-        foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
-        {
-            inventorySlotButton.Validate();
-        }
-    }
+		foreach (Vector3 weaponslotSelectorPosition in weaponSlotSelectorPositions)
+		{
+			GameObject weaponSlotSelector = Instantiate(AssetManager.WeaponSlotSelector, weaponslotSelectorPosition, Quaternion.identity);
+			WeaponSlotSelectors.Add(weaponSlotSelector.GetComponent<WeaponSlotSelector>());
+		}
+	}
 
-    private void DeselectCurrentButtons()
-    {
-        if (CurrentInventorySlotButton != null) CurrentInventorySlotButton.Deselect();
-        if (CurrentWeaponSlotButton != null) CurrentWeaponSlotButton.Deselect();
-    }
-    public void SetSelectedWeaponSlotButton(int index)
-    {
-        DeselectCurrentButtons();
-        CurrentWeaponSlotButton = WeaponSlotButtons[index];
-        CurrentWeaponSlotButton.Select();
-        CurrentWeaponSlotButtonIndex = index;
-        ActiveContainer = "WeaponSlots";
-    }
+	private void LinkNodesToSelectors()
+	{
+		// WeaponSlotNodeGroups and WeaponSlotNodes have been sorted by YPos
+		int nodeCounter = 0;
+		int nodeGroupCounter = 0;
+		WeaponSlotNode RearAsymmetricalWeaponSlotNode;
+		while (nodeCounter < WeaponSlotNodes.Count)
+		{
+			// Handle first WeaponSlotNodeGroup
+			if (nodeCounter == 0 && FirstWeaponSlotNodeIsCentered)
+			{
+				WeaponSlotNodes[0].AssignSelector(WeaponSlotSelectors[0]);
+				nodeCounter++;
+			}
+			else
+			{
+				foreach (WeaponSlotNode weaponSlotNode in WeaponSlotNodeGroups[nodeGroupCounter])
+				{
+					if (weaponSlotNode.XPos > 0)
+					{ // On the right
+						weaponSlotNode.AssignSelector(WeaponSlotSelectors[nodeCounter]);
+					}
+					else if (weaponSlotNode.XPos < 0)
+					{ // On the left
+						weaponSlotNode.AssignSelector(WeaponSlotSelectors[WeaponSlotNodes.Count - nodeCounter]);
+					}
+					else
+					{ // Centered
+						// Needs to save it until last, OR divide the total count by two to get the lowest selector...
+						// Log error if already set, can only have one of these...
+						RearAsymmetricalWeaponSlotNode = weaponSlotNode;
+					}
+					nodeCounter++;
+				}
+			}
+			nodeGroupCounter++;
+		}
+	}
 
-    public void SetSelectedInventorySlotButton(int index)
-    {
-        if (ValidInventorySlotButtons.Count == 0) return;
-        DeselectCurrentButtons();
-        CurrentInventorySlotButton = ValidInventorySlotButtons[index];
-        CurrentInventorySlotButton.Select();
-        CurrentInventorySlotButtonIndex = index;
-        ActiveContainer = "Inventory";
-    }
+	Vector3 CalculateLocalPosition(float angleDegrees)
+	{
+		// Convert angle to radians
+		float angleRadians = angleDegrees * Mathf.Deg2Rad;
 
-    private void ClearWeaponSlots()
-    {
-        foreach (WeaponSlotButton button in WeaponSlotButtons)
-        {
-            button.Clear();
-        }
-    }
+		// Calculate offsets
+		float offsetX = Mathf.Cos(angleRadians) * WeaponSlotSelectorDistance;
+		float offsetY = Mathf.Sin(angleRadians) * WeaponSlotSelectorDistance;
 
-    private void ClearInventorySlots()
-    {
-        foreach (InventorySlotButton button in InventorySlotButtons)
-        {
-            button.Clear();
-        }
-    }
+		// Create the new position vector
+		Vector3 offset = new Vector3(offsetX, offsetY, 0);
+
+		// Transform the offset to local coordinates
+		Vector3 localPosition = PlayerManager.Inst.ActivePlayerShip.transform.localPosition + offset;
+
+		return localPosition;
+	}
+
+	private void SetInitialCursor()
+	{
+		WeaponSlotNode weaponSlotNode = InitialWeaponSlotCursor.GetComponent<WeaponSlotNode>();
+		SetCursor(weaponSlotNode);
+	}
+
+	private void SetCursor(WeaponSlotNode weaponSlotNode)
+	{
+		WeaponSlotCursor?.DisableHoverState();
+		WeaponSlotCursor = weaponSlotNode;
+		WeaponSlotCursor.EnableHoverState();
+	}
+
+	//   private void UpdateAvailableWeapons() {
+	//     LightWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Light);
+	//     MediumWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Medium);
+	//     HeavyWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Heavy);
+	//   }
+
+	public override void HandleSelect()
+	{
+		WeaponSlotCursor?.HandleSelect();
+	}
+
+	public override void HandleBack()
+	{
+		if (WeaponSlotCursor.IsSelected) WeaponSlotCursor.HandleDeselect();
+		// else Trigger termination animations and return to InterScene
+	}
+
+	public override void HandleBackClicked() { }
+
+	public override void HandleMoveLeft()
+	{
+		if (!WeaponSlotCursor.IsSelected)
+		{
+			WeaponSlotNode leftWeaponNode = DetermineAppropriateHoizontalNode(true);
+			if (leftWeaponNode == null) return;
+			SetCursor(leftWeaponNode);
+		}
+	}
+
+	public override void HandleMoveRight()
+	{
+		if (!WeaponSlotCursor.IsSelected)
+		{
+			WeaponSlotNode rightWeaponNode = DetermineAppropriateHoizontalNode(false);
+			if (rightWeaponNode == null) return;
+			SetCursor(rightWeaponNode);
+		}
+	}
+
+	public override void HandleMoveUp()
+	{
+		if (!WeaponSlotCursor.IsSelected)
+		{
+			WeaponSlotNode aboveWeaponNode = DetermineAppropriateVerticalNode(true);
+			if (aboveWeaponNode == null) return;
+			SetCursor(aboveWeaponNode);
+		}
+		else
+		{
+			WeaponSlotCursor.WeaponSlotSelector.HandleScrollUp();
+		}
+	}
+
+	public override void HandleMoveDown()
+	{
+		if (!WeaponSlotCursor.IsSelected)
+		{
+			WeaponSlotNode belowWeaponNode = DetermineAppropriateVerticalNode(false);
+			if (belowWeaponNode == null) return;
+			SetCursor(belowWeaponNode);
+		}
+		else
+		{
+			WeaponSlotCursor.WeaponSlotSelector.HandleScrollDown();
+		}
+	}
 }

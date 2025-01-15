@@ -8,5 +8,6 @@ public abstract class UIWindowBase : MonoBehaviour
     public abstract void HandleMoveUp();
     public abstract void HandleMoveDown();
     public abstract void HandleSelect();
+    public abstract void HandleBack();
     public abstract void HandleBackClicked();
 }
