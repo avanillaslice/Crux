@@ -14,13 +14,14 @@ public static class GameConfig
     public static EnemyPaths EnemyPaths { get; private set; }
     public static Positions Positions { get; private set; }
     public static Dictionary<string, PathData> EnemyPathPresets { get; private set; } = new Dictionary<string, PathData>();
-    public static List<EffectData> EffectDataList = new List<EffectData>();
+    public static List<EffectData> EffectDataList { get; private set; } = new List<EffectData>();
 
     // CONFIG
-    public static int InitialLives = 3;
-    public static int InitialScore = 0;
-    public static float RespawnTimer = 2;
-    public static bool CameraMovementEnabled = false;
+    public static int InitialLives { get; private set; } = 3;
+    public static int InitialScore { get; private set; } = 0;
+    public static float RespawnTimer { get; private set; } = 2;
+    public static bool CameraMovementEnabled { get; private set; } = false;
+    public static float BaseVolume { get; private set; } = 0.01f;
 
     public static void Initialise()
     {

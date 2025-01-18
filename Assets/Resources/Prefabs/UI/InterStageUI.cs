@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class InterStage : MonoBehaviour
+public class InterStageUI : MonoBehaviour
 {
     public void Continue()
     {

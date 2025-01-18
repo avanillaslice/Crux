@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class ShipSelection : UIWindowBase
+public class ShipSelectionUI : UIWindowBase
 {
     public List<GameObject> Ships;
     public GameObject Cursor;
@@ -66,9 +66,13 @@ public class ShipSelection : UIWindowBase
     {
         // Do nothing
     }
-
-    public override void HandleBackClicked()
+    public override void HandleExit()
+    {
+        // Do nothing
+    }
+    public override void HandleBack()
     {
         // Do nothing
     }   
+
 }

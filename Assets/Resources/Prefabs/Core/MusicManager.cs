@@ -16,9 +16,17 @@ public class MusicManager : MonoBehaviour
             return;  // Ensure no further code execution in this instance
         }
         Inst = this;
+        InitialiseAudioSources();
+    }
 
+    private void InitialiseAudioSources() {
         AudioSources.AddRange(GetComponents<AudioSource>());
+        foreach(AudioSource audioSource in AudioSources) audioSource.volume = GameConfig.BaseVolume;
+
+        // Set randomised queue on GameManager
         if (GameManager.BackgroundMusicQueue.Count < 1) CreateBGMQueue();
+
+        BGMAudioSource.volume = GameConfig.BaseVolume;
     }
 
     private void CreateBGMQueue()

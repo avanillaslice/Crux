@@ -2,10 +2,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WeaponSlotSelector : MonoBehaviour
+public class WeaponNodeSelector : MonoBehaviour
 {
 	// Inspector
-	public WeaponList WeaponList;
+	public GameObject WeaponList;
 	public Image WeaponIcon;
 	public TextMeshProUGUI WeaponName;
 	public TextMeshProUGUI WeaponType;
@@ -17,14 +17,15 @@ public class WeaponSlotSelector : MonoBehaviour
 	void Awake()
 	{
 		// Disable Hover and Selected components
-		HoverStateComponent.SetActive(false);
+		// HoverStateComponent.SetActive(false);
 	}
 
 	public void UpdateWeaponDetails(AttachPoint attachPoint, WeaponSlot weaponSlot)
 	{
 		WeaponBase assignedWeapon = attachPoint.GetComponent<WeaponBase>();
-		WeaponIcon = assignedWeapon.WeaponIcon;
-		WeaponName.text = assignedWeapon.WeaponName;
+		// ! REQUIRES UI ELEMENT
+		// WeaponIcon = assignedWeapon.WeaponIcon;
+		// WeaponName.text = assignedWeapon.WeaponName;
 		SetWeaponType(weaponSlot.Type);
 	}
 
@@ -55,6 +56,10 @@ public class WeaponSlotSelector : MonoBehaviour
 			default: return;
 		}
 	}
+
+	public void ScrollUp() {}
+
+	public void ScrollDown() {}
 
 	public void HandleSelect()
 	{

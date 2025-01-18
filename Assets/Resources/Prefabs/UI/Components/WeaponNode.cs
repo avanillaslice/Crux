@@ -1,24 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class WeaponSlotNode : MonoBehaviour
+public class WeaponNode : MonoBehaviour
 {
 	// Inspector
-	public WeaponSlotSelector WeaponSlotSelector;
 	public Color HoverColor;
 	public Color SelectedColor;
-	public Image ColorComponent;
 
 	// Data
-	public bool IsSelected;
-	public bool IsHoverState;
+	[HideInInspector] public float XPos;
+	[HideInInspector] public float YPos;
+	[HideInInspector] public WeaponNodeSelector WeaponNodeSelector;
+	[HideInInspector] public bool IsSelected;
+	[HideInInspector] public bool IsHoverState;
+	private SpriteRenderer ColorComponent;
 	private Color DefaultColor;
-	private List<WeaponSlotNode> RelatedWeaponSlotNodes;
-	public AttachPoint AttachPoint;
-	public WeaponSlot WeaponSlot;
-	public float XPos;
-	public float YPos;
+	private List<WeaponNode> RelatedWeaponNodes = new List<WeaponNode>();
+	private AttachPoint AttachPoint;
+	private WeaponSlot WeaponSlot;
 
 	// Types
 	internal enum ColorState
@@ -26,6 +25,10 @@ public class WeaponSlotNode : MonoBehaviour
 		Default,
 		Hover,
 		Selected
+	}
+
+	void Awake() {
+		ColorComponent = gameObject.GetComponent<SpriteRenderer>();
 	}
 
 	public void Init(AttachPoint attachPoint, WeaponSlot weaponSlot)
@@ -36,29 +39,29 @@ public class WeaponSlotNode : MonoBehaviour
 		YPos = attachPoint.transform.position.y;
 	}
 
-	public void AssignSelector(WeaponSlotSelector weaponSlotSelector)
+	public void AssignSelector(WeaponNodeSelector weaponNodeSelector)
 	{
-		if (weaponSlotSelector == null)
+		if (weaponNodeSelector == null)
 		{
-			Debug.LogError("Cannot assign null weaponSlotSelector");
+			Debug.LogError("Cannot assign null WeaponNodeSelector");
 			return;
 		}
-		WeaponSlotSelector = weaponSlotSelector;
-		WeaponSlotSelector.UpdateWeaponDetails(AttachPoint, WeaponSlot);
+		WeaponNodeSelector = weaponNodeSelector;
+		WeaponNodeSelector.UpdateWeaponDetails(AttachPoint, WeaponSlot);
 	}
 
-	public void SetRelatedNodes(List<WeaponSlotNode> weaponSlotNodes)
+	public void SetRelatedNodes(List<WeaponNode> weaponNodes)
 	{
-		foreach (WeaponSlotNode weaponSlotNode in weaponSlotNodes)
+		foreach (WeaponNode weaponNode in weaponNodes)
 		{
-			if (weaponSlotNode != this) RelatedWeaponSlotNodes.Add(weaponSlotNode);
+			if (weaponNode != this) RelatedWeaponNodes.Add(weaponNode);
 		}
 	}
 
 	public void EnableHoverState()
 	{
 		if (IsHoverState || IsSelected) return;
-		WeaponSlotSelector.EnableHoverState();
+		WeaponNodeSelector.EnableHoverState();
 		IsHoverState = true;
 		SetColorState(ColorState.Hover);
 	}
@@ -66,7 +69,7 @@ public class WeaponSlotNode : MonoBehaviour
 	public void DisableHoverState()
 	{
 		if (!IsHoverState || IsSelected) return;
-		WeaponSlotSelector.DisableHoverState();
+		WeaponNodeSelector.DisableHoverState();
 		IsHoverState = false;
 		SetColorState(ColorState.Default);
 	}
@@ -77,13 +80,13 @@ public class WeaponSlotNode : MonoBehaviour
 			SetColorState(ColorState.Selected);
 			IsSelected = true;
 
-			foreach (WeaponSlotNode weaponSlotNode in RelatedWeaponSlotNodes)
+			foreach (WeaponNode weaponNode in RelatedWeaponNodes)
 			{
-				weaponSlotNode.SetColorState(ColorState.Selected);
+				weaponNode.SetColorState(ColorState.Selected);
 			}
 		}
 
-		WeaponSlotSelector.HandleSelect();
+		WeaponNodeSelector.HandleSelect();
 	}
 
 	public void HandleDeselect()
@@ -93,13 +96,13 @@ public class WeaponSlotNode : MonoBehaviour
 			SetColorState(ColorState.Default); ;
 			IsSelected = false;
 
-			foreach (WeaponSlotNode weaponSlotNode in RelatedWeaponSlotNodes)
+			foreach (WeaponNode weaponNode in RelatedWeaponNodes)
 			{
-				weaponSlotNode.SetColorState(ColorState.Default);
+				weaponNode.SetColorState(ColorState.Default);
 			}
 		}
 
-		WeaponSlotSelector.HandleDeselect();
+		WeaponNodeSelector.HandleDeselect();
 	}
 
 	internal void SetColorState(ColorState colorState)

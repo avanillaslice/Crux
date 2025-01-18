@@ -99,7 +99,7 @@ public static class GameManager
 
     public static async void HandleStageCompleted()
     {
-        await PlayerManager.Inst.FlyOutOfScene();
+        // await PlayerManager.Inst.FlyOutOfScene();
         ItemDropManager.Inst.DestroyAllActiveItemDrops();
         GameInputHandler.Inst.DisableGameplayControls();
         TransitionToInterStage();

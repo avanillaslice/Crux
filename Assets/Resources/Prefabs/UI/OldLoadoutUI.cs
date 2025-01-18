@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OldLoadout : UIWindowBase
+public class OldLoadoutUI : UIWindowBase
 {
-    public static OldLoadout Inst { get; private set; }
+    public static OldLoadoutUI Inst { get; private set; }
 
     // WEAPON SLOTS
     public GameObject WeaponSlotContainer;
@@ -50,7 +50,7 @@ public class OldLoadout : UIWindowBase
 
     public override void HandleBack() {}
 
-    public override void HandleBackClicked()
+    public override void HandleExit()
     {
         UIManager.Inst.DisableLoadoutUI();
         UIManager.Inst.EnableInterStageUI();

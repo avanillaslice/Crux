@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // SkillTree is a UIWindowBase that handles the skill tree UI.
-public class SkillTree : UIWindowBase
+public class SkillTreeUI : UIWindowBase
 {
-    public static SkillTree Inst { get; private set; }
+    public static SkillTreeUI Inst { get; private set; }
 
     // Inspector
     public List<GameObject> SkillTreeContainers; // Container for skill tree nodes and connections
@@ -129,7 +129,7 @@ public class SkillTree : UIWindowBase
         Cursor.AttemptSkillActivationOrUpgrade();
     }
 
-    public override void HandleBackClicked()
+    public override void HandleExit()
     {
         UIManager.Inst.DisableSkillTreeUI();
         UIManager.Inst.EnableInterStageUI();

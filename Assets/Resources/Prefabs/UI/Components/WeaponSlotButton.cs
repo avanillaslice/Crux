@@ -29,14 +29,14 @@ public class WeaponSlotButton : MonoBehaviour
 
     public void HandleClicked()
     {
-        if (OldLoadout.Inst.ActiveContainer == "Inventory") return;
-        OldLoadout.Inst.HandleSelect();
+        if (OldLoadoutUI.Inst.ActiveContainer == "Inventory") return;
+        OldLoadoutUI.Inst.HandleSelect();
     }
     
     public void HandlePointerEnter()
     {
-        if (OldLoadout.Inst.ActiveContainer == "Inventory") return;
-        OldLoadout.Inst.SetSelectedWeaponSlotButton(ListIndex);
+        if (OldLoadoutUI.Inst.ActiveContainer == "Inventory") return;
+        OldLoadoutUI.Inst.SetSelectedWeaponSlotButton(ListIndex);
     }
 
     public void Select()
