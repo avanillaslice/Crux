@@ -8,22 +8,22 @@ public class Missile : ProjectileBase
     public float forwardDuration = 2f;
     public float BaseSideSpeed = 1f;
 
-    protected override void InitializeBehaviour(Vector2 initialVelocity, AttachPoint.RelativeSide side, Vector2? direction)
+    protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
     {
         StartCoroutine(MoveMissile(initialVelocity, side));
     }
 
-    private IEnumerator MoveMissile(Vector2 initialVelocity, AttachPoint.RelativeSide side)
+    private IEnumerator MoveMissile(Vector2 initialVelocity, RelativeSide side)
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
         // Determine the direction based on the side
         Vector2 sideDirection;
-        if (side == AttachPoint.RelativeSide.Left)
+        if (side == RelativeSide.Left)
         {
             sideDirection = Quaternion.Euler(0, 0, 15) * Vector2.left; // 15 degrees off to the left
         }
-        else if (side == AttachPoint.RelativeSide.Right)
+        else if (side == RelativeSide.Right)
         {
             sideDirection = Quaternion.Euler(0, 0, -15) * Vector2.right; // 15 degrees off to the right
         }

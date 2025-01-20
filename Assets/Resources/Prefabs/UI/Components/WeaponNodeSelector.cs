@@ -22,11 +22,11 @@ public class WeaponNodeSelector : MonoBehaviour
 
 	public void UpdateWeaponDetails(AttachPoint attachPoint, WeaponSlot weaponSlot)
 	{
-		WeaponBase assignedWeapon = attachPoint.GetComponent<WeaponBase>();
+		WeaponBase assignedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
 		// ! REQUIRES UI ELEMENT
 		// WeaponIcon = assignedWeapon.WeaponIcon;
-		// WeaponName.text = assignedWeapon.WeaponName;
-		SetWeaponType(weaponSlot.Type);
+		WeaponName.text = assignedWeapon.WeaponName;
+		// SetWeaponType(weaponSlot.Type);
 	}
 
 	// Probably needs to be WeaponSlotType and not WeaponType

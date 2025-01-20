@@ -115,6 +115,7 @@ public class UIManager : MonoBehaviour
     public void DisableLoadoutUI()
     {
         if (LoadoutUI == null) return;
+        // else Destroy(LoadoutUI);
         else LoadoutUI.SetActive(false);
         ActiveWindow = null;
         ActiveUIWindow = null;

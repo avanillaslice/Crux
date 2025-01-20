@@ -18,7 +18,7 @@ public abstract class ProjectileBase : MonoBehaviour
     protected int PierceCount;
 
     // Initialize method to set the projectile's properties
-    public void Initialize(bool isEnemy, float speedModifier, float damageModifier, int piercingModifier, float criticalHitChanceModifier, Vector2 initialVelocity, AttachPoint.RelativeSide side, Vector2? direction = null)
+    public void Initialize(bool isEnemy, float speedModifier, float damageModifier, int piercingModifier, float criticalHitChanceModifier, Vector2 initialVelocity, RelativeSide side, Vector2? direction = null)
     {
         FiredByEnemy = isEnemy;
         SpeedModifier = speedModifier;
@@ -30,7 +30,7 @@ public abstract class ProjectileBase : MonoBehaviour
     }
 
     // Abstract method to be implemented by specific projectiles
-    protected abstract void InitializeBehaviour(Vector2 initialVelocity, AttachPoint.RelativeSide side, Vector2? direction);
+    protected abstract void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction);
 
     // Method to handle collision with other objects
     void OnTriggerEnter2D(Collider2D other)

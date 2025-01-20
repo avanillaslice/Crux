@@ -1,16 +1,18 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class LoadoutUI : UIWindowBase
 {
 	public static LoadoutUI Inst { get; private set; }
 
 	// Inspector
-	public GameObject WeaponSlotUIContainer;
+	public GameObject WeaponUIContainer;
 	public GameObject InitialWeaponSlotCursor;
 
 	// Data
-	private float WeaponNodeSelectorDistance = 4f;
+	private float WeaponNodeSelectorDistance = 2.5f;
 	private bool FirstWeaponNodeIsCentered = true;
 	private List<WeaponNode> WeaponNodes = new List<WeaponNode>();
 	private List<WeaponNodeSelector> WeaponNodeSelectors = new List<WeaponNodeSelector>();
@@ -33,13 +35,24 @@ public class LoadoutUI : UIWindowBase
             return;  // Ensure no further code execution in this instance
         }
         Inst = this;
-		InitialiseLoadoutUI();
 	}
 
-	void OnEnable()
-	{
+	void OnEnable() {
+		PlayerManager.Inst.ActivePlayerShip.transform.localScale += new Vector3(1f, 1f, 1f);
 		UpdateAvailableWeapons();
-		SetInitialCursor();
+		InitialiseLoadoutUI();
+		// SetInitialCursor();
+	}
+
+	void OnDisable() {
+		PlayerManager.Inst.ActivePlayerShip.transform.localScale -= new Vector3(1f, 1f, 1f);
+		foreach (Transform child in WeaponUIContainer.transform)
+		{
+			Destroy(child.gameObject);
+		}
+		WeaponNodes = new List<WeaponNode>();
+		WeaponNodeSelectors = new List<WeaponNodeSelector>();
+		WeaponNodeGroups = new List<List<WeaponNode>>();
 	}
 
 	private void InitialiseLoadoutUI()
@@ -57,9 +70,8 @@ public class LoadoutUI : UIWindowBase
 	// Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
 	private void InstantiateWeaponNodes()
 	{
-		Debug.Log("InstantiateWeaponNodes");
 		// Find all AttachPoints from PlayerShip
-		List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.WeaponSlots;
+		List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.GetActiveWeaponSlots();
 
 		// Sort attachPoints by YPOS (what kind of list do I use for static order?)
 		foreach (WeaponSlot weaponSlot in weaponSlots)
@@ -70,18 +82,13 @@ public class LoadoutUI : UIWindowBase
 			foreach (AttachPoint attachPoint in weaponSlot.AttachPoints)
 			{
 				// FetchGameObject for transform position
-				Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y, 11); // One unit above player
-				WeaponNode weaponNode = Instantiate(AssetManager.WeaponNodePrefab, attachPoint.transform.position, Quaternion.identity).GetComponent<WeaponNode>();
+				Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y, WeaponUIContainer.transform.position.z); // One unit above player
+				WeaponNode weaponNode = Instantiate(AssetManager.WeaponNodePrefab, posAbovePlayer, Quaternion.identity, WeaponUIContainer.transform).GetComponent<WeaponNode>();
 				weaponNode.Init(attachPoint, weaponSlot);
 
 				// Add to group
 				relatedWeaponNodes.Add(weaponNode);
 				WeaponNodes.Add(weaponNode);
-
-				// Not sure if I need this now that they are partnered up
-				// if (WeaponNode.transform.position.x > 0) LeftWeaponNodes.Add(WeaponNode);
-				// else if (WeaponNode.transform.position.x < 0) RightWeaponNodes.Add(WeaponNode);
-				// else CentralWeaponNodes.Add(WeaponNode); // Maybe? Just felt weird it not being in a list
 			}
 
 			// Assign related nodes to each group
@@ -94,23 +101,13 @@ public class LoadoutUI : UIWindowBase
 
 		// Sort WeaponNodes by YPos
 		// Does this mean I dont need to for WeaponNodeGroups?
-		WeaponNodes.Sort((x, y) => x.YPos.CompareTo(y.YPos));
-		WeaponNodeGroups.Sort((listA, listB) => listA[0].YPos.CompareTo(listB[0].YPos));
-	}
-
-	private void UpdateAvailableWeapons() {
-		// LoadoutManager should return a pre sorted loadout package
-		List<GameObject> ActiveLoadout = LoadoutManager.GetInventory();
-
-		// So we dont have to do this....
-	    // LightWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Light);
-	    // MediumWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Medium);
-	    // HeavyWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Heavy);
+		// WeaponNodes.Sort((a, b) => b.YPos.CompareTo(a.YPos));
+		WeaponNodeGroups.Sort((listA, listB) => listB[0].YPos.CompareTo(listA[0].YPos));
+		foreach(List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
 	}
 
 	private void InitialiseWeaponNodeSelectors()
 	{
-		Debug.Log("InitialiseWeaponNodeSelectors");
 		List<Vector3> WeaponNodeSelectorPositions = DetermineWeaponNodeSelectorPositions();
 		InstantiateWeaponNodeSelectors(WeaponNodeSelectorPositions);
 		LinkNodesToSelectors();
@@ -118,7 +115,6 @@ public class LoadoutUI : UIWindowBase
 
 	private List<Vector3> DetermineWeaponNodeSelectorPositions()
 	{
-		Debug.Log("DetermineWeaponNodeSelectorPositions");
 		List<Vector3> weaponNodeSelectorPositions = new List<Vector3>();
 
 		// Angle between each WeaponNodeSelector
@@ -128,13 +124,11 @@ public class LoadoutUI : UIWindowBase
 		Vector3 FirstWeaponNodeSelectorPosition;
 		if (WeaponNodes[0].XPos == 0)
 		{
-			Debug.Log("FIRST NODE IS CENTERED");
 			FirstWeaponNodeIsCentered = true;
 			FirstWeaponNodeSelectorPosition = CalculateLocalPosition(0);
 		}
 		else
 		{
-			Debug.Log("FIRST NODE IS NOT CENTERED");
 			FirstWeaponNodeIsCentered = false;
 			FirstWeaponNodeSelectorPosition = CalculateLocalPosition(anglePerSelector / 2);
 		}
@@ -157,7 +151,6 @@ public class LoadoutUI : UIWindowBase
 
 	private void InstantiateWeaponNodeSelectors(List<Vector3> WeaponNodeSelectorPositions)
 	{
-		Debug.Log("InstantiateWeaponNodeSelectors");
 		if (WeaponNodeSelectorPositions.Count == 0)
 		{
 			Debug.LogError("No WeaponNodeSelectorPositions have been set");
@@ -167,7 +160,7 @@ public class LoadoutUI : UIWindowBase
 
 		foreach (Vector3 WeaponNodeSelectorPosition in WeaponNodeSelectorPositions)
 		{
-			GameObject WeaponNodeSelector = Instantiate(AssetManager.WeaponNodeSelectorPrefab, WeaponNodeSelectorPosition, Quaternion.identity);
+			GameObject WeaponNodeSelector = Instantiate(AssetManager.WeaponNodeSelectorPrefab, WeaponNodeSelectorPosition, Quaternion.identity, WeaponUIContainer.transform);
 
 			WeaponNodeSelectors.Add(WeaponNodeSelector.GetComponent<WeaponNodeSelector>());
 		}
@@ -175,7 +168,6 @@ public class LoadoutUI : UIWindowBase
 
 	private void LinkNodesToSelectors()
 	{
-		Debug.Log("LinkNodesToSelectors");
 		// WeaponNodeGroups and WeaponNodes have been sorted by YPos
 		int nodeCounter = 0;
 		int nodeGroupCounter = 0;
@@ -184,44 +176,58 @@ public class LoadoutUI : UIWindowBase
 		Debug.Log("Detected " + WeaponNodeSelectors.Count + " WeaponNodeSelectors");
 		while (nodeCounter < WeaponNodes.Count)
 		{
-			Debug.Log("Placing Node: " + nodeCounter);
 			Debug.Log("Placing Group: " + nodeGroupCounter);
-			// Handle first WeaponNodeGroup
-			if (nodeCounter == 0 && FirstWeaponNodeIsCentered)
+			foreach (WeaponNode weaponNode in WeaponNodeGroups[nodeGroupCounter])
 			{
-				Debug.Log("FIRSTWEAPONNODE IS CENTERED");
-				WeaponNodes[0].AssignSelector(WeaponNodeSelectors[0]);
-				nodeCounter++;
-			}
-			else
-			{
-				foreach (WeaponNode weaponNode in WeaponNodeGroups[nodeGroupCounter])
-				{
-					if (weaponNode.XPos > 0)
-					{ // On the right
-						weaponNode.AssignSelector(WeaponNodeSelectors[nodeCounter]);
+				Debug.Log("Placing Node: " + nodeCounter + " X: " + weaponNode.XPos + " Y: " + weaponNode.YPos + " Side: " + weaponNode.Side);
+
+				switch (weaponNode.Side) {
+					case RelativeSide.Right: {
+						Debug.Log("ON THE RIGHT");
+						weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
+						break;
 					}
-					else if (weaponNode.XPos < 0)
-					{ // On the left
-						weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodes.Count - nodeCounter]);
+					case RelativeSide.Left: {
+						Debug.Log("ON THE LEFT");
+						weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodeGroups.Count - nodeGroupCounter]);
+						break;
 					}
-					else
-					{ // Centered
-						// Needs to save it until last, OR divide the total count by two to get the lowest selector...
-						// Log error if already set, can only have one of these...
-						RearAsymmetricalWeaponNode = weaponNode;
+					case RelativeSide.Center: {
+						Debug.Log("CENTERED");
+						if (nodeGroupCounter == 0) {
+							Debug.Log("FIRSTWEAPONNODE IS CENTERED");
+							WeaponNodes[0].AssignSelector(WeaponNodeSelectors[0]);
+						} else {
+							Debug.Log("SETTING RearAsymmetricalWeaponNode FOR LATER");
+							RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
+						}
+						break;
 					}
-					nodeCounter++;
+					default: {
+						Debug.LogWarning("Unexpected Side value: " + weaponNode.Side);
+						break;
+					}
 				}
+				nodeCounter++;
 			}
 			nodeGroupCounter++;
 		}
 	}
 
+	private void UpdateAvailableWeapons() {
+		// LoadoutManager should return a pre sorted loadout package
+		List<GameObject> ActiveLoadout = LoadoutManager.GetInventory();
+
+		// So we dont have to do this....
+	    // LightWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Light);
+	    // MediumWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Medium);
+	    // HeavyWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Heavy);
+	}
+
 	Vector3 CalculateLocalPosition(float angleDegrees)
 	{
 		// Convert angle to radians
-		float angleRadians = angleDegrees * Mathf.Deg2Rad;
+		float angleRadians = (angleDegrees + 90) * Mathf.Deg2Rad;
 
 		// Calculate offsets
 		float offsetX = Mathf.Cos(angleRadians) * WeaponNodeSelectorDistance;
@@ -232,14 +238,15 @@ public class LoadoutUI : UIWindowBase
 
 		// Transform the offset to local coordinates
 		Vector3 localPosition = PlayerManager.Inst.ActivePlayerShip.transform.localPosition + offset;
+		localPosition.z = WeaponUIContainer.transform.position.z;
 
 		return localPosition;
 	}
 
 	private void SetInitialCursor()
 	{
-		WeaponNode weaponNode = InitialWeaponSlotCursor.GetComponent<WeaponNode>();
-		SetCursor(weaponNode);
+		if (InitialWeaponSlotCursor != null) SetCursor(InitialWeaponSlotCursor.GetComponent<WeaponNode>());
+		else SetCursor(WeaponNodes[0]);
 	}
 
 	private void SetCursor(WeaponNode weaponNode)
@@ -257,10 +264,13 @@ public class LoadoutUI : UIWindowBase
 	public override void HandleBack()
 	{
 		if (WeaponSlotCursor.IsSelected) WeaponSlotCursor.HandleDeselect();
-		// else Trigger termination animations and return to InterScene
+		else HandleExit();
 	}
 
 	public override void HandleExit() {
+		// Animation stuff goes here
+
+		// This should probably use UIManager.Inst.HandleExit()
         UIManager.Inst.DisableLoadoutUI();
         UIManager.Inst.EnableInterStageUI();
 	}

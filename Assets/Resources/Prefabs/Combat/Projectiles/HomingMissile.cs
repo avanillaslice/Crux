@@ -12,17 +12,17 @@ public class HomingMissile : ProjectileBase
 
     private Transform target;
 
-    protected override void InitializeBehaviour(Vector2 initialVelocity, AttachPoint.RelativeSide side, Vector2? direction)
+    protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
     {
         StartCoroutine(MoveMissile(initialVelocity, side));
     }
 
-    private IEnumerator MoveMissile(Vector2 initialVelocity, AttachPoint.RelativeSide side)
+    private IEnumerator MoveMissile(Vector2 initialVelocity, RelativeSide side)
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
         // Determine the initial direction based on the side and initial angle
-        float angle = (side == AttachPoint.RelativeSide.Left) ? initialAngle : -initialAngle;
+        float angle = (side == RelativeSide.Left) ? initialAngle : -initialAngle;
         Vector2 initialDirection = Quaternion.Euler(0, 0, angle) * Vector2.up;
         rb.linearVelocity = initialVelocity + initialDirection * BaseSpeed * SpeedModifier;
 

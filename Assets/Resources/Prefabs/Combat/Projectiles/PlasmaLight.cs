@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlasmaLight : ProjectileBase
 {
-    protected override void InitializeBehaviour(Vector2 initialVelocity, AttachPoint.RelativeSide side, Vector2? direction)
+    protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
 

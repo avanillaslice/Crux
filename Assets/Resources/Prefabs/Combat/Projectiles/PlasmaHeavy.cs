@@ -15,7 +15,7 @@ public class PlasmaHeavy : ProjectileBase
         }
     }
 
-    protected override void InitializeBehaviour(Vector2 initialVelocity, AttachPoint.RelativeSide side, Vector2? direction)
+    protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
@@ -46,7 +46,7 @@ public class PlasmaHeavy : ProjectileBase
             {
                 Vector2 initialVelocity = rb != null ? rb.linearVelocity : Vector2.zero;
                 // ! Replace with shrapnel projectile to prevent speed modifier conflicts
-                plasmaScript.Initialize(FiredByEnemy, 0.75f, DamageModifier, PiercingModifier, CriticalHitChanceModifier, initialVelocity, AttachPoint.RelativeSide.Center, newDirection);
+                plasmaScript.Initialize(FiredByEnemy, 0.75f, DamageModifier, PiercingModifier, CriticalHitChanceModifier, initialVelocity, RelativeSide.Center, newDirection);
             }
         }
 

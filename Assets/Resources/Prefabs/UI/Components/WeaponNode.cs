@@ -10,6 +10,7 @@ public class WeaponNode : MonoBehaviour
 	// Data
 	[HideInInspector] public float XPos;
 	[HideInInspector] public float YPos;
+	[HideInInspector] public RelativeSide Side;
 	[HideInInspector] public WeaponNodeSelector WeaponNodeSelector;
 	[HideInInspector] public bool IsSelected;
 	[HideInInspector] public bool IsHoverState;
@@ -35,8 +36,10 @@ public class WeaponNode : MonoBehaviour
 	{
 		WeaponSlot = weaponSlot;
 		AttachPoint = attachPoint;
-		XPos = attachPoint.transform.position.x;
-		YPos = attachPoint.transform.position.y;
+		Side = AttachPoint.Side;
+		XPos = attachPoint.transform.localPosition.x;
+		YPos = attachPoint.transform.localPosition.y;
+		Debug.Log("NEW NODE POSTION X: " + XPos + " Y: " + YPos);
 	}
 
 	public void AssignSelector(WeaponNodeSelector weaponNodeSelector)
@@ -46,6 +49,10 @@ public class WeaponNode : MonoBehaviour
 			Debug.LogError("Cannot assign null WeaponNodeSelector");
 			return;
 		}
+
+		if (WeaponSlot == null) Debug.LogWarning("WeaponSlot not set on Node");
+		if (AttachPoint == null) Debug.LogWarning("AttachPoint not set on Node");
+
 		WeaponNodeSelector = weaponNodeSelector;
 		WeaponNodeSelector.UpdateWeaponDetails(AttachPoint, WeaponSlot);
 	}

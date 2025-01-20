@@ -31,7 +31,7 @@ public abstract class WeaponBase : MonoBehaviour
     public Sprite WeaponIcon;
 
     // Add the Side field
-    public AttachPoint.RelativeSide Side { get; set; }
+    public RelativeSide Side { get; set; }
 
     protected ShipBase ParentShip;
 

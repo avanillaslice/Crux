@@ -5,13 +5,13 @@ Stages:
             WaveDelay: 20
             Enemies:
               - ShipType: SF1
-                Amt: 4
+                Amt: 2
             Drops: [TurretSmall]
           - SpawnCooldown: 0.5
             WaveDelay: 20
             Enemies:
               - ShipType: SF1
-                Amt: 4
+                Amt: 2
               - ShipType: SF2
-                Amt: 4
+                Amt: 2
             Drops: [ElectroShield]

@@ -1,19 +1,19 @@
 using UnityEngine;
 
+public enum RelativeSide
+{
+    Left,
+    Right,
+    Center
+}
+
 public class AttachPoint : MonoBehaviour
 {
-    public enum RelativeSide
-    {
-        Left,
-        Right,
-        Center
-    }
-
     // public GameObject PreAttachedWeapon;
     public GameObject AttachedWeapon;
     [HideInInspector] public bool IsEmpty = true;
 
-    private RelativeSide Side;
+    public RelativeSide Side;
 
     private void Awake()
     {
