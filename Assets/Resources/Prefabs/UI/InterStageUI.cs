@@ -17,6 +17,11 @@ public class InterStageUI : MonoBehaviour
         UIManager.Inst.TransitionToLoadout();
     }
 
+		public void OldLoadout()
+    {
+        UIManager.Inst.TransitionToOldLoadout();
+    }
+
     public void Skills()
     {
     }

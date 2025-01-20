@@ -38,6 +38,7 @@ public static class AssetManager
     public static GameObject PauseMenuPrefab { get; private set; }
     public static GameObject InterStageUIPrefab { get; private set; }
     public static GameObject LoadoutUIPrefab { get; private set; }
+    public static GameObject OldLoadoutUIPrefab { get; private set; }
     public static GameObject SkillTreeUIPrefab { get; private set; }
 
     // UI COMPONENTS
@@ -112,6 +113,7 @@ public static class AssetManager
         PauseMenuPrefab = Resources.Load<GameObject>("Prefabs/UI/PauseMenu");
         InterStageUIPrefab = Resources.Load<GameObject>("Prefabs/UI/InterStageUI");
         LoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/LoadoutUI");
+        OldLoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/OldLoadoutUI");
         SkillTreeUIPrefab = Resources.Load<GameObject>("Prefabs/UI/SkillTreeUI");
         if (ShipSelectionUIPrefab == null) Debug.LogError("Failed to load ShipSelectionUIPrefab!");
         if (PickupMessagePrefab == null) Debug.LogError("Failed to load PickupMessagePrefab!");
@@ -120,6 +122,7 @@ public static class AssetManager
         if (WeaponNodePrefab == null) Debug.LogError("Failed to load WeaponNodePrefab!");
         if (PauseMenuPrefab == null) Debug.LogError("Failed to load PauseMenuPrefab!");
         if (LoadoutUIPrefab == null) Debug.LogError("Failed to load LoadoutUIPrefab!");
+        if (OldLoadoutUIPrefab == null) Debug.LogError("Failed to load OldLoadoutUIPrefab!");
         if (SkillTreeUIPrefab == null) Debug.LogError("Failed to load SkillTreeUIPrefab!");
     }
 

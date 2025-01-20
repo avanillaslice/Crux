@@ -52,7 +52,7 @@ public class OldLoadoutUI : UIWindowBase
 
     public override void HandleExit()
     {
-        UIManager.Inst.DisableLoadoutUI();
+        UIManager.Inst.DisableOldLoadoutUI();
         UIManager.Inst.EnableInterStageUI();
     }
 
@@ -111,6 +111,7 @@ public class OldLoadoutUI : UIWindowBase
         List<GameObject> inventory = LoadoutManager.GetInventory();
 
         int i = 0;
+				bool emptyInventorySlotIsCreated = false;
         foreach (InventorySlotButton inventorySlotButton in InventorySlotButtons)
         {
             if (inventorySlotButton.IsEmpty && inventory.Count > i)
@@ -120,6 +121,14 @@ public class OldLoadoutUI : UIWindowBase
                 ActiveInventorySlotButtons.Add(inventorySlotButton);
                 i++;
             }
+						else if (!emptyInventorySlotIsCreated)
+						{
+							inventorySlotButton.gameObject.SetActive(true);
+							inventorySlotButton.SetWeapon(null);
+							inventorySlotButton.ListIndex--;
+							ActiveInventorySlotButtons.Add(inventorySlotButton);
+							emptyInventorySlotIsCreated = true;
+						}
             else
             {
                 inventorySlotButton.Clear();
@@ -179,7 +188,11 @@ public class OldLoadoutUI : UIWindowBase
     {
         if (ActiveContainer == "Inventory")
         {
+					if (CurrentInventorySlotButton.WeaponPrefab == null) {
+						LoadoutManager.UnequipWeapon(CurrentWeaponSlotButton.WeaponSlot.id);
+					} else {
             LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
+					}
             ClearWeaponSlots();
             SetWeaponSlots();
             SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
@@ -213,6 +226,10 @@ public class OldLoadoutUI : UIWindowBase
                 inventorySlotButton.Validate();
                 ValidInventorySlotButtons.Add(inventorySlotButton);
             }
+						else if (inventorySlotButton.WeaponPrefab == null && !inventorySlotButton.IsEmpty) {
+							  inventorySlotButton.Validate();
+                ValidInventorySlotButtons.Add(inventorySlotButton);
+						}
             else
             {
                 inventorySlotButton.Invalidate();

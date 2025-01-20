@@ -100,6 +100,7 @@ public static class GameManager
     public static async void HandleStageCompleted()
     {
         // await PlayerManager.Inst.FlyOutOfScene();
+				PlayerManager.Inst.ActivePlayerShip.SetPosition(new Vector3(0, 0, 10));
         ItemDropManager.Inst.DestroyAllActiveItemDrops();
         GameInputHandler.Inst.DisableGameplayControls();
         TransitionToInterStage();

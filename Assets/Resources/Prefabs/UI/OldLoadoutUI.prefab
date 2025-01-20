@@ -1666,11 +1666,11 @@ PrefabInstance:
       objectReference: {fileID: 4128113589269738966}
     - target: {fileID: 6612851797530709469, guid: 45499aca86f65aa42bdc1627b94acbf7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: HandleBackClicked
+      value: HandleExit
       objectReference: {fileID: 0}
     - target: {fileID: 6612851797530709469, guid: 45499aca86f65aa42bdc1627b94acbf7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Loadout, Assembly-CSharp
+      value: OldLoadoutUI, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7700551683941454464, guid: 45499aca86f65aa42bdc1627b94acbf7, type: 3}
       propertyPath: m_Pivot.x

@@ -107,9 +107,9 @@ public static class LoadoutManager
         return weaponSlot;
     }
 
-    public static void UnequipWeapon(WeaponSlot weaponSlot)
+    public static void UnequipWeapon(int weaponSlotId)
     {
-
+			PlayerManager.Inst.ActivePlayerShip.DetachWeaponsFromSlotById(weaponSlotId);
     }
 
     public static List<GameObject> GetInventory()

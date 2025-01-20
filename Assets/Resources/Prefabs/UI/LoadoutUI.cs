@@ -95,14 +95,14 @@ public class LoadoutUI : UIWindowBase
 			foreach (WeaponNode weaponNode in relatedWeaponNodes)
 			{
 				weaponNode.SetRelatedNodes(relatedWeaponNodes);
-				WeaponNodeGroups.Add(relatedWeaponNodes);
 			}
+			WeaponNodeGroups.Add(relatedWeaponNodes);
 		}
-
 		// Sort WeaponNodes by YPos
 		// Does this mean I dont need to for WeaponNodeGroups?
 		// WeaponNodes.Sort((a, b) => b.YPos.CompareTo(a.YPos));
 		WeaponNodeGroups.Sort((listA, listB) => listB[0].YPos.CompareTo(listA[0].YPos));
+		Debug.Log("WeaponSlotNodes Instantated:");
 		foreach(List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
 	}
 
@@ -130,7 +130,7 @@ public class LoadoutUI : UIWindowBase
 		else
 		{
 			FirstWeaponNodeIsCentered = false;
-			FirstWeaponNodeSelectorPosition = CalculateLocalPosition(anglePerSelector / 2);
+			FirstWeaponNodeSelectorPosition = CalculateLocalPosition(-(anglePerSelector / 2));
 		}
 
 		// Calculate each position and add to list
@@ -140,7 +140,8 @@ public class LoadoutUI : UIWindowBase
 			if (i == 0) weaponNodeSelectorPositions.Add(FirstWeaponNodeSelectorPosition);
 			else
 			{
-				Vector3 newPosition = CalculateLocalPosition(anglePerSelector * i);
+				float originalWeaponNodeAngle = FirstWeaponNodeIsCentered ? 0 : -(anglePerSelector / 2);
+				Vector3 newPosition = CalculateLocalPosition(originalWeaponNodeAngle + anglePerSelector * i);
 				weaponNodeSelectorPositions.Add(newPosition);
 			}
 			i++;
@@ -184,11 +185,13 @@ public class LoadoutUI : UIWindowBase
 				switch (weaponNode.Side) {
 					case RelativeSide.Right: {
 						Debug.Log("ON THE RIGHT");
+						Debug.Log("Fetching WeaponNodeSelector: " + nodeGroupCounter);
 						weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
 						break;
 					}
 					case RelativeSide.Left: {
 						Debug.Log("ON THE LEFT");
+						Debug.Log("Fetching WeaponNodeSelector: " + (WeaponNodeGroups.Count - nodeGroupCounter));
 						weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodeGroups.Count - nodeGroupCounter]);
 						break;
 					}

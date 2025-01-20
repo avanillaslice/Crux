@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour
     private GameObject PauseMenuUI;
     private GameObject InterStageUI;
     private GameObject LoadoutUI;
+    private GameObject OldLoadoutUI;
     private GameObject SkillTreeUI;
     private GameObject SpecialWeaponUnlockedUI;
 
@@ -55,6 +56,11 @@ public class UIManager : MonoBehaviour
     {
         DisableInterStageUI();
         EnableLoadoutUI();
+    }
+    public void TransitionToOldLoadout()
+    {
+        DisableInterStageUI();
+        EnableOldLoadoutUI();
     }
 
     public void TransitionToSkillTree()
@@ -111,12 +117,28 @@ public class UIManager : MonoBehaviour
         ActiveWindow = "Loadout";
         ActiveUIWindow = LoadoutUI.GetComponent<UIWindowBase>();
     }
+    private void EnableOldLoadoutUI()
+    {
+        if (OldLoadoutUI == null) OldLoadoutUI = Instantiate(AssetManager.OldLoadoutUIPrefab, InterStageUICanvas.transform);
+        else OldLoadoutUI.SetActive(true);
+        ActiveWindow = "OldLoadout";
+        ActiveUIWindow = OldLoadoutUI.GetComponent<UIWindowBase>();
+    }
 
     public void DisableLoadoutUI()
     {
         if (LoadoutUI == null) return;
         // else Destroy(LoadoutUI);
         else LoadoutUI.SetActive(false);
+        ActiveWindow = null;
+        ActiveUIWindow = null;
+    }
+
+		public void DisableOldLoadoutUI()
+    {
+        if (OldLoadoutUI == null) return;
+        // else Destroy(LoadoutUI);
+        else OldLoadoutUI.SetActive(false);
         ActiveWindow = null;
         ActiveUIWindow = null;
     }

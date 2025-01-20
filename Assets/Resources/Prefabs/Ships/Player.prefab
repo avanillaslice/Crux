@@ -475,6 +475,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AttPoint 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7804016732810071630, guid: 3d7799b06f6e13d41a9d08b54a6e6751, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

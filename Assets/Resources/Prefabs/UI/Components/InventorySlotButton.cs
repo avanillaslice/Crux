@@ -17,6 +17,11 @@ public class InventorySlotButton : MonoBehaviour
     public void SetWeapon(GameObject weaponPrefab)
     {
         WeaponPrefab = weaponPrefab;
+				if (WeaponPrefab == null) {
+					WeaponName.text = "Empty";
+					IsEmpty = false;
+					return;
+				}
         WeaponName.text = WeaponPrefab.GetComponent<WeaponBase>().WeaponName;
         SlotType = WeaponPrefab.GetComponent<WeaponBase>().SlotType;
         IsEmpty = false;
