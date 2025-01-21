@@ -44,6 +44,8 @@ public static class AssetManager
     // UI COMPONENTS
     public static GameObject WeaponNodePrefab { get; private set; }
     public static GameObject WeaponNodeSelectorPrefab { get; private set; }
+    public static GameObject WeaponNodeSelectorListPrefab { get; private set; }
+    public static GameObject WeaponNodeSelectorListCellPrefab { get; private set; }
 
     // SETTINGS
     private static List<string> WeaponPrefabsToLoad = new List<string> { "Cannon", "CannonSmall", "MissileLauncher", "HomingMissileLauncher", "ElectroShield", "ElectroShieldEffect", "DroneShield", "DroneShieldEffect", "TurretSmall" };
@@ -108,22 +110,26 @@ public static class AssetManager
         ShipSelectionUIPrefab = Resources.Load<GameObject>("Prefabs/UI/ShipSelectionUI");
         PickupMessagePrefab = Resources.Load<GameObject>("Prefabs/UI/PickupMessage");
         SpecialWeaponUnlockedPrefab = Resources.Load<GameObject>("Prefabs/UI/SpecialWeaponUnlocked");
-        WeaponNodeSelectorPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelector");
-        WeaponNodePrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNode");
         PauseMenuPrefab = Resources.Load<GameObject>("Prefabs/UI/PauseMenu");
         InterStageUIPrefab = Resources.Load<GameObject>("Prefabs/UI/InterStageUI");
-        LoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/LoadoutUI");
         OldLoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/OldLoadoutUI");
         SkillTreeUIPrefab = Resources.Load<GameObject>("Prefabs/UI/SkillTreeUI");
+        LoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/LoadoutUI");
+        WeaponNodeSelectorPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelector");
+        WeaponNodePrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNode");
+        WeaponNodeSelectorListPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelectorList");
+        WeaponNodeSelectorListCellPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelectorListCell");
         if (ShipSelectionUIPrefab == null) Debug.LogError("Failed to load ShipSelectionUIPrefab!");
         if (PickupMessagePrefab == null) Debug.LogError("Failed to load PickupMessagePrefab!");
         if (SpecialWeaponUnlockedPrefab == null) Debug.LogError("Failed to load SpecialWeaponUnlockedPrefab!");
-        if (WeaponNodeSelectorPrefab == null) Debug.LogError("Failed to load WeaponNodeSelectorPrefab!");
-        if (WeaponNodePrefab == null) Debug.LogError("Failed to load WeaponNodePrefab!");
         if (PauseMenuPrefab == null) Debug.LogError("Failed to load PauseMenuPrefab!");
-        if (LoadoutUIPrefab == null) Debug.LogError("Failed to load LoadoutUIPrefab!");
         if (OldLoadoutUIPrefab == null) Debug.LogError("Failed to load OldLoadoutUIPrefab!");
         if (SkillTreeUIPrefab == null) Debug.LogError("Failed to load SkillTreeUIPrefab!");
+        if (LoadoutUIPrefab == null) Debug.LogError("Failed to load LoadoutUIPrefab!");
+        if (WeaponNodeSelectorPrefab == null) Debug.LogError("Failed to load WeaponNodeSelectorPrefab!");
+        if (WeaponNodePrefab == null) Debug.LogError("Failed to load WeaponNodePrefab!");
+        if (WeaponNodeSelectorListPrefab == null) Debug.LogError("Failed to load WeaponNodeSelectorListPrefab!");
+        if (WeaponNodeSelectorListCellPrefab == null) Debug.LogError("Failed to load WeaponNodeSelectorListCellPrefab!");
     }
 
     private static void CacheAudioAssets()

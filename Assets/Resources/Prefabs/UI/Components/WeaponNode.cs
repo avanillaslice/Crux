@@ -16,7 +16,7 @@ public class WeaponNode : MonoBehaviour
 	[HideInInspector] public bool IsHoverState;
 	private SpriteRenderer ColorComponent;
 	private Color DefaultColor;
-	private List<WeaponNode> RelatedWeaponNodes = new List<WeaponNode>();
+	private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
 	private AttachPoint AttachPoint;
 	private WeaponSlot WeaponSlot;
 
@@ -54,14 +54,14 @@ public class WeaponNode : MonoBehaviour
 		if (AttachPoint == null) Debug.LogWarning("AttachPoint not set on Node");
 
 		WeaponNodeSelector = weaponNodeSelector;
-		WeaponNodeSelector.UpdateWeaponDetails(AttachPoint, WeaponSlot);
+		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot);
 	}
 
 	public void SetRelatedNodes(List<WeaponNode> weaponNodes)
 	{
 		foreach (WeaponNode weaponNode in weaponNodes)
 		{
-			if (weaponNode != this) RelatedWeaponNodes.Add(weaponNode);
+			if (weaponNode != this) LinkedWeaponNodes.Add(weaponNode);
 		}
 	}
 
@@ -87,7 +87,7 @@ public class WeaponNode : MonoBehaviour
 			SetColorState(ColorState.Selected);
 			IsSelected = true;
 
-			foreach (WeaponNode weaponNode in RelatedWeaponNodes)
+			foreach (WeaponNode weaponNode in LinkedWeaponNodes)
 			{
 				weaponNode.SetColorState(ColorState.Selected);
 			}
@@ -103,7 +103,7 @@ public class WeaponNode : MonoBehaviour
 			SetColorState(ColorState.Default); ;
 			IsSelected = false;
 
-			foreach (WeaponNode weaponNode in RelatedWeaponNodes)
+			foreach (WeaponNode weaponNode in LinkedWeaponNodes)
 			{
 				weaponNode.SetColorState(ColorState.Default);
 			}

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,26 +7,30 @@ public class WeaponNodeSelector : MonoBehaviour
 {
 	// Inspector
 	public GameObject WeaponList;
-	public Image WeaponIcon;
+	public Image WeaponTypeIcon; // To left of selector
 	public TextMeshProUGUI WeaponName;
 	public TextMeshProUGUI WeaponType;
 	public GameObject HoverStateComponent; // Contains Light/Medium/Heavy
 
 	// Data
+	private WeaponNodeSelectorList WeaponListComponent;
 	private bool ListIsActive = false;
+	private List<WeaponBase> AvailableWeapons = new List<WeaponBase>();
+	private SlotType SlotType;
 
 	void Awake()
 	{
 		// Disable Hover and Selected components
 		// HoverStateComponent.SetActive(false);
+		WeaponListComponent = WeaponList.GetComponent<WeaponNodeSelectorList>();
 	}
 
-	public void UpdateWeaponDetails(AttachPoint attachPoint, WeaponSlot weaponSlot)
+	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot)
 	{
 		WeaponBase assignedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
-		// ! REQUIRES UI ELEMENT
-		// WeaponIcon = assignedWeapon.WeaponIcon;
-		WeaponName.text = assignedWeapon.WeaponName;
+		SlotType = assignedWeapon.SlotType;
+		AvailableWeapons = LoadoutUI.Inst.AvailableWeapons[SlotType];
+		WeaponListComponent.Init(assignedWeapon, AvailableWeapons);
 		// SetWeaponType(weaponSlot.Type);
 	}
 
@@ -78,9 +83,11 @@ public class WeaponNodeSelector : MonoBehaviour
 	{
 		// which will do things
 	}
+
 	private void ActivateList()
 	{
 		WeaponList.SetActive(true); // OnEnable animation
+		WeaponListComponent.ActivateList(AvailableWeapons);
 	}
 
 	private void DeactivateList()

@@ -21,30 +21,41 @@ public class LoadoutUI : UIWindowBase
 
 	private WeaponNode WeaponSlotCursor;
 
-	public List<WeaponBase> LightWeapons;
-	public List<WeaponBase> MediumWeapons;
-	public List<WeaponBase> HeavyWeapons;
+	public Dictionary<SlotType, List<WeaponBase>> AvailableWeapons { get; private set; }
 
 	void Awake()
 	{
 		Debug.Log("LOADOUT UI AWAKE");
 		if (Inst != null && Inst != this)
-        {
-            Debug.Log("Loadout already exists");
-            Destroy(gameObject);
-            return;  // Ensure no further code execution in this instance
-        }
-        Inst = this;
+		{
+			Debug.Log("Loadout already exists");
+			Destroy(gameObject);
+			return;  // Ensure no further code execution in this instance
+		}
+		Inst = this;
+		InitializeAvailableWeapons();
 	}
 
-	void OnEnable() {
+	private void InitializeAvailableWeapons()
+	{
+		AvailableWeapons = new Dictionary<SlotType, List<WeaponBase>>
+		{
+			{ SlotType.Single, new List<WeaponBase>() },
+			{ SlotType.Dual, new List<WeaponBase>() },
+			{ SlotType.System, new List<WeaponBase>() }
+		};
+	}
+
+	void OnEnable()
+	{
 		PlayerManager.Inst.ActivePlayerShip.transform.localScale += new Vector3(1f, 1f, 1f);
 		UpdateAvailableWeapons();
 		InitialiseLoadoutUI();
 		// SetInitialCursor();
 	}
 
-	void OnDisable() {
+	void OnDisable()
+	{
 		PlayerManager.Inst.ActivePlayerShip.transform.localScale -= new Vector3(1f, 1f, 1f);
 		foreach (Transform child in WeaponUIContainer.transform)
 		{
@@ -64,7 +75,6 @@ public class LoadoutUI : UIWindowBase
 			return;
 		}
 		InitialiseWeaponNodeSelectors();
-		UpdateAvailableWeapons();
 	}
 
 	// Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
@@ -103,7 +113,7 @@ public class LoadoutUI : UIWindowBase
 		// WeaponNodes.Sort((a, b) => b.YPos.CompareTo(a.YPos));
 		WeaponNodeGroups.Sort((listA, listB) => listB[0].YPos.CompareTo(listA[0].YPos));
 		Debug.Log("WeaponSlotNodes Instantated:");
-		foreach(List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
+		foreach (List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
 	}
 
 	private void InitialiseWeaponNodeSelectors()
@@ -182,34 +192,42 @@ public class LoadoutUI : UIWindowBase
 			{
 				Debug.Log("Placing Node: " + nodeCounter + " X: " + weaponNode.XPos + " Y: " + weaponNode.YPos + " Side: " + weaponNode.Side);
 
-				switch (weaponNode.Side) {
-					case RelativeSide.Right: {
-						Debug.Log("ON THE RIGHT");
-						Debug.Log("Fetching WeaponNodeSelector: " + nodeGroupCounter);
-						weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
-						break;
-					}
-					case RelativeSide.Left: {
-						Debug.Log("ON THE LEFT");
-						Debug.Log("Fetching WeaponNodeSelector: " + (WeaponNodeGroups.Count - nodeGroupCounter));
-						weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodeGroups.Count - nodeGroupCounter]);
-						break;
-					}
-					case RelativeSide.Center: {
-						Debug.Log("CENTERED");
-						if (nodeGroupCounter == 0) {
-							Debug.Log("FIRSTWEAPONNODE IS CENTERED");
-							WeaponNodes[0].AssignSelector(WeaponNodeSelectors[0]);
-						} else {
-							Debug.Log("SETTING RearAsymmetricalWeaponNode FOR LATER");
-							RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
+				switch (weaponNode.Side)
+				{
+					case RelativeSide.Right:
+						{
+							Debug.Log("ON THE RIGHT");
+							Debug.Log("Fetching WeaponNodeSelector: " + nodeGroupCounter);
+							weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
+							break;
 						}
-						break;
-					}
-					default: {
-						Debug.LogWarning("Unexpected Side value: " + weaponNode.Side);
-						break;
-					}
+					case RelativeSide.Left:
+						{
+							Debug.Log("ON THE LEFT");
+							Debug.Log("Fetching WeaponNodeSelector: " + (WeaponNodeGroups.Count - nodeGroupCounter));
+							weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodeGroups.Count - nodeGroupCounter]);
+							break;
+						}
+					case RelativeSide.Center:
+						{
+							Debug.Log("CENTERED");
+							if (nodeGroupCounter == 0)
+							{
+								Debug.Log("FIRSTWEAPONNODE IS CENTERED");
+								WeaponNodes[0].AssignSelector(WeaponNodeSelectors[0]);
+							}
+							else
+							{
+								Debug.Log("SETTING RearAsymmetricalWeaponNode FOR LATER");
+								RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
+							}
+							break;
+						}
+					default:
+						{
+							Debug.LogWarning("Unexpected Side value: " + weaponNode.Side);
+							break;
+						}
 				}
 				nodeCounter++;
 			}
@@ -217,14 +235,12 @@ public class LoadoutUI : UIWindowBase
 		}
 	}
 
-	private void UpdateAvailableWeapons() {
-		// LoadoutManager should return a pre sorted loadout package
-		List<GameObject> ActiveLoadout = LoadoutManager.GetInventory();
-
-		// So we dont have to do this....
-	    // LightWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Light);
-	    // MediumWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Medium);
-	    // HeavyWeapons = LoadoutManager.FetchWeapons(WeaponSlotType.Heavy);
+	private void UpdateAvailableWeapons()
+	{
+		// Update the dictionary with the new lists
+		AvailableWeapons[SlotType.Single] = LoadoutManager.GetInventoryByType(SlotType.Single);
+		AvailableWeapons[SlotType.Dual] = LoadoutManager.GetInventoryByType(SlotType.Dual);
+		AvailableWeapons[SlotType.System] = LoadoutManager.GetInventoryByType(SlotType.System);
 	}
 
 	Vector3 CalculateLocalPosition(float angleDegrees)
@@ -270,12 +286,13 @@ public class LoadoutUI : UIWindowBase
 		else HandleExit();
 	}
 
-	public override void HandleExit() {
+	public override void HandleExit()
+	{
 		// Animation stuff goes here
 
 		// This should probably use UIManager.Inst.HandleExit()
-        UIManager.Inst.DisableLoadoutUI();
-        UIManager.Inst.EnableInterStageUI();
+		UIManager.Inst.DisableLoadoutUI();
+		UIManager.Inst.EnableInterStageUI();
 	}
 
 	public override void HandleMoveLeft()
@@ -326,11 +343,13 @@ public class LoadoutUI : UIWindowBase
 		}
 	}
 
-	private WeaponNode DetermineAppropriateHoizontalNode(bool up) {
+	private WeaponNode DetermineAppropriateHoizontalNode(bool up)
+	{
 		return new WeaponNode();
 	}
 
-	private WeaponNode DetermineAppropriateVerticalNode(bool left) {
+	private WeaponNode DetermineAppropriateVerticalNode(bool left)
+	{
 		return new WeaponNode();
 	}
 }
