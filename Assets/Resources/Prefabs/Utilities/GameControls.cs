@@ -31,7 +31,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""name"": ""Pause"",
                     ""type"": ""Button"",
                     ""id"": ""cbc24e14-62d4-485b-838b-f7f6de453bde"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -110,7 +110,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""name"": ""MoveUp"",
                     ""type"": ""Button"",
                     ""id"": ""e0616576-8bd3-480c-a37c-647d15153a8a"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -146,7 +146,16 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""name"": ""Select"",
                     ""type"": ""Button"",
                     ""id"": ""b9bbd629-17c6-4232-b923-e041d18f7d67"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Back"",
+                    ""type"": ""Button"",
+                    ""id"": ""7a231384-952f-4e42-a672-88b5aed173c7"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -251,6 +260,17 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
                     ""action"": ""Select"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""79c41e84-2add-47d7-af8f-967f659947e3"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Back"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -269,6 +289,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
         m_MenuNavigation_MoveLeft = m_MenuNavigation.FindAction("MoveLeft", throwIfNotFound: true);
         m_MenuNavigation_MoveRight = m_MenuNavigation.FindAction("MoveRight", throwIfNotFound: true);
         m_MenuNavigation_Select = m_MenuNavigation.FindAction("Select", throwIfNotFound: true);
+        m_MenuNavigation_Back = m_MenuNavigation.FindAction("Back", throwIfNotFound: true);
     }
 
     ~@GameControls()
@@ -403,6 +424,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_MenuNavigation_MoveLeft;
     private readonly InputAction m_MenuNavigation_MoveRight;
     private readonly InputAction m_MenuNavigation_Select;
+    private readonly InputAction m_MenuNavigation_Back;
     public struct MenuNavigationActions
     {
         private @GameControls m_Wrapper;
@@ -412,6 +434,7 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
         public InputAction @MoveLeft => m_Wrapper.m_MenuNavigation_MoveLeft;
         public InputAction @MoveRight => m_Wrapper.m_MenuNavigation_MoveRight;
         public InputAction @Select => m_Wrapper.m_MenuNavigation_Select;
+        public InputAction @Back => m_Wrapper.m_MenuNavigation_Back;
         public InputActionMap Get() { return m_Wrapper.m_MenuNavigation; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -436,6 +459,9 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
             @Select.started += instance.OnSelect;
             @Select.performed += instance.OnSelect;
             @Select.canceled += instance.OnSelect;
+            @Back.started += instance.OnBack;
+            @Back.performed += instance.OnBack;
+            @Back.canceled += instance.OnBack;
         }
 
         private void UnregisterCallbacks(IMenuNavigationActions instance)
@@ -455,6 +481,9 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
             @Select.started -= instance.OnSelect;
             @Select.performed -= instance.OnSelect;
             @Select.canceled -= instance.OnSelect;
+            @Back.started -= instance.OnBack;
+            @Back.performed -= instance.OnBack;
+            @Back.canceled -= instance.OnBack;
         }
 
         public void RemoveCallbacks(IMenuNavigationActions instance)
@@ -485,5 +514,6 @@ public partial class @GameControls: IInputActionCollection2, IDisposable
         void OnMoveLeft(InputAction.CallbackContext context);
         void OnMoveRight(InputAction.CallbackContext context);
         void OnSelect(InputAction.CallbackContext context);
+        void OnBack(InputAction.CallbackContext context);
     }
 }

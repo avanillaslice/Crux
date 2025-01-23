@@ -1,60 +1,52 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class WeaponNodeSelector : MonoBehaviour
 {
 	// Inspector
-	public GameObject WeaponList;
-	public Image WeaponTypeIcon; // To left of selector
-	public TextMeshProUGUI WeaponName;
-	public TextMeshProUGUI WeaponType;
-	public GameObject HoverStateComponent; // Contains Light/Medium/Heavy
+	public WeaponNodeSelectorList List;
+	public SpriteRenderer SlotTypeIcon; // To left of selector
+	public TextMeshProUGUI SlotTypeText;
+	// public GameObject HoverStateComponent; // Contains Light/Medium/Heavy
 
 	// Data
-	private WeaponNodeSelectorList WeaponListComponent;
-	private bool ListIsActive = false;
-	private List<WeaponBase> AvailableWeapons = new List<WeaponBase>();
 	private SlotType SlotType;
 
 	void Awake()
 	{
 		// Disable Hover and Selected components
 		// HoverStateComponent.SetActive(false);
-		WeaponListComponent = WeaponList.GetComponent<WeaponNodeSelectorList>();
 	}
 
 	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot)
 	{
 		WeaponBase assignedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
 		SlotType = assignedWeapon.SlotType;
-		AvailableWeapons = LoadoutUI.Inst.AvailableWeapons[SlotType];
-		WeaponListComponent.Init(assignedWeapon, AvailableWeapons);
-		// SetWeaponType(weaponSlot.Type);
+		List.Init(assignedWeapon, LoadoutUI.Inst.AvailableWeapons[SlotType]);
+		SetWeaponType(weaponSlot.Type);
 	}
 
 	// Probably needs to be WeaponSlotType and not WeaponType
-	private void SetWeaponType(SlotType weaponType)
+	private void SetWeaponType(SlotType slotType)
 	{
-		switch (weaponType)
+		switch (slotType)
 		{
 			case global::SlotType.Single:
 				{
-					WeaponType.text = "Single";
+					SlotTypeText.text = "Single";
 					// Set Color
 					break;
 				}
 				;
 			case global::SlotType.Dual:
 				{
-					WeaponType.text = "Dual";
+					SlotTypeText.text = "Dual";
 					// Set Color
 					break;
 				}
 			case global::SlotType.System:
 				{
-					WeaponType.text = "System";
+					SlotTypeText.text = "System";
 					// Set Color
 					break;
 				}
@@ -62,48 +54,52 @@ public class WeaponNodeSelector : MonoBehaviour
 		}
 	}
 
-	public void ScrollUp() {}
+	public void ScrollUp() {
+		List.ScrollUp();
+	}
 
-	public void ScrollDown() {}
+	public void ScrollDown() {
+		List.ScrollDown();
+	}
 
 	public void HandleSelect()
 	{
-		if (WeaponList.activeSelf) {
+		if (List.State == WeaponNodeSelectorList.ListState.Active) {
 			SelectWeapon();
 			DeactivateList();
 		}
 		else ActivateList();
 	}
 
+	public void HandleDeselect()
+	{
+		if (List.State != WeaponNodeSelectorList.ListState.Active) return;
+		DeactivateList();
+	}
+
 	private void SelectWeapon() {
 
 	}
 
-	public void HandleDeselect()
-	{
-		// which will do things
-	}
-
 	private void ActivateList()
 	{
-		WeaponList.SetActive(true); // OnEnable animation
-		WeaponListComponent.ActivateList(AvailableWeapons);
+		List.ActivateList(); // OnEnable animation?
 	}
 
 	private void DeactivateList()
 	{
-		WeaponList.SetActive(false); // OnDisable animation
+		List.DeactivateList(); // OnDisable animation
 	}
 
 	public void EnableHoverState()
 	{
 		// Enables SlotTypeUIComponent
-		HoverStateComponent.SetActive(true);
+		// HoverStateComponent.SetActive(true);
 	}
 	public void DisableHoverState()
 	{
 		// Disables SlotTypeUIComponent
-		HoverStateComponent.SetActive(false);
+		// HoverStateComponent.SetActive(false);
 	}
 
 }

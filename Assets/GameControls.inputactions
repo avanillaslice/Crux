@@ -9,7 +9,7 @@
                     "name": "Pause",
                     "type": "Button",
                     "id": "cbc24e14-62d4-485b-838b-f7f6de453bde",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -88,7 +88,7 @@
                     "name": "MoveUp",
                     "type": "Button",
                     "id": "e0616576-8bd3-480c-a37c-647d15153a8a",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -124,7 +124,16 @@
                     "name": "Select",
                     "type": "Button",
                     "id": "b9bbd629-17c6-4232-b923-e041d18f7d67",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "7a231384-952f-4e42-a672-88b5aed173c7",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -227,6 +236,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "79c41e84-2add-47d7-af8f-967f659947e3",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

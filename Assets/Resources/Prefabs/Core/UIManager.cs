@@ -232,6 +232,12 @@ public class UIManager : MonoBehaviour
         // }
     }
 
+    public void HandleBack()
+    {
+        Debug.Log("UIMANAGER HANDLEBACK");
+        ActiveUIWindow.HandleBack();
+    }
+
     public void EnablePauseMenu()
     {
         if (PauseMenuUI == null) PauseMenuUI = Instantiate(AssetManager.PauseMenuPrefab, GameplayOverlayCanvas.transform);

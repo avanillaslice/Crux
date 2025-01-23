@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class LoadoutUI : UIWindowBase
 {
@@ -9,17 +7,16 @@ public class LoadoutUI : UIWindowBase
 
 	// Inspector
 	public GameObject WeaponUIContainer;
-	public GameObject InitialWeaponSlotCursor;
 
 	// Data
-	private float WeaponNodeSelectorDistance = 2.5f;
+	private float WeaponNodeSelectorDistance = 3f;
 	private bool FirstWeaponNodeIsCentered = true;
 	private List<WeaponNode> WeaponNodes = new List<WeaponNode>();
 	private List<WeaponNodeSelector> WeaponNodeSelectors = new List<WeaponNodeSelector>();
 	private List<List<WeaponNode>> WeaponNodeGroups = new List<List<WeaponNode>>();
 	private List<GameObject> ActiveLoadout;
 
-	private WeaponNode WeaponSlotCursor;
+	public WeaponNode WeaponNodeCursor;
 
 	public Dictionary<SlotType, List<WeaponBase>> AvailableWeapons { get; private set; }
 
@@ -51,7 +48,7 @@ public class LoadoutUI : UIWindowBase
 		PlayerManager.Inst.ActivePlayerShip.transform.localScale += new Vector3(1f, 1f, 1f);
 		UpdateAvailableWeapons();
 		InitialiseLoadoutUI();
-		// SetInitialCursor();
+		SetCursor(WeaponNodes[0]);
 	}
 
 	void OnDisable()
@@ -74,7 +71,8 @@ public class LoadoutUI : UIWindowBase
 			Debug.LogError("NO NODES FOUND");
 			return;
 		}
-		InitialiseWeaponNodeSelectors();
+		InstantiateWeaponNodeSelectors();
+		LinkNodesToSelectors();
 	}
 
 	// Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
@@ -112,15 +110,88 @@ public class LoadoutUI : UIWindowBase
 		// Does this mean I dont need to for WeaponNodeGroups?
 		// WeaponNodes.Sort((a, b) => b.YPos.CompareTo(a.YPos));
 		WeaponNodeGroups.Sort((listA, listB) => listB[0].YPos.CompareTo(listA[0].YPos));
-		Debug.Log("WeaponSlotNodes Instantated:");
-		foreach (List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
+		// foreach (List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
+		Debug.Log("WeaponNodes Instantated!");
 	}
 
-	private void InitialiseWeaponNodeSelectors()
+	private void InstantiateWeaponNodeSelectors()
 	{
-		List<Vector3> WeaponNodeSelectorPositions = DetermineWeaponNodeSelectorPositions();
-		InstantiateWeaponNodeSelectors(WeaponNodeSelectorPositions);
-		LinkNodesToSelectors();
+		List<Vector3> weaponNodeSelectorPositions = DetermineWeaponNodeSelectorPositions();
+		if (weaponNodeSelectorPositions.Count == 0)
+		{
+			Debug.LogError("No WeaponNodeSelectorPositions have been set");
+			// This should throw error to cease other functions
+			return;
+		}
+
+		foreach (Vector3 weaponNodeSelectorPosition in weaponNodeSelectorPositions)
+		{
+			GameObject WeaponNodeSelector = Instantiate(AssetManager.WeaponNodeSelectorPrefab, weaponNodeSelectorPosition, Quaternion.identity, WeaponUIContainer.transform);
+
+			WeaponNodeSelectors.Add(WeaponNodeSelector.GetComponent<WeaponNodeSelector>());
+		}
+		// Debug.Log("WeaponNodeSelectors Instantiated!");
+	}
+
+	private void LinkNodesToSelectors()
+	{
+		// WeaponNodeGroups and WeaponNodes have been sorted by YPos
+		int nodeCounter = 0;
+		int nodeGroupCounter = 0;
+		WeaponNode RearAsymmetricalWeaponNode;
+		// Debug.Log("Detected " + WeaponNodes.Count + " WeaponNodes");
+		// Debug.Log("Detected " + WeaponNodeSelectors.Count + " WeaponNodeSelectors");
+		while (nodeCounter < WeaponNodes.Count)
+		{
+			foreach (WeaponNode weaponNode in WeaponNodeGroups[nodeGroupCounter])
+			{
+				// Debug.Log("Placing Node: " + nodeCounter + " X: " + weaponNode.XPos + " Y: " + weaponNode.YPos + " Side: " + weaponNode.Side);
+
+				switch (weaponNode.Side)
+				{
+					case RelativeSide.Right:
+						{
+							weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
+							break;
+						}
+					case RelativeSide.Left:
+						{
+							weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodes.Count - nodeGroupCounter]);
+							break;
+						}
+					case RelativeSide.Center:
+						{
+							if (nodeGroupCounter == 0)
+							{
+								WeaponNodes[0].AssignSelector(WeaponNodeSelectors[0]);
+							}
+							else
+							{
+								RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
+							}
+							break;
+						}
+					default:
+						{
+							Debug.LogWarning("Unexpected Side value: " + weaponNode.Side);
+							break;
+						}
+				}
+				nodeCounter++;
+			}
+			nodeGroupCounter++;
+		}
+		// Debug.Log("Nodes and Selectors Linked!");
+	}
+
+	private void UpdateAvailableWeapons()
+	{
+		// Ideally LoadoutManager keeps a persistent list that can be referenced, rather than refreshing logic elsewhere
+		// Update the dictionary with the new lists
+		AvailableWeapons[SlotType.Single] = LoadoutManager.GetInventoryByType(SlotType.Single);
+		AvailableWeapons[SlotType.Dual] = LoadoutManager.GetInventoryByType(SlotType.Dual);
+		AvailableWeapons[SlotType.Dual].AddRange(LoadoutManager.GetInventoryByType(SlotType.Single));
+		AvailableWeapons[SlotType.System] = LoadoutManager.GetInventoryByType(SlotType.System);
 	}
 
 	private List<Vector3> DetermineWeaponNodeSelectorPositions()
@@ -160,97 +231,22 @@ public class LoadoutUI : UIWindowBase
 		return weaponNodeSelectorPositions;
 	}
 
-	private void InstantiateWeaponNodeSelectors(List<Vector3> WeaponNodeSelectorPositions)
+	private Vector3 CalculateLocalPosition(float angleDegrees)
 	{
-		if (WeaponNodeSelectorPositions.Count == 0)
-		{
-			Debug.LogError("No WeaponNodeSelectorPositions have been set");
-			// This should throw error to cease other functions
-			return;
-		}
+		// Calculate distance modifier based on the original angle
+		float normalisedAngle = Mathf.Abs((angleDegrees % 180) - 90);
+		
+		// Use a non-linear function to adjust the distanceModifier
+		float t = normalisedAngle / 90;
+		float distanceModifier = Mathf.SmoothStep(0, 1f, t); // Smoothly transition from 0 to 0.9
 
-		foreach (Vector3 WeaponNodeSelectorPosition in WeaponNodeSelectorPositions)
-		{
-			GameObject WeaponNodeSelector = Instantiate(AssetManager.WeaponNodeSelectorPrefab, WeaponNodeSelectorPosition, Quaternion.identity, WeaponUIContainer.transform);
+		// Apply a 90-degree counterclockwise offset for positioning
+		float adjustedAngle = angleDegrees + 90;
 
-			WeaponNodeSelectors.Add(WeaponNodeSelector.GetComponent<WeaponNodeSelector>());
-		}
-	}
-
-	private void LinkNodesToSelectors()
-	{
-		// WeaponNodeGroups and WeaponNodes have been sorted by YPos
-		int nodeCounter = 0;
-		int nodeGroupCounter = 0;
-		WeaponNode RearAsymmetricalWeaponNode;
-		Debug.Log("Detected " + WeaponNodes.Count + " WeaponNodes");
-		Debug.Log("Detected " + WeaponNodeSelectors.Count + " WeaponNodeSelectors");
-		while (nodeCounter < WeaponNodes.Count)
-		{
-			Debug.Log("Placing Group: " + nodeGroupCounter);
-			foreach (WeaponNode weaponNode in WeaponNodeGroups[nodeGroupCounter])
-			{
-				Debug.Log("Placing Node: " + nodeCounter + " X: " + weaponNode.XPos + " Y: " + weaponNode.YPos + " Side: " + weaponNode.Side);
-
-				switch (weaponNode.Side)
-				{
-					case RelativeSide.Right:
-						{
-							Debug.Log("ON THE RIGHT");
-							Debug.Log("Fetching WeaponNodeSelector: " + nodeGroupCounter);
-							weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
-							break;
-						}
-					case RelativeSide.Left:
-						{
-							Debug.Log("ON THE LEFT");
-							Debug.Log("Fetching WeaponNodeSelector: " + (WeaponNodeGroups.Count - nodeGroupCounter));
-							weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodeGroups.Count - nodeGroupCounter]);
-							break;
-						}
-					case RelativeSide.Center:
-						{
-							Debug.Log("CENTERED");
-							if (nodeGroupCounter == 0)
-							{
-								Debug.Log("FIRSTWEAPONNODE IS CENTERED");
-								WeaponNodes[0].AssignSelector(WeaponNodeSelectors[0]);
-							}
-							else
-							{
-								Debug.Log("SETTING RearAsymmetricalWeaponNode FOR LATER");
-								RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
-							}
-							break;
-						}
-					default:
-						{
-							Debug.LogWarning("Unexpected Side value: " + weaponNode.Side);
-							break;
-						}
-				}
-				nodeCounter++;
-			}
-			nodeGroupCounter++;
-		}
-	}
-
-	private void UpdateAvailableWeapons()
-	{
-		// Update the dictionary with the new lists
-		AvailableWeapons[SlotType.Single] = LoadoutManager.GetInventoryByType(SlotType.Single);
-		AvailableWeapons[SlotType.Dual] = LoadoutManager.GetInventoryByType(SlotType.Dual);
-		AvailableWeapons[SlotType.System] = LoadoutManager.GetInventoryByType(SlotType.System);
-	}
-
-	Vector3 CalculateLocalPosition(float angleDegrees)
-	{
-		// Convert angle to radians
-		float angleRadians = (angleDegrees + 90) * Mathf.Deg2Rad;
-
-		// Calculate offsets
-		float offsetX = Mathf.Cos(angleRadians) * WeaponNodeSelectorDistance;
-		float offsetY = Mathf.Sin(angleRadians) * WeaponNodeSelectorDistance;
+		// Calculate offsets using the adjusted angle
+		// Debug.Log("ANGLEDEGREES: " + angleDegrees + " DISTANCE MODIFIER: " + distanceModifier);
+		float offsetX = Mathf.Cos(adjustedAngle * Mathf.Deg2Rad) * (WeaponNodeSelectorDistance * (1f + distanceModifier));
+		float offsetY = Mathf.Sin(adjustedAngle * Mathf.Deg2Rad) * WeaponNodeSelectorDistance;
 
 		// Create the new position vector
 		Vector3 offset = new Vector3(offsetX, offsetY, 0);
@@ -262,27 +258,38 @@ public class LoadoutUI : UIWindowBase
 		return localPosition;
 	}
 
-	private void SetInitialCursor()
+	public void SetCursor(WeaponNode weaponNode)
 	{
-		if (InitialWeaponSlotCursor != null) SetCursor(InitialWeaponSlotCursor.GetComponent<WeaponNode>());
-		else SetCursor(WeaponNodes[0]);
+		WeaponNodeCursor?.DisableHover();
+		WeaponNodeCursor = weaponNode;
+		WeaponNodeCursor.EnableHover();
 	}
 
-	private void SetCursor(WeaponNode weaponNode)
-	{
-		WeaponSlotCursor?.DisableHoverState();
-		WeaponSlotCursor = weaponNode;
-		WeaponSlotCursor.EnableHoverState();
+	public void HandlePointerEnterOnNode(WeaponNode weaponNode) {
+		if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+		SetCursor(weaponNode);
+	}
+
+	public void HandlePointerExitOnNode(WeaponNode weaponNode) {
+		if (WeaponNodeCursor != weaponNode || WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+		WeaponNodeCursor.DisableHover();
+	}
+
+	public void HandlePointerClickOnNode(WeaponNode weaponNode) {
+		if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+		if (WeaponNodeCursor != weaponNode) SetCursor(weaponNode);
+		WeaponNodeCursor.HandleSelect();
 	}
 
 	public override void HandleSelect()
 	{
-		WeaponSlotCursor?.HandleSelect();
+		WeaponNodeCursor?.HandleSelect();
 	}
 
 	public override void HandleBack()
 	{
-		if (WeaponSlotCursor.IsSelected) WeaponSlotCursor.HandleDeselect();
+		Debug.Log("LOUDOUT HANDLE BACK");
+		if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) WeaponNodeCursor.HandleDeselect();
 		else HandleExit();
 	}
 
@@ -297,9 +304,9 @@ public class LoadoutUI : UIWindowBase
 
 	public override void HandleMoveLeft()
 	{
-		if (!WeaponSlotCursor.IsSelected)
+		if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 		{
-			WeaponNode leftWeaponNode = DetermineAppropriateHoizontalNode(true);
+			WeaponNode leftWeaponNode = DetermineAppropriateHorizontalNode(true);
 			if (leftWeaponNode == null) return;
 			SetCursor(leftWeaponNode);
 		}
@@ -307,9 +314,9 @@ public class LoadoutUI : UIWindowBase
 
 	public override void HandleMoveRight()
 	{
-		if (!WeaponSlotCursor.IsSelected)
+		if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 		{
-			WeaponNode rightWeaponNode = DetermineAppropriateHoizontalNode(false);
+			WeaponNode rightWeaponNode = DetermineAppropriateHorizontalNode(true);
 			if (rightWeaponNode == null) return;
 			SetCursor(rightWeaponNode);
 		}
@@ -317,7 +324,7 @@ public class LoadoutUI : UIWindowBase
 
 	public override void HandleMoveUp()
 	{
-		if (!WeaponSlotCursor.IsSelected)
+		if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 		{
 			WeaponNode aboveWeaponNode = DetermineAppropriateVerticalNode(true);
 			if (aboveWeaponNode == null) return;
@@ -325,13 +332,13 @@ public class LoadoutUI : UIWindowBase
 		}
 		else
 		{
-			WeaponSlotCursor.WeaponNodeSelector.ScrollUp();
+			WeaponNodeCursor.WeaponNodeSelector.ScrollUp();
 		}
 	}
 
 	public override void HandleMoveDown()
 	{
-		if (!WeaponSlotCursor.IsSelected)
+		if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 		{
 			WeaponNode belowWeaponNode = DetermineAppropriateVerticalNode(false);
 			if (belowWeaponNode == null) return;
@@ -339,17 +346,47 @@ public class LoadoutUI : UIWindowBase
 		}
 		else
 		{
-			WeaponSlotCursor.WeaponNodeSelector.ScrollDown();
+			WeaponNodeCursor.WeaponNodeSelector.ScrollDown();
 		}
 	}
 
-	private WeaponNode DetermineAppropriateHoizontalNode(bool up)
+	public WeaponNode DetermineAppropriateHorizontalNode(bool right)
 	{
-		return new WeaponNode();
+		if (WeaponNodeCursor.YPos == 0) {
+			foreach (WeaponNode node in WeaponNodes)
+			{
+				if (node.YPos == 0 && ((right && node.XPos > WeaponNodeCursor.XPos) || (!right && node.XPos < WeaponNodeCursor.XPos))) return node;
+			}
+		}
+		int currentIndex = WeaponNodes.IndexOf(WeaponNodeCursor);
+		if (WeaponNodeCursor.YPos < 0 && currentIndex + 1 < WeaponNodes.Count)
+		{
+			return WeaponNodes[currentIndex + 1];
+		}
+		else if (WeaponNodeCursor.YPos > 0 && currentIndex - 1 >= 0)
+		{
+			return WeaponNodes[currentIndex - 1];
+		}
+		return WeaponNodes[0];
 	}
 
-	private WeaponNode DetermineAppropriateVerticalNode(bool left)
+	public WeaponNode DetermineAppropriateVerticalNode(bool up)
 	{
-		return new WeaponNode();
+		if (WeaponNodeCursor.XPos == 0) {
+			foreach (WeaponNode node in WeaponNodes)
+			{
+				if (node.XPos == 0 && ((up && node.YPos > WeaponNodeCursor.YPos) || (!up && node.YPos < WeaponNodeCursor.YPos))) return node;
+			}
+		}
+		int currentIndex = WeaponNodes.IndexOf(WeaponNodeCursor);
+		if (WeaponNodeCursor.XPos < 0 && currentIndex + 1 < WeaponNodes.Count)
+		{
+			return WeaponNodes[currentIndex + 1];
+		}
+		else if (WeaponNodeCursor.XPos > 0 && currentIndex - 1 >= 0)
+		{
+			return WeaponNodes[currentIndex - 1];
+		}
+		return WeaponNodes[0];
 	}
 }

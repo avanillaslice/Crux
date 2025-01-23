@@ -28,6 +28,7 @@ public class GameInputHandler : MonoBehaviour
         controls.MenuNavigation.MoveLeft.performed += ctx => MoveLeft();
         controls.MenuNavigation.MoveRight.performed += ctx => MoveRight();
         controls.MenuNavigation.Select.performed += ctx => Select();
+        controls.MenuNavigation.Back.performed += ctx => Back();
     }
 
     public void EnableGameplayControls()
@@ -106,5 +107,10 @@ public class GameInputHandler : MonoBehaviour
     private void Select()
     {
         UIManager.Inst.HandleSelect();
+    }
+
+    private void Back()
+    {
+        UIManager.Inst.HandleBack();
     }
 }

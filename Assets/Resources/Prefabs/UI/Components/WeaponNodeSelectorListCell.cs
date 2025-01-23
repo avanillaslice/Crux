@@ -1,77 +1,91 @@
 using TMPro;
 using UnityEngine;
+using System.Collections;
 
 public class WeaponNodeSelectorListCell : MonoBehaviour
 {
-	// Types
-	public enum CellState
-	{
-		Default,
-		Hover,
-		Active,
-	}
-
 	// Inspector
 	public SpriteRenderer IconComponent;
 	public TextMeshProUGUI Name;
+	public TextMeshProUGUI ListIndexText;
 	public TextMeshProUGUI Description;
 
 	// Data
+	public int ListPosition;
 	public int WeaponListIndex;
-	private CellState State = CellState.Default;
 
-	public void SetData(int index, string name, string description, Sprite icon)
+	public void Init(WeaponNodeSelectorList.PosData posData)
 	{
-		Name.text = name;
-		Description.text = description;
-		IconComponent.sprite = icon;
+		gameObject.transform.localScale = new Vector3(posData.Scale, posData.Scale, gameObject.transform.localScale.z); // Set scale to 75%
+		SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
+		foreach (SpriteRenderer renderer in spriteRenderers)
+		{
+			Color color = renderer.color;
+			color.a = posData.Opacity; // Set opacity to 50%
+			renderer.color = color;
+		}
+		Name.alpha = posData.Opacity;
+		Debug.Log(ListIndexText.text);
+		if (ListIndexText.text == "abc") ListIndexText.text = posData.Position.ToString();
+
+		ListPosition = posData.Position;
+		if (ListPosition == 1) EnableHover();
+		else DisableHover();
+	}
+
+	public void SetData(int index, string name, string description, Sprite icon) {
 		WeaponListIndex = index;
+		Name.text = name;
+		// Description.text = description;
+		// IconComponent.sprite = icon;
 	}
 
-	public void SetState(CellState state)
+	public void Scroll(WeaponNodeSelectorList.PosData posData)
 	{
-		if (state == State) return;
-
-		switch (state)
-		{
-			case CellState.Default: TransitionToDefault(); break;
-			case CellState.Hover: TransitionToHover(); break;
-			case CellState.Active: TransitionToActive(); break;
-		}
+		if (ListPosition == 1) DisableHover();
+		StartCoroutine(TransitionToPosition(posData));
 	}
 
-	private void TransitionToDefault()
+	private IEnumerator TransitionToPosition(WeaponNodeSelectorList.PosData posData)
 	{
-		if (State == CellState.Active) DisableActive();
-		DisableHover();
-	}
+	    float duration = 0.5f; // Duration of the transition
+	    float elapsedTime = 0f;
 
-	private void TransitionToActive()
-	{
-		if (State == CellState.Default)
-		{
-			Debug.LogWarning("Cannot set state to Active when Default");
-			return;
-		}
-		EnableActive();
-	}
+	    SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
+	    float initialOpacity = spriteRenderers[0].color.a;
+	    Vector3 initialScale = gameObject.transform.localScale;
 
-	private void TransitionToHover()
-	{
-		if (State == CellState.Active) DisableActive();
-		else EnableHover();
+		ListPosition = posData.Position;
+		// ListIndexText.text = posData.Position.ToString();
+	    while (elapsedTime < duration)
+	    {
+	        elapsedTime += Time.deltaTime;
+	        float t = elapsedTime / duration;
+
+	        foreach (SpriteRenderer renderer in spriteRenderers)
+	        {
+	            Color color = renderer.color;
+	            color.a = Mathf.Lerp(initialOpacity, posData.Opacity, t);
+	            renderer.color = color;
+	        }
+			Name.alpha = Mathf.Lerp(initialOpacity, posData.Opacity, t);
+
+	        gameObject.transform.localScale = Vector3.Lerp(initialScale, new Vector3(posData.Scale, posData.Scale, initialScale.z), t);
+
+	        yield return null;
+	    }
+		
+		if (ListPosition == 1) EnableHover();
 	}
 
 	// Shifts to Default style
 	private void DisableHover()
 	{
-
 	}
 
 	// Shifts to Hover from Default
 	private void EnableHover()
 	{
-
 	}
 
 	// Shifts to Hover from Active
