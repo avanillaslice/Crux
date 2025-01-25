@@ -28,8 +28,8 @@ public static class GameManager
         MusicManager.Inst.PlayBackgroundMusic();
         await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
         GameInputHandler.Inst.EnableGameplayControls();
-        StageManager.StartStage(0);
-        // HandleStageCompleted();
+        // StageManager.StartStage(0);
+        HandleStageCompleted();
     }
 
     public static void TogglePause()
@@ -99,8 +99,7 @@ public static class GameManager
 
     public static async void HandleStageCompleted()
     {
-        // await PlayerManager.Inst.FlyOutOfScene();
-				PlayerManager.Inst.ActivePlayerShip.SetPosition(new Vector3(0, 0, 10));
+        await PlayerManager.Inst.FlyOutOfScene();
         ItemDropManager.Inst.DestroyAllActiveItemDrops();
         GameInputHandler.Inst.DisableGameplayControls();
         TransitionToInterStage();
@@ -109,6 +108,7 @@ public static class GameManager
 
     public static void TransitionToInterStage()
     {
+				PlayerManager.Inst.ActivePlayerShip.SetPosition(new Vector3(0, 0, 10));
         HUDManager.Inst.DisableHUD();
         UIManager.Inst.EnableInterStageUI();
         GameInputHandler.Inst.EnableMenuNavigationControls();

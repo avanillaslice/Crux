@@ -20,6 +20,9 @@ public class WeaponNode : MonoBehaviour
 	private AttachPoint AttachPoint;
 	private WeaponSlot WeaponSlot;
 
+	//Temp
+	int NodeId;
+
 	// Types
 	public enum NodeState
 	{
@@ -34,8 +37,9 @@ public class WeaponNode : MonoBehaviour
 		State = NodeState.Default;
 	}
 
-	public void Init(AttachPoint attachPoint, WeaponSlot weaponSlot)
+	public void Init(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
 	{
+		NodeId = nodeId;
 		WeaponSlot = weaponSlot;
 		AttachPoint = attachPoint;
 		Side = AttachPoint.Side;
@@ -56,7 +60,7 @@ public class WeaponNode : MonoBehaviour
 		if (AttachPoint == null) Debug.LogWarning("AttachPoint not set on Node");
 
 		WeaponNodeSelector = weaponNodeSelector;
-		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot);
+		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, NodeId);
 	}
 
 	public void SetRelatedNodes(List<WeaponNode> weaponNodes)

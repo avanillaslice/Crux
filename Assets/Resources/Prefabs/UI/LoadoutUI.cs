@@ -82,6 +82,7 @@ public class LoadoutUI : UIWindowBase
 		List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.GetActiveWeaponSlots();
 
 		// Sort attachPoints by YPOS (what kind of list do I use for static order?)
+		int i = 0;
 		foreach (WeaponSlot weaponSlot in weaponSlots)
 		{
 			List<WeaponNode> relatedWeaponNodes = new List<WeaponNode>();
@@ -92,11 +93,12 @@ public class LoadoutUI : UIWindowBase
 				// FetchGameObject for transform position
 				Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y, WeaponUIContainer.transform.position.z); // One unit above player
 				WeaponNode weaponNode = Instantiate(AssetManager.WeaponNodePrefab, posAbovePlayer, Quaternion.identity, WeaponUIContainer.transform).GetComponent<WeaponNode>();
-				weaponNode.Init(attachPoint, weaponSlot);
+				weaponNode.Init(attachPoint, weaponSlot, i);
 
 				// Add to group
 				relatedWeaponNodes.Add(weaponNode);
 				WeaponNodes.Add(weaponNode);
+				i++;
 			}
 
 			// Assign related nodes to each group

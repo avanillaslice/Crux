@@ -95,7 +95,7 @@ public abstract class ShipBase : MonoBehaviour
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
-        DroneAnchor.transform.position = position;
+        if (DroneAnchor != null) DroneAnchor.transform.position = position;
         OnSetPosition?.Invoke();
     }
 

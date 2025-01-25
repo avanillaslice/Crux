@@ -18,11 +18,11 @@ public class WeaponNodeSelector : MonoBehaviour
 		// HoverStateComponent.SetActive(false);
 	}
 
-	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot)
+	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
 	{
 		WeaponBase assignedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
 		SlotType = assignedWeapon.SlotType;
-		List.Init(assignedWeapon, LoadoutUI.Inst.AvailableWeapons[SlotType]);
+		List.Init(assignedWeapon, LoadoutUI.Inst.AvailableWeapons[SlotType], nodeId);
 		SetWeaponType(weaponSlot.Type);
 	}
 
