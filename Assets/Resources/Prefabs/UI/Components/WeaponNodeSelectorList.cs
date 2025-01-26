@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 
 public class WeaponNodeSelectorList : MonoBehaviour
@@ -26,14 +25,14 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	// This is to prevent an entry without a position AND avoiding the creation of cells
 	public readonly Dictionary<int, PosData> PosDataDict = new Dictionary<int, PosData>
 	{
-		{ 0, new PosData { Position = 0, YPos = 255f, Scale = 145f, Opacity = 0.0f } },	// To swap
+		// { 0, new PosData { Position = 0, YPos = 255f, Scale = 145f, Opacity = 0.0f } },	// To swap
 		{ 1, new PosData { Position = 1, YPos = 170f, Scale = 145f, Opacity = 0.0f } },	// Next top cell
 		{ 2, new PosData { Position = 2, YPos = 85f, Scale = 160f, Opacity = 0.5f } },	// Above cell
 		{ 3, new PosData { Position = 3, YPos = 0f, Scale = 200f, Opacity = 1.0f } },	// Active cell
 		{ 4, new PosData { Position = 4, YPos = -85f, Scale = 160f, Opacity = 0.5f } },	// Below cell
 		{ 5, new PosData { Position = 5, YPos = -170f, Scale = 145f, Opacity = 0.25f } },	// Bottom cell
 		{ 6, new PosData { Position = 6, YPos = -255f, Scale = 145f, Opacity = 0.0f } },	// Next bottom cell
-		{ 7, new PosData { Position = 7, YPos = -340f, Scale = 145f, Opacity = 0.0f } }	// To swap, initially empty
+		// { 7, new PosData { Position = 7, YPos = -340f, Scale = 145f, Opacity = 0.0f } }	// To swap, initially empty
 	};
 
 	// TEMP
@@ -144,12 +143,16 @@ public class WeaponNodeSelectorList : MonoBehaviour
 		IsScrolling = true;
 
 		// Shift cells up
+		GameObject topCell = Cells[0];
+
 		int i = 0;
 		foreach (GameObject cell in Cells)
 		{
 			WeaponNodeSelectorListCell cellComponent = cell.GetComponent<WeaponNodeSelectorListCell>();
-			Debug.Log("Shifting Cell: " + cellComponent.ListPosition + " " + cellComponent.Name.text + " to position: " + (cellComponent.ListPosition - 1));
-			if (i == 5) cellComponent.OnScrollComplete += HandleScrollComplete;
+			if (cellComponent == topCell.GetComponent<WeaponNodeSelectorListCell>()) continue;
+			if ((cellComponent.ListPosition - 1) < 0) continue;
+			if (i == 4) cellComponent.OnScrollComplete += HandleScrollComplete;
+			// Debug.Log("Shifting Cell: " + cellComponent.ListPosition + " " + cellComponent.Name.text + " to position: " + (cellComponent.ListPosition - 1));
 			cellComponent.Scroll(PosDataDict[cellComponent.ListPosition - 1]);
 			i++;
 		}
@@ -157,10 +160,9 @@ public class WeaponNodeSelectorList : MonoBehaviour
 		// Fetch weaponIndex from last cell, set incremented value on top cell, then move it to last place
 		WeaponNodeSelectorListCell lastCellComponent = Cells[Cells.Count - 1].GetComponent<WeaponNodeSelectorListCell>();
 		int weaponIndex = (lastCellComponent.WeaponListIndex + 1) % AvailableWeapons.Count;
-		GameObject topCell = Cells[0];
+		
 		Cells.RemoveAt(0);
 		Cells.Add(topCell); // Move to last position
-		// topCell.transform.SetSiblingIndex(Cells.Count - 1); // Physically move to last position
 		topCell.GetComponent<WeaponNodeSelectorListCell>().SetData(weaponIndex, AvailableWeapons[weaponIndex].WeaponName, AvailableWeapons[weaponIndex].Description, AvailableWeapons[weaponIndex].WeaponIcon, ListId);
 		topCell.GetComponent<WeaponNodeSelectorListCell>().Init(PosDataDict[6]); // Use the second last position in PosDataDict
 	}
@@ -175,12 +177,16 @@ public class WeaponNodeSelectorList : MonoBehaviour
 		IsScrolling = true;
 
 		// Shift cells down
+		GameObject bottomCell = Cells[Cells.Count - 1];
+
 		int i = 0;
 		foreach (GameObject cell in Cells)
 		{
 			WeaponNodeSelectorListCell cellComponent = cell.GetComponent<WeaponNodeSelectorListCell>();
-			Debug.Log("Shifting Cell: " + cellComponent.ListPosition + " to position: " + (cellComponent.ListPosition + 1));
-			if (i == 5) cellComponent.OnScrollComplete += HandleScrollComplete;
+			if (cellComponent == bottomCell.GetComponent<WeaponNodeSelectorListCell>()) continue;
+			if ((cellComponent.ListPosition + 1) > PosDataDict.Count) continue;
+			// Debug.Log("Shifting Cell: " + cellComponent.ListPosition + " to position: " + (cellComponent.ListPosition + 1));
+			if (i == 4) cellComponent.OnScrollComplete += HandleScrollComplete;
 			cellComponent.Scroll(PosDataDict[cellComponent.ListPosition + 1]);
 			i++;
 		}
@@ -188,12 +194,11 @@ public class WeaponNodeSelectorList : MonoBehaviour
 		// Fetch WeaponListIndex from current bottom cell, move it to the top position
 		WeaponNodeSelectorListCell firstCellComponent = Cells[0].GetComponent<WeaponNodeSelectorListCell>();
 		int weaponIndex = (firstCellComponent.WeaponListIndex - 1 + AvailableWeapons.Count) % AvailableWeapons.Count;
-		GameObject bottomCell = Cells[Cells.Count - 1];
+
 		Cells.RemoveAt(Cells.Count - 1);
 		Cells.Insert(0, bottomCell); // Move to top position
-		// bottomCell.transform.SetSiblingIndex(0); // Physically move to top position
+		bottomCell.GetComponent<WeaponNodeSelectorListCell>().Init(PosDataDict[1]);
 		bottomCell.GetComponent<WeaponNodeSelectorListCell>().SetData(weaponIndex, AvailableWeapons[weaponIndex].WeaponName, AvailableWeapons[weaponIndex].Description, AvailableWeapons[weaponIndex].WeaponIcon, ListId);
-		bottomCell.GetComponent<WeaponNodeSelectorListCell>().Init(PosDataDict[1]); // Use the top position in PosDataDict
 	}
 
 	private void HandleScrollComplete(WeaponNodeSelectorListCell eventCell)
