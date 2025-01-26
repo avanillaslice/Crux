@@ -44,7 +44,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		WeaponListIndex = index;
 		Name.text = name;
 		ListId = listId;
-		Debug.Log($"ListID: {ListId} Cell: {Name.text} ListPosition: {ListPosition}");
+		// Debug.Log($"ListID: {ListId} Cell: {Name.text} ListPosition: {ListPosition}");
 		// Description.text = description;
 		// IconComponent.sprite = icon;
 	}
@@ -57,7 +57,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 	private IEnumerator TransitionToPosition(WeaponNodeSelectorList.PosData posData)
 	{
-		float duration = 0.5f; // Duration of the transition
+		float duration = 0.25f; // Duration of the transition
 		float elapsedTime = 0f;
 
 		SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();

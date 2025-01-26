@@ -88,8 +88,9 @@ public class LoadoutUI : UIWindowBase
 			List<WeaponNode> relatedWeaponNodes = new List<WeaponNode>();
 
 			// Instantiate and group WeaponNodes
-			foreach (AttachPoint attachPoint in weaponSlot.AttachPoints)
+			for (int j = weaponSlot.AttachPoints.Count - 1; j >= 0; j--)
 			{
+				AttachPoint attachPoint = weaponSlot.AttachPoints[j];
 				// FetchGameObject for transform position
 				Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y, WeaponUIContainer.transform.position.z); // One unit above player
 				WeaponNode weaponNode = Instantiate(AssetManager.WeaponNodePrefab, posAbovePlayer, Quaternion.identity, WeaponUIContainer.transform).GetComponent<WeaponNode>();
@@ -100,6 +101,21 @@ public class LoadoutUI : UIWindowBase
 				WeaponNodes.Add(weaponNode);
 				i++;
 			}
+
+
+			// OLD LOOP 
+			// foreach (AttachPoint attachPoint in weaponSlot.AttachPoints)
+			// {
+			// 	// FetchGameObject for transform position
+			// 	Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y, WeaponUIContainer.transform.position.z); // One unit above player
+			// 	WeaponNode weaponNode = Instantiate(AssetManager.WeaponNodePrefab, posAbovePlayer, Quaternion.identity, WeaponUIContainer.transform).GetComponent<WeaponNode>();
+			// 	weaponNode.Init(attachPoint, weaponSlot, i);
+
+			// 	// Add to group
+			// 	relatedWeaponNodes.Add(weaponNode);
+			// 	WeaponNodes.Add(weaponNode);
+			// 	i++;
+			// }
 
 			// Assign related nodes to each group
 			foreach (WeaponNode weaponNode in relatedWeaponNodes)
@@ -128,6 +144,7 @@ public class LoadoutUI : UIWindowBase
 
 		foreach (Vector3 weaponNodeSelectorPosition in weaponNodeSelectorPositions)
 		{
+			Debug.Log($"New Selector Instantiated: {weaponNodeSelectorPosition}");
 			GameObject WeaponNodeSelector = Instantiate(AssetManager.WeaponNodeSelectorPrefab, weaponNodeSelectorPosition, Quaternion.identity, WeaponUIContainer.transform);
 
 			WeaponNodeSelectors.Add(WeaponNodeSelector.GetComponent<WeaponNodeSelector>());
@@ -140,14 +157,18 @@ public class LoadoutUI : UIWindowBase
 		// WeaponNodeGroups and WeaponNodes have been sorted by YPos
 		int nodeCounter = 0;
 		int nodeGroupCounter = 0;
-		WeaponNode RearAsymmetricalWeaponNode;
+		WeaponNode RearAsymmetricalWeaponNode = null;
 		// Debug.Log("Detected " + WeaponNodes.Count + " WeaponNodes");
 		// Debug.Log("Detected " + WeaponNodeSelectors.Count + " WeaponNodeSelectors");
+		foreach (WeaponNodeSelector selector in WeaponNodeSelectors)
+		{
+			Debug.Log($"Selector Position: X: {selector.transform.position.x} Y: {selector.transform.position.y}");
+		}
 		while (nodeCounter < WeaponNodes.Count)
 		{
 			foreach (WeaponNode weaponNode in WeaponNodeGroups[nodeGroupCounter])
 			{
-				// Debug.Log("Placing Node: " + nodeCounter + " X: " + weaponNode.XPos + " Y: " + weaponNode.YPos + " Side: " + weaponNode.Side);
+				Debug.Log($"Linking Node: {weaponNode.ID.text} X: {weaponNode.XPos} Y: {weaponNode.YPos} Side: {weaponNode.Side}");
 
 				switch (weaponNode.Side)
 				{
@@ -169,7 +190,17 @@ public class LoadoutUI : UIWindowBase
 							}
 							else
 							{
-								RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
+								if (RearAsymmetricalWeaponNode != null)
+								{
+									RearAsymmetricalWeaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodes.Count - nodeGroupCounter]);
+									weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
+									RearAsymmetricalWeaponNode = null;
+								}
+								else
+								{
+									RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
+									nodeGroupCounter--;
+								}
 							}
 							break;
 						}
@@ -182,6 +213,15 @@ public class LoadoutUI : UIWindowBase
 				nodeCounter++;
 			}
 			nodeGroupCounter++;
+		}
+		if (RearAsymmetricalWeaponNode != null) {
+			WeaponNodeSelector remainingSelector = null;
+			foreach (WeaponNodeSelector selector in WeaponNodeSelectors) {
+				if (selector.ID.text == "abc") remainingSelector = selector;
+				break;
+			}
+			int selectorIndex = WeaponNodeSelectors.IndexOf(remainingSelector);
+			RearAsymmetricalWeaponNode.AssignSelector(WeaponNodeSelectors[selectorIndex]);
 		}
 		// Debug.Log("Nodes and Selectors Linked!");
 	}
@@ -220,16 +260,29 @@ public class LoadoutUI : UIWindowBase
 		int i = 0;
 		while (i < WeaponNodes.Count)
 		{
-			if (i == 0) weaponNodeSelectorPositions.Add(FirstWeaponNodeSelectorPosition);
+			if (i == 0)
+			{
+				weaponNodeSelectorPositions.Add(FirstWeaponNodeSelectorPosition);
+				Debug.Log($"New Selector Position: {FirstWeaponNodeSelectorPosition}");
+			}
 			else
 			{
-				float originalWeaponNodeAngle = FirstWeaponNodeIsCentered ? 0 : -(anglePerSelector / 2);
+				float originalWeaponNodeAngle = FirstWeaponNodeIsCentered ? 0 : 360 - (anglePerSelector / 2);
+				Debug.Log($"Iterator: {i}");
+				Debug.Log($"OriginalNodeAngle: {originalWeaponNodeAngle}");
+				Debug.Log($"anglePerSelector: {anglePerSelector}");
 				Vector3 newPosition = CalculateLocalPosition(originalWeaponNodeAngle + anglePerSelector * i);
 				weaponNodeSelectorPositions.Add(newPosition);
+				Debug.Log($"New Selector Position: {newPosition}");
 			}
 			i++;
 		}
+		Debug.Log("Positions:");
+		foreach (Vector3 position in weaponNodeSelectorPositions)
+		{
 
+			Debug.Log(position);
+		}
 		return weaponNodeSelectorPositions;
 	}
 
@@ -237,7 +290,7 @@ public class LoadoutUI : UIWindowBase
 	{
 		// Calculate distance modifier based on the original angle
 		float normalisedAngle = Mathf.Abs((angleDegrees % 180) - 90);
-		
+
 		// Use a non-linear function to adjust the distanceModifier
 		float t = normalisedAngle / 90;
 		float distanceModifier = Mathf.SmoothStep(0, 1f, t); // Smoothly transition from 0 to 0.9
@@ -247,7 +300,7 @@ public class LoadoutUI : UIWindowBase
 
 		// Calculate offsets using the adjusted angle
 		// Debug.Log("ANGLEDEGREES: " + angleDegrees + " DISTANCE MODIFIER: " + distanceModifier);
-		float offsetX = Mathf.Cos(adjustedAngle * Mathf.Deg2Rad) * (WeaponNodeSelectorDistance * (1f + distanceModifier));
+		float offsetX = -Mathf.Cos(adjustedAngle * Mathf.Deg2Rad) * (WeaponNodeSelectorDistance * (1f + distanceModifier));
 		float offsetY = Mathf.Sin(adjustedAngle * Mathf.Deg2Rad) * WeaponNodeSelectorDistance;
 
 		// Create the new position vector
@@ -267,17 +320,20 @@ public class LoadoutUI : UIWindowBase
 		WeaponNodeCursor.EnableHover();
 	}
 
-	public void HandlePointerEnterOnNode(WeaponNode weaponNode) {
+	public void HandlePointerEnterOnNode(WeaponNode weaponNode)
+	{
 		if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
 		SetCursor(weaponNode);
 	}
 
-	public void HandlePointerExitOnNode(WeaponNode weaponNode) {
+	public void HandlePointerExitOnNode(WeaponNode weaponNode)
+	{
 		if (WeaponNodeCursor != weaponNode || WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
 		WeaponNodeCursor.DisableHover();
 	}
 
-	public void HandlePointerClickOnNode(WeaponNode weaponNode) {
+	public void HandlePointerClickOnNode(WeaponNode weaponNode)
+	{
 		if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
 		if (WeaponNodeCursor != weaponNode) SetCursor(weaponNode);
 		WeaponNodeCursor.HandleSelect();
@@ -354,7 +410,8 @@ public class LoadoutUI : UIWindowBase
 
 	public WeaponNode DetermineAppropriateHorizontalNode(bool right)
 	{
-		if (WeaponNodeCursor.YPos == 0) {
+		if (WeaponNodeCursor.YPos == 0)
+		{
 			foreach (WeaponNode node in WeaponNodes)
 			{
 				if (node.YPos == 0 && ((right && node.XPos > WeaponNodeCursor.XPos) || (!right && node.XPos < WeaponNodeCursor.XPos))) return node;
@@ -374,7 +431,8 @@ public class LoadoutUI : UIWindowBase
 
 	public WeaponNode DetermineAppropriateVerticalNode(bool up)
 	{
-		if (WeaponNodeCursor.XPos == 0) {
+		if (WeaponNodeCursor.XPos == 0)
+		{
 			foreach (WeaponNode node in WeaponNodes)
 			{
 				if (node.XPos == 0 && ((up && node.YPos > WeaponNodeCursor.YPos) || (!up && node.YPos < WeaponNodeCursor.YPos))) return node;

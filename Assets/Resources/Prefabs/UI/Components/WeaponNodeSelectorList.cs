@@ -25,20 +25,19 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	// This is to prevent an entry without a position AND avoiding the creation of cells
 	public readonly Dictionary<int, PosData> PosDataDict = new Dictionary<int, PosData>
 	{
-		// { 0, new PosData { Position = 0, YPos = 255f, Scale = 145f, Opacity = 0.0f } },	// To swap
 		{ 1, new PosData { Position = 1, YPos = 170f, Scale = 145f, Opacity = 0.0f } },	// Next top cell
 		{ 2, new PosData { Position = 2, YPos = 85f, Scale = 160f, Opacity = 0.5f } },	// Above cell
 		{ 3, new PosData { Position = 3, YPos = 0f, Scale = 200f, Opacity = 1.0f } },	// Active cell
 		{ 4, new PosData { Position = 4, YPos = -85f, Scale = 160f, Opacity = 0.5f } },	// Below cell
 		{ 5, new PosData { Position = 5, YPos = -170f, Scale = 145f, Opacity = 0.25f } },	// Bottom cell
 		{ 6, new PosData { Position = 6, YPos = -255f, Scale = 145f, Opacity = 0.0f } },	// Next bottom cell
-		// { 7, new PosData { Position = 7, YPos = -340f, Scale = 145f, Opacity = 0.0f } }	// To swap, initially empty
 	};
 
 	// TEMP
 	public int ListId;
 
 	// Data
+	private bool Initialised = false;
 	private Queue<ScrollDirection> ScrollQueue = new Queue<ScrollDirection>();
 	public bool IsScrolling = false;
 	public int ScrollBuffer = 0;
@@ -80,6 +79,7 @@ public class WeaponNodeSelectorList : MonoBehaviour
 		ListId = listId;
 		SetDataOnRemainingCells(weaponIndex);
 		DeactivateList();
+		Initialised = true;
 	}
 
 	private int FindWeaponIndex(WeaponBase targetWeapon)
@@ -119,6 +119,7 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	public void ActivateList()
 	{
 		// Animation?
+		if (!Initialised) return;
 		foreach (GameObject cell in Cells) cell.SetActive(true);
 		State = ListState.Active;
 	}
@@ -127,14 +128,17 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	{
 		foreach (GameObject cell in Cells)
 		{
-			if (cell.GetComponent<WeaponNodeSelectorListCell>() == ActiveCell) continue;
+			if (cell.GetComponent<WeaponNodeSelectorListCell>().ListPosition == 3) continue;
 			cell.SetActive(false);
+			IsScrolling = false;
+			ScrollQueue.Clear();
 		}
 		State = ListState.Inactive;
 	}
 
 	public void ScrollUp()
 	{
+		if (!Initialised) return;
 		if (IsScrolling)
 		{
 			if (ScrollQueue.Count < 3) ScrollQueue.Enqueue(ScrollDirection.Up);
@@ -169,6 +173,7 @@ public class WeaponNodeSelectorList : MonoBehaviour
 
 	public void ScrollDown()
 	{
+		if (!Initialised) return;
 		if (IsScrolling)
 		{
 			if (ScrollQueue.Count < 3) ScrollQueue.Enqueue(ScrollDirection.Down);

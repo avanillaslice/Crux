@@ -1,14 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 public class WeaponNode : MonoBehaviour
 {
 	// Inspector
 	public Color HoverColor;
 	public Color SelectedColor;
+	public TextMeshProUGUI ID;
 
 	// Data
+	private bool Initialised = false;
 	[HideInInspector] public float XPos;
 	[HideInInspector] public float YPos;
 	[HideInInspector] public RelativeSide Side;
@@ -40,6 +43,7 @@ public class WeaponNode : MonoBehaviour
 	public void Init(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
 	{
 		NodeId = nodeId;
+		ID.text = NodeId.ToString();
 		WeaponSlot = weaponSlot;
 		AttachPoint = attachPoint;
 		Side = AttachPoint.Side;
@@ -61,6 +65,7 @@ public class WeaponNode : MonoBehaviour
 
 		WeaponNodeSelector = weaponNodeSelector;
 		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, NodeId);
+		Initialised = true;
 	}
 
 	public void SetRelatedNodes(List<WeaponNode> weaponNodes)
@@ -72,43 +77,52 @@ public class WeaponNode : MonoBehaviour
 	}
 
 	public void HandlePointerEnter() {
+		if (!Initialised) return;
 		LoadoutUI.Inst.HandlePointerEnterOnNode(this);
 	}
 
 	public void HandlePointerExit() {
+		if (!Initialised) return;
 		LoadoutUI.Inst.HandlePointerExitOnNode(this);
 	}
 
 	public void HandlePointerClick() {
+		if (!Initialised) return;
 		LoadoutUI.Inst.HandlePointerClickOnNode(this);
 	}
 
 	public void EnableHover()
 	{
+		if (!Initialised) return;
 		if (State == NodeState.Hover || State == NodeState.Selected) return;
 		SetState(NodeState.Hover);
 	}
 
 	public void DisableHover()
 	{
+		if (!Initialised) return;
 		if (State != NodeState.Hover || State == NodeState.Selected) return;
 		SetState(NodeState.Default);
 	}
 	
 	public void HandleSelect()
 	{
+		if (!Initialised) return;
 		if (State != NodeState.Hover) return;
+		Debug.Log($"Node: {NodeId} Clicked!");
 		SetState(NodeState.Selected);
 	}
 
 	public void HandleDeselect()
 	{
+		if (!Initialised) return;
 		if (State != NodeState.Selected) return;
 		SetState(NodeState.Hover);
 	}
 
 	internal void SetState(NodeState state)
 	{
+		if (!Initialised) return;
 		switch (state)
 		{
 			case NodeState.Default: {

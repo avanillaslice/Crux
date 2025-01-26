@@ -7,6 +7,7 @@ public class WeaponNodeSelector : MonoBehaviour
 	public WeaponNodeSelectorList List;
 	public SpriteRenderer SlotTypeIcon; // To left of selector
 	public TextMeshProUGUI SlotTypeText;
+	public TextMeshProUGUI ID;
 	// public GameObject HoverStateComponent; // Contains Light/Medium/Heavy
 
 	// Data
@@ -20,6 +21,7 @@ public class WeaponNodeSelector : MonoBehaviour
 
 	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
 	{
+		ID.text = nodeId.ToString();
 		WeaponBase assignedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
 		SlotType = assignedWeapon.SlotType;
 		List.Init(assignedWeapon, LoadoutUI.Inst.AvailableWeapons[SlotType], nodeId);
