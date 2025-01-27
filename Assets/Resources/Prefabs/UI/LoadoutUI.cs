@@ -129,7 +129,7 @@ public class LoadoutUI : UIWindowBase
 		// WeaponNodes.Sort((a, b) => b.YPos.CompareTo(a.YPos));
 		WeaponNodeGroups.Sort((listA, listB) => listB[0].YPos.CompareTo(listA[0].YPos));
 		// foreach (List<WeaponNode> weaponNodeGroup in WeaponNodeGroups) Debug.Log("YPOSITION: " + weaponNodeGroup[0].YPos);
-		Debug.Log("WeaponNodes Instantated!");
+		// Debug.Log("WeaponNodes Instantated!");
 	}
 
 	private void InstantiateWeaponNodeSelectors()
@@ -144,7 +144,7 @@ public class LoadoutUI : UIWindowBase
 
 		foreach (Vector3 weaponNodeSelectorPosition in weaponNodeSelectorPositions)
 		{
-			Debug.Log($"New Selector Instantiated: {weaponNodeSelectorPosition}");
+			// Debug.Log($"New Selector Instantiated: {weaponNodeSelectorPosition}");
 			GameObject WeaponNodeSelector = Instantiate(AssetManager.WeaponNodeSelectorPrefab, weaponNodeSelectorPosition, Quaternion.identity, WeaponUIContainer.transform);
 
 			WeaponNodeSelectors.Add(WeaponNodeSelector.GetComponent<WeaponNodeSelector>());
@@ -162,24 +162,26 @@ public class LoadoutUI : UIWindowBase
 		// Debug.Log("Detected " + WeaponNodeSelectors.Count + " WeaponNodeSelectors");
 		foreach (WeaponNodeSelector selector in WeaponNodeSelectors)
 		{
-			Debug.Log($"Selector Position: X: {selector.transform.position.x} Y: {selector.transform.position.y}");
+			// Debug.Log($"Selector Position: X: {selector.transform.position.x} Y: {selector.transform.position.y}");
 		}
 		while (nodeCounter < WeaponNodes.Count)
 		{
 			foreach (WeaponNode weaponNode in WeaponNodeGroups[nodeGroupCounter])
 			{
-				Debug.Log($"Linking Node: {weaponNode.ID.text} X: {weaponNode.XPos} Y: {weaponNode.YPos} Side: {weaponNode.Side}");
+				// Debug.Log($"Linking Node: {weaponNode.ID.text} X: {weaponNode.XPos} Y: {weaponNode.YPos} Side: {weaponNode.Side}");
 
 				switch (weaponNode.Side)
 				{
 					case RelativeSide.Right:
 						{
-							weaponNode.AssignSelector(WeaponNodeSelectors[nodeGroupCounter]);
+							int index = nodeGroupCounter - (RearAsymmetricalWeaponNode == null ? 0 : 1);
+							weaponNode.AssignSelector(WeaponNodeSelectors[index]);
 							break;
 						}
 					case RelativeSide.Left:
 						{
-							weaponNode.AssignSelector(WeaponNodeSelectors[WeaponNodes.Count - nodeGroupCounter]);
+							int index = WeaponNodes.Count - nodeGroupCounter + (RearAsymmetricalWeaponNode == null ? 0 : 1) - (FirstWeaponNodeIsCentered ? 0 : 1);
+							weaponNode.AssignSelector(WeaponNodeSelectors[index]);
 							break;
 						}
 					case RelativeSide.Center:
@@ -199,7 +201,6 @@ public class LoadoutUI : UIWindowBase
 								else
 								{
 									RearAsymmetricalWeaponNode = weaponNode; // Replace this with AddOrFetchRearAsymmetricalWeaponNode() logic
-									nodeGroupCounter--;
 								}
 							}
 							break;
@@ -214,16 +215,22 @@ public class LoadoutUI : UIWindowBase
 			}
 			nodeGroupCounter++;
 		}
-		if (RearAsymmetricalWeaponNode != null) {
-			WeaponNodeSelector remainingSelector = null;
-			foreach (WeaponNodeSelector selector in WeaponNodeSelectors) {
-				if (selector.ID.text == "abc") remainingSelector = selector;
-				break;
-			}
-			int selectorIndex = WeaponNodeSelectors.IndexOf(remainingSelector);
-			RearAsymmetricalWeaponNode.AssignSelector(WeaponNodeSelectors[selectorIndex]);
+		if (RearAsymmetricalWeaponNode != null)
+		{
+			int remainingSelectorIndex = FetchRemainingSelectorIndex();
+			if (remainingSelectorIndex == -1) Debug.LogError("Could not find remainingSelector");
+			else RearAsymmetricalWeaponNode.AssignSelector(WeaponNodeSelectors[remainingSelectorIndex]);
 		}
 		// Debug.Log("Nodes and Selectors Linked!");
+	}
+
+	private int FetchRemainingSelectorIndex()
+	{
+		foreach (WeaponNodeSelector selector in WeaponNodeSelectors)
+		{
+			if (selector.ID.text == "abc") return WeaponNodeSelectors.IndexOf(selector);
+		}
+		return -1;
 	}
 
 	private void UpdateAvailableWeapons()
@@ -253,7 +260,7 @@ public class LoadoutUI : UIWindowBase
 		else
 		{
 			FirstWeaponNodeIsCentered = false;
-			FirstWeaponNodeSelectorPosition = CalculateLocalPosition(-(anglePerSelector / 2));
+			FirstWeaponNodeSelectorPosition = CalculateLocalPosition((anglePerSelector / 2));
 		}
 
 		// Calculate each position and add to list
@@ -263,26 +270,26 @@ public class LoadoutUI : UIWindowBase
 			if (i == 0)
 			{
 				weaponNodeSelectorPositions.Add(FirstWeaponNodeSelectorPosition);
-				Debug.Log($"New Selector Position: {FirstWeaponNodeSelectorPosition}");
+				// Debug.Log($"New Selector Position: {FirstWeaponNodeSelectorPosition}");
 			}
 			else
 			{
-				float originalWeaponNodeAngle = FirstWeaponNodeIsCentered ? 0 : 360 - (anglePerSelector / 2);
-				Debug.Log($"Iterator: {i}");
-				Debug.Log($"OriginalNodeAngle: {originalWeaponNodeAngle}");
-				Debug.Log($"anglePerSelector: {anglePerSelector}");
+				float originalWeaponNodeAngle = FirstWeaponNodeIsCentered ? 0 : (anglePerSelector / 2);
+				// Debug.Log($"Iterator: {i}");
+				// Debug.Log($"OriginalNodeAngle: {originalWeaponNodeAngle}");
+				// Debug.Log($"anglePerSelector: {anglePerSelector}");
 				Vector3 newPosition = CalculateLocalPosition(originalWeaponNodeAngle + anglePerSelector * i);
 				weaponNodeSelectorPositions.Add(newPosition);
-				Debug.Log($"New Selector Position: {newPosition}");
+				// Debug.Log($"New Selector Position: {newPosition}");
 			}
 			i++;
 		}
-		Debug.Log("Positions:");
-		foreach (Vector3 position in weaponNodeSelectorPositions)
-		{
+		// Debug.Log("Positions:");
+		// foreach (Vector3 position in weaponNodeSelectorPositions)
+		// {
 
-			Debug.Log(position);
-		}
+		// 	Debug.Log(position);
+		// }
 		return weaponNodeSelectorPositions;
 	}
 
@@ -346,7 +353,6 @@ public class LoadoutUI : UIWindowBase
 
 	public override void HandleBack()
 	{
-		Debug.Log("LOUDOUT HANDLE BACK");
 		if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) WeaponNodeCursor.HandleDeselect();
 		else HandleExit();
 	}
