@@ -109,8 +109,8 @@ public class WeaponNode : MonoBehaviour
 	{
 		if (!Initialised) return;
 		if (State != NodeState.Hover) return;
-		Debug.Log($"Node: {NodeId} Clicked!");
 		SetState(NodeState.Selected);
+		WeaponNodeSelector.HandleSelect();
 	}
 
 	public void HandleDeselect()
@@ -118,6 +118,7 @@ public class WeaponNode : MonoBehaviour
 		if (!Initialised) return;
 		if (State != NodeState.Selected) return;
 		SetState(NodeState.Hover);
+		WeaponNodeSelector.HandleDeselect();
 	}
 
 	internal void SetState(NodeState state)
@@ -132,12 +133,12 @@ public class WeaponNode : MonoBehaviour
 				break;
 			}
 			case NodeState.Hover: {
-				ColorComponent.color = HoverColor;
-				WeaponNodeSelector.EnableHoverState();
 				if (State == NodeState.Selected) {
+					WeaponNodeSelector.HandleDeselect();
 					foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Default);
 				}
-				WeaponNodeSelector.HandleDeselect();
+				ColorComponent.color = HoverColor;
+				WeaponNodeSelector.EnableHoverState();
 				break;
 			}
 			case NodeState.Selected: {
@@ -145,7 +146,6 @@ public class WeaponNode : MonoBehaviour
 				if (State == NodeState.Hover) {
 					foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Selected);
 				}
-				WeaponNodeSelector.HandleSelect();
 				break;
 			}
 		}
