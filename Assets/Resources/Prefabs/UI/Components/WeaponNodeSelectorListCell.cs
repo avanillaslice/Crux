@@ -9,6 +9,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 	public SpriteRenderer IconComponent;
 	public TextMeshProUGUI Name;
 	public TextMeshProUGUI Description;
+	public SpriteRenderer BackgroundComponent;
 	// TEMP
 	public TextMeshProUGUI ListIndexText;
 	public int ListId;
@@ -26,17 +27,18 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		foreach (SpriteRenderer renderer in spriteRenderers)
 		{
 			Color color = renderer.color;
-			color.a = posData.Opacity; // Set opacity to 50%
+			color.a = posData.Color.a; // Set opacity to 50%
 			renderer.color = color;
 		}
-		Name.alpha = posData.Opacity;
+		Name.alpha = posData.Color.a;
+		BackgroundComponent.color = posData.Color;
 		if (ListIndexText.text == "abc") ListIndexText.text = posData.Position.ToString();
 
 		ListPosition = posData.Position;
 		gameObject.transform.localPosition = new Vector3(gameObject.transform.localPosition.x, posData.YPos, gameObject.transform.localPosition.z); // Update Y position
 		// Debug.Log("Cell ListPosition: " + ListPosition);
-		if (ListPosition == 1) EnableHover();
-		else DisableHover();
+		// if (ListPosition == 3) EnableActive();
+		// else DisableActive();
 	}
 
 	public void SetData(int index, string name, string description, Sprite icon, int listId)
@@ -51,7 +53,6 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 	public void Scroll(WeaponNodeSelectorList.PosData posData)
 	{
-		if (ListPosition == 1) DisableHover();
 		StartCoroutine(TransitionToPosition(posData));
 	}
 
@@ -62,6 +63,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 		SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
 		float initialOpacity = spriteRenderers[0].color.a;
+		Color initialBackgroundColor = BackgroundComponent.color;
 		Vector3 initialScale = gameObject.transform.localScale;
 		Vector3 initialPosition = gameObject.transform.localPosition; // Store initial position
 
@@ -75,10 +77,11 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 			foreach (SpriteRenderer renderer in spriteRenderers)
 			{
 				Color color = renderer.color;
-				color.a = Mathf.Lerp(initialOpacity, posData.Opacity, t);
+				color.a = Mathf.Lerp(initialOpacity, posData.Color.a, t);
 				renderer.color = color;
 			}
-			Name.alpha = Mathf.Lerp(initialOpacity, posData.Opacity, t);
+			Name.alpha = Mathf.Lerp(initialOpacity, posData.Color.a, t);
+			BackgroundComponent.color = Color.Lerp(initialBackgroundColor, posData.Color, t);
 
 			gameObject.transform.localScale = Vector3.Lerp(initialScale, new Vector3(posData.Scale, posData.Scale, initialScale.z), t);
 			
@@ -88,7 +91,6 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 			yield return null;
 		}
 
-		if (ListPosition == 1) EnableHover();
 		OnScrollComplete?.Invoke(this);
 	}
 
@@ -105,12 +107,10 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 	// Shifts to Hover from Active
 	private void DisableActive()
 	{
-
 	}
 
 	// Shifts to Active from Hover
 	private void EnableActive()
 	{
-
 	}
 }

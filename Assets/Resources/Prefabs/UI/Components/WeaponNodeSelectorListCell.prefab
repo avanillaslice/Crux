@@ -383,6 +383,9 @@ MonoBehaviour:
   IconComponent: {fileID: 2237967964779072025}
   Name: {fileID: 4446949674075693064}
   Description: {fileID: 0}
+  BackgroundComponent: {fileID: 5792070550172801322}
+  DefaultColor: {r: 1, g: 1, b: 1, a: 0}
+  ActiveColor: {r: 1, g: 0, b: 0, a: 1}
   ListIndexText: {fileID: 3296812782055388812}
   ListId: 0
   ListPosition: 0
