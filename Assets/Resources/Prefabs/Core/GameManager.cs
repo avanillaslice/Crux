@@ -28,8 +28,8 @@ public static class GameManager
         MusicManager.Inst.PlayBackgroundMusic();
         await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
         GameInputHandler.Inst.EnableGameplayControls();
-        // StageManager.StartStage(0);
-        HandleStageCompleted();
+        StageManager.StartStage(0);
+        // HandleStageCompleted();
     }
 
     public static void TogglePause()
