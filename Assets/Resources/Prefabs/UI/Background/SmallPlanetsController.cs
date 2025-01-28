@@ -25,17 +25,30 @@ public class SmallPlanetsController : MonoBehaviour, IBackgroundController
 
 	void Update()
 	{
-		InitiateScrolling();
+		if (PlayerManager.Inst == null || PlayerManager.Inst.ActivePlayerShip == null) InitiateScrolling();
+		else InitiateScrollingWithParralax();
 	}
 
 	void Start()
 	{
 		// Initialize the previous player position
-		previousPlayerPosition = PlayerManager.Inst.ActivePlayerShip.transform.position;
+		if (PlayerManager.Inst == null || PlayerManager.Inst.ActivePlayerShip == null) previousPlayerPosition = new Vector3(0,0,0);
+		else previousPlayerPosition = PlayerManager.Inst.ActivePlayerShip.transform.position;
 	}
 
 	public void InitiateScrolling()
 	{
+		if (activeObjects.Count > 0)
+		{
+			foreach (var obj in activeObjects)
+			{
+				// Move down based on scroll speed
+				obj.transform.position += Vector3.down * scrollSpeed * BackgroundManager.Inst.ScrollSpeedModifier * Time.deltaTime;
+			}
+		}
+	}
+
+	public void InitiateScrollingWithParralax() {
 		if (activeObjects.Count > 0)
 		{
 			// Get the player's current position
@@ -50,7 +63,7 @@ public class SmallPlanetsController : MonoBehaviour, IBackgroundController
 				obj.transform.position += Vector3.down * scrollSpeed * BackgroundManager.Inst.ScrollSpeedModifier * Time.deltaTime;
 
 				// Calculate the parallax effect based on player's movement
-				float parallaxFactor = 0.025f; // Adjust this value for more or less parallax effect
+				float parallaxFactor = 0.0025f; // Adjust this value for more or less parallax effect
 
 				// Update the object's x position based on the player's movement for parallax effect
 				obj.transform.position += new Vector3(-deltaX * parallaxFactor, 0, 0);

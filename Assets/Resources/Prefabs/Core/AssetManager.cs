@@ -107,18 +107,18 @@ public static class AssetManager
 
     private static void CacheUIAssets()
     {
-        ShipSelectionUIPrefab = Resources.Load<GameObject>("Prefabs/UI/ShipSelectionUI");
-        PickupMessagePrefab = Resources.Load<GameObject>("Prefabs/UI/PickupMessage");
-        SpecialWeaponUnlockedPrefab = Resources.Load<GameObject>("Prefabs/UI/SpecialWeaponUnlocked");
-        PauseMenuPrefab = Resources.Load<GameObject>("Prefabs/UI/PauseMenu");
-        InterStageUIPrefab = Resources.Load<GameObject>("Prefabs/UI/InterStageUI");
-        OldLoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/OldLoadoutUI");
-        SkillTreeUIPrefab = Resources.Load<GameObject>("Prefabs/UI/SkillTreeUI");
-        LoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/LoadoutUI");
-        WeaponNodeSelectorPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelector");
-        WeaponNodePrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNode");
-        WeaponNodeSelectorListPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelectorList");
-        WeaponNodeSelectorListCellPrefab = Resources.Load<GameObject>("Prefabs/UI/Components/WeaponNodeSelectorListCell");
+        ShipSelectionUIPrefab = Resources.Load<GameObject>("Prefabs/UI/MainMenu/ShipSelectionUI");
+        PickupMessagePrefab = Resources.Load<GameObject>("Prefabs/UI/Gameplay/PickupMessage");
+        SpecialWeaponUnlockedPrefab = Resources.Load<GameObject>("Prefabs/UI/Gameplay/SpecialWeaponUnlocked");
+        PauseMenuPrefab = Resources.Load<GameObject>("Prefabs/UI/Gameplay/PauseMenu");
+        InterStageUIPrefab = Resources.Load<GameObject>("Prefabs/UI/InterStage/InterStageUI");
+        OldLoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/Loadout/OldLoadout/OldLoadoutUI");
+        SkillTreeUIPrefab = Resources.Load<GameObject>("Prefabs/UI/SkillTree/SkillTreeUI");
+        LoadoutUIPrefab = Resources.Load<GameObject>("Prefabs/UI/Loadout/LoadoutUI");
+        WeaponNodeSelectorPrefab = Resources.Load<GameObject>("Prefabs/UI/Loadout/WeaponNodeSelector");
+        WeaponNodePrefab = Resources.Load<GameObject>("Prefabs/UI/Loadout/WeaponNode");
+        WeaponNodeSelectorListPrefab = Resources.Load<GameObject>("Prefabs/UI/Loadout/WeaponNodeSelectorList");
+        WeaponNodeSelectorListCellPrefab = Resources.Load<GameObject>("Prefabs/UI/Loadout/WeaponNodeSelectorListCell");
         if (ShipSelectionUIPrefab == null) Debug.LogError("Failed to load ShipSelectionUIPrefab!");
         if (PickupMessagePrefab == null) Debug.LogError("Failed to load PickupMessagePrefab!");
         if (SpecialWeaponUnlockedPrefab == null) Debug.LogError("Failed to load SpecialWeaponUnlockedPrefab!");

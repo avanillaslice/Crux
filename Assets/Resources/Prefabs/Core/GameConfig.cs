@@ -21,7 +21,7 @@ public static class GameConfig
     public static int InitialScore { get; private set; } = 0;
     public static float RespawnTimer { get; private set; } = 2;
     public static bool CameraMovementEnabled { get; private set; } = false;
-    public static float BaseVolume { get; private set; } = 0.35f;
+    public static float BaseVolume { get; private set; } = 0.1f;
 
     public static void Initialise()
     {
