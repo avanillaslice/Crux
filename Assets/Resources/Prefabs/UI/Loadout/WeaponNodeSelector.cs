@@ -12,6 +12,7 @@ public class WeaponNodeSelector : MonoBehaviour
 
 	// Data
 	private SlotType SlotType;
+	private WeaponNode WeaponNode;
 
 	void Awake()
 	{
@@ -19,9 +20,10 @@ public class WeaponNodeSelector : MonoBehaviour
 		// HoverStateComponent.SetActive(false);
 	}
 
-	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
+	public void UpdateContent(AttachPoint attachPoint, WeaponSlot weaponSlot, WeaponNode weaponNode, int nodeId)
 	{
 		ID.text = nodeId.ToString();
+		WeaponNode = weaponNode;
 		WeaponBase assignedWeapon = attachPoint.AttachedWeapon.GetComponent<WeaponBase>();
 		SlotType = assignedWeapon.SlotType;
 		List.Init(assignedWeapon, LoadoutUI.Inst.AvailableWeapons[SlotType], nodeId);
@@ -80,7 +82,12 @@ public class WeaponNodeSelector : MonoBehaviour
 	}
 
 	private void SelectWeapon() {
-
+		GameObject targetWeaponPrefab = LoadoutManager.FetchWeaponPefab(List.AvailableWeapons[List.ActiveCell.WeaponListIndex]);
+		if (targetWeaponPrefab == null) {
+			Debug.LogError("Could not identify weapon");
+		}
+		WeaponSlot weaponSlot = LoadoutManager.EquipWeaponToSlot(targetWeaponPrefab, WeaponNode.WeaponSlot.id);
+		if (weaponSlot == null) Debug.LogError($"Failed to equip weapom: {List.AvailableWeapons[List.ActiveCell.WeaponListIndex].WeaponName}");
 	}
 
 	private void ActivateList()

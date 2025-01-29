@@ -21,7 +21,7 @@ public class WeaponNode : MonoBehaviour
 	private Color DefaultColor;
 	private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
 	private AttachPoint AttachPoint;
-	private WeaponSlot WeaponSlot;
+	public WeaponSlot WeaponSlot;
 
 	//Temp
 	int NodeId;
@@ -64,7 +64,7 @@ public class WeaponNode : MonoBehaviour
 		if (AttachPoint == null) Debug.LogWarning("AttachPoint not set on Node");
 
 		WeaponNodeSelector = weaponNodeSelector;
-		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, NodeId);
+		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
 		Initialised = true;
 	}
 
@@ -107,10 +107,18 @@ public class WeaponNode : MonoBehaviour
 	
 	public void HandleSelect()
 	{
-		if (!Initialised) return;
-		if (State != NodeState.Hover) return;
-		SetState(NodeState.Selected);
+		if (!Initialised || State == NodeState.Default) return;
+		else if (State == NodeState.Hover) {
+			SetState(NodeState.Selected);
+			WeaponNodeSelector.HandleSelect();
+			return;
+		}
 		WeaponNodeSelector.HandleSelect();
+		AssignSelector(WeaponNodeSelector);
+		SetState(NodeState.Hover);
+		foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
+			AssignSelector(weaponNode.WeaponNodeSelector);
+		}
 	}
 
 	public void HandleDeselect()

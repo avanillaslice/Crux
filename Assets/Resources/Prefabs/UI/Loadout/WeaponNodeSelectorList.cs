@@ -42,9 +42,9 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	public bool IsScrolling = false;
 	public int ScrollBuffer = 0;
 	[HideInInspector] public ListState State = ListState.Inactive;
-	private WeaponNodeSelectorListCell ActiveCell;
+	public WeaponNodeSelectorListCell ActiveCell;
 	private List<GameObject> Cells = new List<GameObject>();
-	private List<WeaponBase> AvailableWeapons = new List<WeaponBase>();
+	public List<WeaponBase> AvailableWeapons = new List<WeaponBase>();
 
 	void Awake()
 	{
@@ -157,6 +157,7 @@ public class WeaponNodeSelectorList : MonoBehaviour
 			if ((cellComponent.ListPosition - 1) < 0) continue;
 			if (i == 4) cellComponent.OnScrollComplete += HandleScrollComplete;
 			// Debug.Log("Shifting Cell: " + cellComponent.ListPosition + " " + cellComponent.Name.text + " to position: " + (cellComponent.ListPosition - 1));
+			if (cellComponent.ListPosition - 1 == 3) ActiveCell = cellComponent;
 			cellComponent.Scroll(PosDataDict[cellComponent.ListPosition - 1]);
 			i++;
 		}
@@ -192,6 +193,7 @@ public class WeaponNodeSelectorList : MonoBehaviour
 			if ((cellComponent.ListPosition + 1) > PosDataDict.Count) continue;
 			// Debug.Log("Shifting Cell: " + cellComponent.ListPosition + " to position: " + (cellComponent.ListPosition + 1));
 			if (i == 4) cellComponent.OnScrollComplete += HandleScrollComplete;
+			if (cellComponent.ListPosition + 1 == 3) ActiveCell = cellComponent;
 			cellComponent.Scroll(PosDataDict[cellComponent.ListPosition + 1]);
 			i++;
 		}

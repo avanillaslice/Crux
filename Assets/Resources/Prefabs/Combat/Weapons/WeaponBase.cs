@@ -23,8 +23,8 @@ public abstract class WeaponBase : MonoBehaviour
     public SlotType SlotType;
     public WeaponType WeaponType;
     public string WeaponName;
-		public string Description;
-		public Sprite WeaponIcon;
+	public string Description;
+	public Sprite WeaponIcon;
 
     // Reference to the Rigidbody2D component of the weapon
     protected Rigidbody2D rb;

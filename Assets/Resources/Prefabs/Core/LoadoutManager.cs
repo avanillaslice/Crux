@@ -122,6 +122,15 @@ public static class LoadoutManager
 		return inventory;
 	}
 
+	public static GameObject FetchWeaponPefab(WeaponBase weaponBase) {
+		foreach (var weaponEntry in Inventory)
+		{
+			GameObject weaponPrefab = weaponEntry.Value;
+			if (weaponPrefab.GetComponent<WeaponBase>() == weaponBase) return weaponPrefab;
+		}
+		return null;
+	}
+
 	public static List<WeaponBase> GetInventoryByType(SlotType type)
 	{
 		List<WeaponBase> inventory = new List<WeaponBase>();
