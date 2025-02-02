@@ -15,8 +15,7 @@ public abstract class WeaponBase : MonoBehaviour
 
     // Protected variables
     protected bool hasAnimation;
-    [SerializeField]
-    protected float BaseFireRate;
+    [SerializeField] protected float BaseFireRate;
     protected float CurrentFireRate;
     protected float fireRateTimer;
 

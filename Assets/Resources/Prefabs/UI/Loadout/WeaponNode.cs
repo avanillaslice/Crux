@@ -68,6 +68,10 @@ public class WeaponNode : MonoBehaviour
 		Initialised = true;
 	}
 
+	public void RefreshSelector() {
+		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
+	}
+
 	public void SetRelatedNodes(List<WeaponNode> weaponNodes)
 	{
 		foreach (WeaponNode weaponNode in weaponNodes)
@@ -117,7 +121,7 @@ public class WeaponNode : MonoBehaviour
 		AssignSelector(WeaponNodeSelector);
 		SetState(NodeState.Hover);
 		foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
-			AssignSelector(weaponNode.WeaponNodeSelector);
+			weaponNode.RefreshSelector();
 		}
 	}
 

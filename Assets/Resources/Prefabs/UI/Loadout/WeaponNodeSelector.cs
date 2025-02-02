@@ -85,9 +85,11 @@ public class WeaponNodeSelector : MonoBehaviour
 		GameObject targetWeaponPrefab = LoadoutManager.FetchWeaponPefab(List.AvailableWeapons[List.ActiveCell.WeaponListIndex]);
 		if (targetWeaponPrefab == null) {
 			Debug.LogError("Could not identify weapon");
+			return;
 		}
 		WeaponSlot weaponSlot = LoadoutManager.EquipWeaponToSlot(targetWeaponPrefab, WeaponNode.WeaponSlot.id);
 		if (weaponSlot == null) Debug.LogError($"Failed to equip weapom: {List.AvailableWeapons[List.ActiveCell.WeaponListIndex].WeaponName}");
+		else MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
 	}
 
 	private void ActivateList()
