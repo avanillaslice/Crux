@@ -1,44 +1,42 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class MainMenuButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private Image buttonImage;
-    private Color originalColor;
+	private Image buttonImage;
+	private Color originalColor;
+	public TextMeshProUGUI textComponent;
 
 	private void Awake()
 	{
-	    // Get the Image component attached to the GameObject
-	    buttonImage = GetComponent<Image>();
-	    if (buttonImage != null)
-	    {
-	        // Store the original color of the Image
-	        originalColor = buttonImage.color;
-	        // Set the Image to transparent
-	        buttonImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
-	    }
-	    else
-	    {
-	        Debug.LogError("Image component not found on the GameObject.");
-	    }
+		// Store the original vertex color of the text component
+		if (textComponent != null)
+		{
+			originalColor = textComponent.color; // Assuming textComponent is of type TextMeshProUGUI
+		}
+		else
+		{
+			Debug.LogError("TextMeshProUGUI component not found on the GameObject.");
+		}
 	}
-	
+
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-	    // Set the Image to its original color (visible)
-	    if (buttonImage != null)
-	    {
-	        buttonImage.color = originalColor;
-	    }
+		// Set the text component's color to white
+		if (textComponent != null)
+		{
+			textComponent.color = Color.white;
+		}
 	}
-	
+
 	public void OnPointerExit(PointerEventData eventData)
 	{
-	    // Set the Image to transparent
-	    if (buttonImage != null)
-	    {
-	        buttonImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
-	    }
+		// Reset the text component's color to the original color
+		if (textComponent != null)
+		{
+			textComponent.color = originalColor;
+		}
 	}
 }
