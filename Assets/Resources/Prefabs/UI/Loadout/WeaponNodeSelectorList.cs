@@ -26,11 +26,11 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	public readonly Dictionary<int, PosData> PosDataDict = new Dictionary<int, PosData>
 	{
 		{ 1, new PosData { Position = 1, YPos = 170f, Scale = 145f, Color = new Color(1f, 1f, 1f, 0.0f) } },	// Next top cell
-		{ 2, new PosData { Position = 2, YPos = 85f, Scale = 160f, Color = new Color(1f, 1f, 1f, 0.05f) } },	// Above cell
+		{ 2, new PosData { Position = 2, YPos = 95f, Scale = 160f, Color = new Color(1f, 1f, 1f, 0.05f) } },	// Above cell
 		{ 3, new PosData { Position = 3, YPos = 0f, Scale = 200f, Color = new Color(1f, 0f, 0f, 1f) } },		// Active cell
-		{ 4, new PosData { Position = 4, YPos = -85f, Scale = 160f, Color = new Color(1f, 1f, 1f, 0.5f) } },	// Below cell
+		{ 4, new PosData { Position = 4, YPos = -95f, Scale = 160f, Color = new Color(1f, 1f, 1f, 0.5f) } },	// Below cell
 		{ 5, new PosData { Position = 5, YPos = -170f, Scale = 145f, Color = new Color(1f, 1f, 1f, 0.25f) } },	// Bottom cell
-		{ 6, new PosData { Position = 6, YPos = -255f, Scale = 145f, Color = new Color(1f, 1f, 1f, 0.0f) } },	// Next bottom cell
+		{ 6, new PosData { Position = 6, YPos = -245f, Scale = 145f, Color = new Color(1f, 1f, 1f, 0.0f) } },	// Next bottom cell
 	};
 
 	// TEMP
@@ -120,7 +120,13 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	{
 		// Animation?
 		if (!Initialised) return;
-		foreach (GameObject cell in Cells) cell.SetActive(true);
+		foreach (GameObject cell in Cells) {
+			if (cell.GetComponent<WeaponNodeSelectorListCell>().ListPosition == 3) {
+				cell.GetComponent<WeaponNodeSelectorListCell>().Animator.Play("ActivateCell");
+				continue;
+			}
+			cell.SetActive(true);
+		}
 		State = ListState.Active;
 	}
 
@@ -128,7 +134,11 @@ public class WeaponNodeSelectorList : MonoBehaviour
 	{
 		foreach (GameObject cell in Cells)
 		{
-			if (cell.GetComponent<WeaponNodeSelectorListCell>().ListPosition == 3) continue;
+			WeaponNodeSelectorListCell cellComponent = cell.GetComponent<WeaponNodeSelectorListCell>();
+			if (cellComponent.ListPosition == 3) {
+				if (Initialised) cellComponent.Animator.Play("DeactivateCell");
+				continue;
+			};
 			cell.SetActive(false);
 			IsScrolling = false;
 			ScrollQueue.Clear();

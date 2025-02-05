@@ -386,9 +386,9 @@ public abstract class ShipBase : MonoBehaviour
         return null;
     }
 
-		public void DetachWeaponsFromSlotById(int slotId)
+	public void DetachWeaponsFromSlotById(int slotId)
     {
-				WeaponSlot weaponSlot = GetWeaponSlotById(slotId);
+        WeaponSlot weaponSlot = GetWeaponSlotById(slotId);
         foreach (AttachPoint attachPoint in weaponSlot.AttachPoints)
         {
             if (!attachPoint.IsEmpty)

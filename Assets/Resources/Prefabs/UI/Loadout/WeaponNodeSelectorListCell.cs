@@ -20,7 +20,6 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 	// Events
 	public event Action<WeaponNodeSelectorListCell> OnScrollComplete;
 
-
 	public void Init(WeaponNodeSelectorList.PosData posData)
 	{
 		gameObject.transform.localScale = new Vector3(posData.Scale, posData.Scale, gameObject.transform.localScale.z); // Set scale to 75%
@@ -68,8 +67,8 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		Vector3 initialScale = gameObject.transform.localScale;
 		Vector3 initialPosition = gameObject.transform.localPosition; // Store initial position
 
-		if (posData.Position == 3) Animator.SetTrigger("ActivateCell");
-		else if (ListPosition == 3) Animator.SetTrigger("DeactivateCell");
+		if (posData.Position == 3) Animator.Play("ActivateCell"); // If shifting to ActiveCell positon
+		else if (ListPosition == 3) Animator.Play("DeactivateCell"); // If shifting from ActiveCell position
 
 		ListPosition = posData.Position;
 		// ListIndexText.text = posData.Position.ToString();

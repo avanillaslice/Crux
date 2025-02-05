@@ -23,7 +23,7 @@ public class WeaponNode : MonoBehaviour
 	private AttachPoint AttachPoint;
 	public WeaponSlot WeaponSlot;
 
-	//Temp
+	// Temp
 	int NodeId;
 
 	// Types
