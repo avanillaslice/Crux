@@ -10,6 +10,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 	public TextMeshProUGUI Name;
 	public TextMeshProUGUI Description;
 	public SpriteRenderer BackgroundComponent;
+	public Animator Animator;
 	// TEMP
 	public TextMeshProUGUI ListIndexText;
 	public int ListId;
@@ -67,8 +68,12 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		Vector3 initialScale = gameObject.transform.localScale;
 		Vector3 initialPosition = gameObject.transform.localPosition; // Store initial position
 
+		if (posData.Position == 3) Animator.SetTrigger("ActivateCell");
+		else if (ListPosition == 3) Animator.SetTrigger("DeactivateCell");
+
 		ListPosition = posData.Position;
 		// ListIndexText.text = posData.Position.ToString();
+
 		while (elapsedTime < duration)
 		{
 			elapsedTime += Time.deltaTime;
