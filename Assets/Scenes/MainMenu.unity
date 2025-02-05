@@ -362,8 +362,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: DELTA CRUCIS
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 260ed8cb2cd45fd49acecbe49aa5a271, type: 2}
-  m_sharedMaterial: {fileID: 8214760525853804798, guid: 260ed8cb2cd45fd49acecbe49aa5a271, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 26a163ee16f0d7442959d2ca70361d8b, type: 2}
+  m_sharedMaterial: {fileID: 8214760525853804798, guid: 26a163ee16f0d7442959d2ca70361d8b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -752,8 +752,8 @@ RectTransform:
   m_GameObject: {fileID: 983771816}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.86, y: 0.86, z: 0.86}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 504945813}
   - {fileID: 122665245}
@@ -762,7 +762,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0, y: -0.000015259}
+  m_AnchoredPosition: {x: -0, y: -27.67}
   m_SizeDelta: {x: 813.96, y: 256.58}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1167255950 stripped
@@ -980,8 +980,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: DELTA CRUCIS
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 260ed8cb2cd45fd49acecbe49aa5a271, type: 2}
-  m_sharedMaterial: {fileID: 8214760525853804798, guid: 260ed8cb2cd45fd49acecbe49aa5a271, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 26a163ee16f0d7442959d2ca70361d8b, type: 2}
+  m_sharedMaterial: {fileID: 8214760525853804798, guid: 26a163ee16f0d7442959d2ca70361d8b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
