@@ -104,11 +104,13 @@ public class WeaponNodeSelector : MonoBehaviour
 
 	public void EnableHoverState()
 	{
+		List.EnableHoverState();
 		// Enables SlotTypeUIComponent
 		// HoverStateComponent.SetActive(true);
 	}
 	public void DisableHoverState()
 	{
+		List.DisableHoverState();
 		// Disables SlotTypeUIComponent
 		// HoverStateComponent.SetActive(false);
 	}

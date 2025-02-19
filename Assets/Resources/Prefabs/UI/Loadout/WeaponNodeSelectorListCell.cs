@@ -1,7 +1,9 @@
 using TMPro;
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WeaponNodeSelectorListCell : MonoBehaviour
 {
@@ -9,7 +11,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 	public SpriteRenderer IconComponent;
 	public TextMeshProUGUI Name;
 	public TextMeshProUGUI Description;
-	public SpriteRenderer BackgroundComponent;
+	public List<Image> BackgroundComponents;
 	public Animator Animator;
 	// TEMP
 	public TextMeshProUGUI ListIndexText;
@@ -17,21 +19,89 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 	// Data
 	public int ListPosition;
 	public int WeaponListIndex;
+	private List<BorderComponent> BorderComponents;
+	private SpriteRenderer[] SpriteRenderers;
+	private Color DefaultNameColor;
+	private float DefaultNameGlow;
 	// Events
 	public event Action<WeaponNodeSelectorListCell> OnScrollComplete;
 
-	public void Init(WeaponNodeSelectorList.PosData posData)
+	// BorderComponent - Handles Color Swaps
+	private class BorderComponent {
+		private Image Component;
+		private Color DefaultColor;
+		private GlowEffect GlowShader;
+
+		public BorderComponent(Transform uiBorderTransform) {
+			Component = uiBorderTransform.GetComponent<Image>();
+			if (Component != null) {
+				DefaultColor = Component.color;
+			} else {
+				Debug.LogWarning($"No Image component found on {uiBorderTransform.name}");
+			}
+
+			GlowShader = uiBorderTransform.GetComponent<GlowEffect>();
+			if (GlowShader == null) {
+				GlowShader = uiBorderTransform.gameObject.AddComponent<GlowEffect>();
+			}
+			GlowShader.Init(Component, DefaultColor);
+		}
+
+		public void EnableGlow() {
+			GlowShader.SetGlow(1.5f);
+		}
+
+		public void DisableGlow() {
+			GlowShader.SetGlow(1f);
+		}
+
+		public void SetColor(Color? newColor) {
+			float alpha = Component.color.a;
+			Color toSet = newColor ?? DefaultColor;
+			toSet.a = alpha;
+			Component.color = toSet;
+			GlowShader.SetColor(toSet);
+		}
+
+		public void SetOpacity(float newOpacity) {
+			Color color = Component.color;
+			color.a = newOpacity;
+			Component.color = color;
+			GlowShader.SetColor(color);
+		}
+	}
+
+    void Awake()
+    {
+        SpriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
+        InitialiseBorder();
+
+        // Set DefaultNameColor and DefaultNameGlow
+        DefaultNameColor = Name.color;
+        DefaultNameGlow = Name.fontMaterial.GetFloat("_GlowPower");
+    }
+
+	private void InitialiseBorder() {
+		BorderComponents = new List<BorderComponent>();
+		FindUIBorderComponents(transform);
+	}
+
+	private void FindUIBorderComponents(Transform parent) {
+		foreach (Transform child in parent)
+		{
+			if (child.CompareTag("UIBorder"))
+			{
+				BorderComponents.Add(new BorderComponent(child));
+			}
+			// Recursively check the children of this child
+			FindUIBorderComponents(child);
+		}
+	}
+
+    public void Init(WeaponNodeSelectorList.PosData posData)
 	{
 		gameObject.transform.localScale = new Vector3(posData.Scale, posData.Scale, gameObject.transform.localScale.z); // Set scale to 75%
-		SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
-		foreach (SpriteRenderer renderer in spriteRenderers)
-		{
-			Color color = renderer.color;
-			color.a = posData.Color.a; // Set opacity to 50%
-			renderer.color = color;
-		}
-		Name.alpha = posData.Color.a;
-		BackgroundComponent.color = posData.Color;
+		SetCellOpacity(posData.Opacity);
 		if (ListIndexText.text == "abc") ListIndexText.text = posData.Position.ToString();
 
 		ListPosition = posData.Position;
@@ -61,14 +131,18 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		float duration = 0.25f; // Duration of the transition
 		float elapsedTime = 0f;
 
-		SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
-		float initialOpacity = spriteRenderers[0].color.a;
-		Color initialBackgroundColor = BackgroundComponent.color;
+		float initialOpacity = SpriteRenderers[0].color.a;
 		Vector3 initialScale = gameObject.transform.localScale;
 		Vector3 initialPosition = gameObject.transform.localPosition; // Store initial position
 
-		if (posData.Position == 3) Animator.Play("ActivateCell"); // If shifting to ActiveCell positon
-		else if (ListPosition == 3) Animator.Play("DeactivateCell"); // If shifting from ActiveCell position
+		if (posData.Position == 3) { // If shifting to ActiveCell positon
+			Animator.Play("ActivateCell");
+			EnableHover();
+		}
+		else if (ListPosition == 3) { // If shifting from ActiveCell position
+			Animator.Play("DeactivateCell");
+			DisableHover();
+		}
 
 		ListPosition = posData.Position;
 		// ListIndexText.text = posData.Position.ToString();
@@ -78,14 +152,9 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 			elapsedTime += Time.deltaTime;
 			float t = elapsedTime / duration;
 
-			foreach (SpriteRenderer renderer in spriteRenderers)
-			{
-				Color color = renderer.color;
-				color.a = Mathf.Lerp(initialOpacity, posData.Color.a, t);
-				renderer.color = color;
-			}
-			Name.alpha = Mathf.Lerp(initialOpacity, posData.Color.a, t);
-			BackgroundComponent.color = Color.Lerp(initialBackgroundColor, posData.Color, t);
+			float determinedAlpha = Mathf.Lerp(initialOpacity, posData.Opacity, t);
+			
+			SetCellOpacity(determinedAlpha);
 
 			gameObject.transform.localScale = Vector3.Lerp(initialScale, new Vector3(posData.Scale, posData.Scale, initialScale.z), t);
 			
@@ -98,23 +167,68 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		OnScrollComplete?.Invoke(this);
 	}
 
-	// Shifts to Default style
-	private void DisableHover()
+	private void SetCellOpacity(float targetOpacity) {
+		foreach (SpriteRenderer renderer in SpriteRenderers)
+		{
+			Color rcolor = renderer.color;
+			rcolor.a = targetOpacity;
+			renderer.color = rcolor;
+		}
+
+		foreach (BorderComponent borderComponent in BorderComponents)
+		{
+			borderComponent.SetOpacity(targetOpacity);
+		}
+
+		foreach (var backgroundComponent in BackgroundComponents)
+		{
+			Color bgcolor = backgroundComponent.color;
+			bgcolor.a = targetOpacity;
+			backgroundComponent.color = bgcolor;
+		}
+
+		Name.alpha = targetOpacity;
+	}
+
+	public void EnableHover()
+	{
+		Debug.Log("Enabling Hover State");
+		// Set the vertex color of the TextMeshPro component
+		Name.color = Color.white;
+
+		// Set the glow color in the default TextMeshPro shader
+		Material textMaterial = Name.fontMaterial;
+		textMaterial.SetColor("_GlowColor", Color.white);
+		textMaterial.SetFloat("_GlowPower", 1.0f); // Set the glow intensity to full
+		foreach (var borderComponent in BorderComponents)
+		{
+			borderComponent.SetColor(Color.white);
+			borderComponent.EnableGlow();
+		}
+	}
+
+	public void DisableHover()
+	{
+		// Set the vertex color of the TextMeshPro component
+		Name.color = DefaultNameColor;
+
+		// Set the glow color in the default TextMeshPro shader
+		Material textMaterial = Name.fontMaterial;
+		textMaterial.SetColor("_GlowColor", DefaultNameColor);
+		textMaterial.SetFloat("_GlowPower", DefaultNameGlow); // Set the glow intensity to full
+		foreach (var borderComponent in BorderComponents)
+		{
+			borderComponent.SetColor(null);
+			borderComponent.DisableGlow();
+		}
+	}
+
+	public void DisableActive()
 	{
 	}
 
-	// Shifts to Hover from Default
-	private void EnableHover()
-	{
-	}
 
-	// Shifts to Hover from Active
-	private void DisableActive()
-	{
-	}
-
-	// Shifts to Active from Hover
-	private void EnableActive()
+	public void EnableActive()
 	{
 	}
 }

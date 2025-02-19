@@ -7,6 +7,7 @@ TagManager:
   - Enemy
   - Shield
   - Secondary Camera
+  - UIBorder
   layers:
   - Default
   - TransparentFX
