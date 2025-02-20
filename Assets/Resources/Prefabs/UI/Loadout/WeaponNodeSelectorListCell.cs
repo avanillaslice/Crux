@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class WeaponNodeSelectorListCell : MonoBehaviour
 {
@@ -34,16 +35,12 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 		public BorderComponent(Transform uiBorderTransform) {
 			Component = uiBorderTransform.GetComponent<Image>();
-			if (Component != null) {
-				DefaultColor = Component.color;
-			} else {
-				Debug.LogWarning($"No Image component found on {uiBorderTransform.name}");
-			}
+			if (Component != null) DefaultColor = Component.color;
+			else Debug.LogWarning($"No Image component found on {uiBorderTransform.name}");
 
 			GlowShader = uiBorderTransform.GetComponent<GlowEffect>();
-			if (GlowShader == null) {
-				GlowShader = uiBorderTransform.gameObject.AddComponent<GlowEffect>();
-			}
+			if (GlowShader == null) GlowShader = uiBorderTransform.gameObject.AddComponent<GlowEffect>();
+
 			GlowShader.Init(Component, DefaultColor);
 		}
 
@@ -56,18 +53,18 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		}
 
 		public void SetColor(Color? newColor) {
-			float alpha = Component.color.a;
-			Color toSet = newColor ?? DefaultColor;
-			toSet.a = alpha;
-			Component.color = toSet;
-			GlowShader.SetColor(toSet);
+			Color targetColor = newColor ?? DefaultColor;
+			// targetColor.a = Component.color.a; // Preserve existing alpha
+			// Component.color = targetColor;
+			GlowShader.SetColor(targetColor);
 		}
 
 		public void SetOpacity(float newOpacity) {
-			Color color = Component.color;
-			color.a = newOpacity;
-			Component.color = color;
-			GlowShader.SetColor(color);
+			// Color color = Component.color;
+			// color.a = newOpacity;
+			// Component.color = color;
+			// GlowShader.SetColor(color);
+			GlowShader.SetOpacity(newOpacity);
 		}
 	}
 
@@ -137,7 +134,6 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 		if (posData.Position == 3) { // If shifting to ActiveCell positon
 			Animator.Play("ActivateCell");
-			EnableHover();
 		}
 		else if (ListPosition == 3) { // If shifting from ActiveCell position
 			Animator.Play("DeactivateCell");
@@ -152,17 +148,15 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 			elapsedTime += Time.deltaTime;
 			float t = elapsedTime / duration;
 
-			float determinedAlpha = Mathf.Lerp(initialOpacity, posData.Opacity, t);
-			
-			SetCellOpacity(determinedAlpha);
-
+			// Lerp Opacity, Scale, and YPos
+			SetCellOpacity(Mathf.Lerp(initialOpacity, posData.Opacity, t));
 			gameObject.transform.localScale = Vector3.Lerp(initialScale, new Vector3(posData.Scale, posData.Scale, initialScale.z), t);
-			
-			// Update position to the new Y position
 			gameObject.transform.localPosition = new Vector3(initialPosition.x, Mathf.Lerp(initialPosition.y, posData.YPos, t), initialPosition.z);
 
 			yield return null;
 		}
+
+		if (ListPosition == 3) EnableHover();
 
 		OnScrollComplete?.Invoke(this);
 	}
@@ -171,8 +165,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		foreach (SpriteRenderer renderer in SpriteRenderers)
 		{
 			Color rcolor = renderer.color;
-			rcolor.a = targetOpacity;
-			renderer.color = rcolor;
+			renderer.color = new Color(rcolor.r, rcolor.g, rcolor.b, targetOpacity);
 		}
 
 		foreach (BorderComponent borderComponent in BorderComponents)
@@ -183,8 +176,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 		foreach (var backgroundComponent in BackgroundComponents)
 		{
 			Color bgcolor = backgroundComponent.color;
-			bgcolor.a = targetOpacity;
-			backgroundComponent.color = bgcolor;
+			backgroundComponent.color = new Color(bgcolor.r, bgcolor.g, bgcolor.b, targetOpacity);
 		}
 
 		Name.alpha = targetOpacity;
