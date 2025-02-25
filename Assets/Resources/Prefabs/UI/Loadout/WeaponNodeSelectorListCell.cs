@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 
 public class WeaponNodeSelectorListCell : MonoBehaviour
 {
@@ -54,16 +53,10 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 		public void SetColor(Color? newColor) {
 			Color targetColor = newColor ?? DefaultColor;
-			// targetColor.a = Component.color.a; // Preserve existing alpha
-			// Component.color = targetColor;
 			GlowShader.SetColor(targetColor);
 		}
 
 		public void SetOpacity(float newOpacity) {
-			// Color color = Component.color;
-			// color.a = newOpacity;
-			// Component.color = color;
-			// GlowShader.SetColor(color);
 			GlowShader.SetOpacity(newOpacity);
 		}
 	}
