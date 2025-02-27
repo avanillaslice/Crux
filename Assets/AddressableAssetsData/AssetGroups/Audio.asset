@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Audio
+  m_EditorClassIdentifier: 
+  m_GroupName: Audio
+  m_GUID: 8aaa6d01e7cf9b34dade8ec6e224f4c7
+  m_SerializeEntries:
+  - m_GUID: 0887ed857d204f844a7c9664e0a10d56
+    m_Address: BossMusic
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BossMusic
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c418642292b963f4994b44e15469e6ee
+    m_Address: SoundEffects
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - SoundEffects
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ead3e3eb81f92b845b539a81601b2d8b
+    m_Address: BGM
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2a8507ba647f3344c8b09f27b14d64f8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 4e6fbd83b7625c5468bc8e2d3471b536, type: 2}
+    - {fileID: 11400000, guid: 19339b772b9626e4ebe4a24bb17fa824, type: 2}

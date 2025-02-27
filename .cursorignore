@@ -1,31 +1,40 @@
 # Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+# Common Unity file types
 *.prefab
 *.shader
 *.shadergraph
 *.inputactions
-*.md
-*.conf
-*.txt
-*.unity
 *.anim
 *.meta
 *.asset
 *.controller
-*.0
 *.mat
+*.unity
+
+# Temporary and configuration files
+*.0
+*.md
+*.conf
+*.txt
+
+# Version control and IDE specific directories
 .plastic/
 .vscode/
-Assets/Art/
-Assets/Fonts/
-Assets/GameInputControllerIconsFree/
-Assets/Pixel Spaceships for SHMUP/
-Assets/Scenes/
-Assets/SimplePixelUI/
-Assets/SpaceGameIconSet/
-Assets/TextMesh Pro/
-Assets/YamlDotNet/
+
+# Project specific directories
+Assets/AddressableAssetsData/
+Assets/Project/Media/
+Assets/Project/Scenes/
+
+# Specific utility scripts (ensure these are not needed for indexing)
+Assets/Project/Utilities/GameControls.cs
+Assets/Project/Utilities/ReflectionUtility.cs
+
+# Third-party and package directories
+Assets/ThirdParty/
 Packages/
+
+# Global suppressions and project settings
 GlobalSuppressions.cs
-Assets/Resources/Audio/
-Assets/Resources/Sprites/
 ProjectSettings/

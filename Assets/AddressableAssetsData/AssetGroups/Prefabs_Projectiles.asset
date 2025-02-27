@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Prefabs_Projectiles
+  m_EditorClassIdentifier: 
+  m_GroupName: Prefabs_Projectiles
+  m_GUID: 9a14dcedbe93e0a40b4fc691df53e3f7
+  m_SerializeEntries:
+  - m_GUID: 0b197c7fdfb037f478d42e2cac585efc
+    m_Address: HomingMissile
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6295b4bb31ef8464a865a8ab35eaadad
+    m_Address: Plasma
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6f6ff1a97e8cd874fb2c69561577b9d4
+    m_Address: ElectricExplosionChain
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a04d760d6366c1e43a0363346c173ac7
+    m_Address: Missile
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a315ea9e26616e547a5ff41ed09e1053
+    m_Address: PlasmaHeavy
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b8af780a25bea1a41bdb6c5a2ff73114
+    m_Address: ElectricExplosion
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1163ff07be973146a8910a1927e75ba
+    m_Address: PlasmaLight
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2a8507ba647f3344c8b09f27b14d64f8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 1d9796970976be04e8e0deea0e5f0f7c, type: 2}
+    - {fileID: 11400000, guid: 01f70193b35637e44bda3b4dab58118d, type: 2}

@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Prefabs_Weapons
+  m_EditorClassIdentifier: 
+  m_GroupName: Prefabs_Weapons
+  m_GUID: 8dbe4e1708e4e77478851e96bc2eabc6
+  m_SerializeEntries:
+  - m_GUID: 185392d383b7c8243b275b735c6009b8
+    m_Address: DroneShieldEffect
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 32422a22034f10844ab6b402f38d7b3e
+    m_Address: ElectroShield
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 71a598d5ca5429c4fa9f016244c4dc3e
+    m_Address: Cannon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 809730f18bf80954c804f1a6d32d14af
+    m_Address: TurretSmall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf1a907ae5f1ce74b809d8ab46b51bfa
+    m_Address: ElectroShieldEffect
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c6834141b33bf7f41a768754c3871265
+    m_Address: DroneShield
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dfb0038e95c30e34c97faec75d513756
+    m_Address: HomingMissileLauncher
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6c7890cb9857874083ecbacee940fa2
+    m_Address: MissileLauncher
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f277810b29f05f143ad49420cc364e65
+    m_Address: CannonSmall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2a8507ba647f3344c8b09f27b14d64f8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 5c3d8b63713dea0489541b4cab65335d, type: 2}
+    - {fileID: 11400000, guid: 4ddf79efffa6f834088f0771c9efad81, type: 2}
