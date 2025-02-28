@@ -118,7 +118,7 @@ public class WeaponNodeSelectorListCell : MonoBehaviour
 
 	private IEnumerator TransitionToPosition(WeaponNodeSelectorList.PosData posData)
 	{
-		float duration = 0.25f; // Duration of the transition
+		float duration = 0.15f; // Duration of the transition
 		float elapsedTime = 0f;
 
 		float initialOpacity = SpriteRenderers[0].color.a;
