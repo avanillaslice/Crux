@@ -1,23 +1,27 @@
 using System;
+using Project.Ships;
 
-public abstract class ToggleFireWeaponBase : WeaponBase
+namespace Project.Combat.Weapons
 {
-    public override void AttemptFire(bool isEnemy)
+    public abstract class ToggleFireWeaponBase : WeaponBase
     {
-        Fire(isEnemy);
-    }
+        public override void AttemptFire(bool isEnemy)
+        {
+            Fire(isEnemy);
+        }
 
-    public override void AttemptCeaseFire()
-    {
-        ShipBase ship = GetComponentInParent<ShipBase>();
-        CeaseFire(OnCeaseFireCompleted);
-    }
+        public override void AttemptCeaseFire()
+        {
+            ShipBase ship = GetComponentInParent<ShipBase>();
+            CeaseFire(OnCeaseFireCompleted);
+        }
 
-    protected abstract void Fire(bool isEnemy);
-    protected abstract void CeaseFire(Action onCompleted);
-    protected virtual void OnCeaseFireCompleted()
-    {
-        ShipBase ship = GetComponentInParent<ShipBase>();
-        if (ship != null) ship.HandleSpecialFireCeased();
+        protected abstract void Fire(bool isEnemy);
+        protected abstract void CeaseFire(Action onCompleted);
+        protected virtual void OnCeaseFireCompleted()
+        {
+            ShipBase ship = GetComponentInParent<ShipBase>();
+            if (ship != null) ship.HandleSpecialFireCeased();
+        }
     }
 }

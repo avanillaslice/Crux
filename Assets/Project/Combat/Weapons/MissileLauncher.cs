@@ -1,11 +1,14 @@
-public class MissileLauncher : SingleFireWeaponBase
+namespace Project.Combat.Weapons
 {
-    // Initialize default values
-    protected void Awake()
+    public class MissileLauncher : SingleFireWeaponBase
     {
-        hasAnimation = false;
-        CurrentFireRate = BaseFireRate;
-        WeaponType = WeaponType.Primary;
-    }
+        // Initialize default values
+        protected void Awake()
+        {
+            hasAnimation = false;
+            CurrentFireRate = BaseFireRate;
+            WeaponType = WeaponType.Primary;
+        }
 
+    }
 }

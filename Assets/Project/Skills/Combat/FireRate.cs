@@ -1,51 +1,54 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class FireRate : SkillBase
+namespace Project.Skills.Combat
 {
-    public override string SkillName => "Fire Rate";
-    public override string Description => "Increases the rate of fire for the ship's weapons.";
-    public override int MaxLevel => 3;
-
-    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public class FireRate : SkillBase
     {
-        { 1, 0.05f },
-        { 2, 0.1f },
-        { 3, 0.15f }
-    };
+        public override string SkillName => "Fire Rate";
+        public override string Description => "Increases the rate of fire for the ship's weapons.";
+        public override int MaxLevel => 3;
 
-    public FireRate(int level) : base(level) { }
-
-    public override void Activate()
-    {
-        TargetShip.OnSpawn += OnSpawn;
-    }
-
-    private float DetermineFireRateModifier()
-    {
-        return GetAmountAffected(Level);
-    }
-
-    private void OnSpawn()
-    {
-        TargetShip.FireRateModifier += DetermineFireRateModifier();
-    }
-
-    public override void Deactivate()
-    {
-        // Implementation for FireRate deactivation
-    }
-
-    public static float GetAmountAffected(int level)
-    {
-        if (levelEffects.TryGetValue(level, out float effect))
+        public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
         {
-            return effect;
+            { 1, 0.05f },
+            { 2, 0.1f },
+            { 3, 0.15f }
+        };
+
+        public FireRate(int level) : base(level) { }
+
+        public override void Activate()
+        {
+            TargetShip.OnSpawn += OnSpawn;
         }
-        else
+
+        private float DetermineFireRateModifier()
         {
-            Debug.LogError("Fire Rate level is invalid");
-            return 0f; // Default value or error handling
+            return GetAmountAffected(Level);
+        }
+
+        private void OnSpawn()
+        {
+            TargetShip.FireRateModifier += DetermineFireRateModifier();
+        }
+
+        public override void Deactivate()
+        {
+            // Implementation for FireRate deactivation
+        }
+
+        public static float GetAmountAffected(int level)
+        {
+            if (levelEffects.TryGetValue(level, out float effect))
+            {
+                return effect;
+            }
+            else
+            {
+                Debug.LogError("Fire Rate level is invalid");
+                return 0f; // Default value or error handling
+            }
         }
     }
 }

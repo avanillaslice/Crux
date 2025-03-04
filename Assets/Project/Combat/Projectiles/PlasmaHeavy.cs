@@ -1,55 +1,60 @@
-using UnityEngine;
 using System.Collections;
+using Project.Core;
+using Project.Ships;
+using UnityEngine;
 
-public class PlasmaHeavy : ProjectileBase
+namespace Project.Combat.Projectiles
 {
-    public float SplitTime = 1f; // Adjustable time before splitting
-    public int PlasmaCount = 3; // Adjustable number of Plasma projectiles to spawn
-    public GameObject PlasmaPrefab; // Assign this in the inspector
-
-    void Awake()
+    public class PlasmaHeavy : ProjectileBase
     {
-        PlasmaPrefab = AssetManager.GetProjectilePrefab("Plasma");
-        if (PlasmaPrefab == null) {
-            Debug.LogError("PlasmaHeavy: PlasmaPrefab is not assigned!");
-        }
-    }
+        public float SplitTime = 1f; // Adjustable time before splitting
+        public int PlasmaCount = 3; // Adjustable number of Plasma projectiles to spawn
+        public GameObject PlasmaPrefab; // Assign this in the inspector
 
-    protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
-    {
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-
-        // Set the velocity of the projectile
-        rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
-
-        // Start the coroutine for splitting
-        StartCoroutine(SplitAfterDelay());
-    }
-
-    private IEnumerator SplitAfterDelay()
-    {
-        yield return new WaitForSeconds(SplitTime);
-
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        Vector2 currentDirection = rb.linearVelocity.normalized;
-        float angleStep = 90f / (PlasmaCount - 1); // Maximum 45 degrees on each side
-
-        for (int i = 0; i < PlasmaCount; i++)
+        void Awake()
         {
-            float angle = -45f + (angleStep * i);
-            Vector2 newDirection = Quaternion.Euler(0, 0, angle) * currentDirection;
-
-            GameObject plasmaObj = Instantiate(PlasmaPrefab, transform.position, Quaternion.identity);
-            Plasma plasmaScript = plasmaObj.GetComponent<Plasma>();
-            
-            if (plasmaScript != null)
-            {
-                Vector2 initialVelocity = rb != null ? rb.linearVelocity : Vector2.zero;
-                // ! Replace with shrapnel projectile to prevent speed modifier conflicts
-                plasmaScript.Initialize(FiredByEnemy, 0.75f, DamageModifier, PiercingModifier, CriticalHitChanceModifier, initialVelocity, RelativeSide.Center, newDirection);
+            PlasmaPrefab = AssetManager.GetProjectilePrefab("Plasma");
+            if (PlasmaPrefab == null) {
+                Debug.LogError("PlasmaHeavy: PlasmaPrefab is not assigned!");
             }
         }
 
-        Destroy(gameObject);
+        protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
+        {
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+
+            // Set the velocity of the projectile
+            rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
+
+            // Start the coroutine for splitting
+            StartCoroutine(SplitAfterDelay());
+        }
+
+        private IEnumerator SplitAfterDelay()
+        {
+            yield return new WaitForSeconds(SplitTime);
+
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            Vector2 currentDirection = rb.linearVelocity.normalized;
+            float angleStep = 90f / (PlasmaCount - 1); // Maximum 45 degrees on each side
+
+            for (int i = 0; i < PlasmaCount; i++)
+            {
+                float angle = -45f + (angleStep * i);
+                Vector2 newDirection = Quaternion.Euler(0, 0, angle) * currentDirection;
+
+                GameObject plasmaObj = Instantiate(PlasmaPrefab, transform.position, Quaternion.identity);
+                Plasma plasmaScript = plasmaObj.GetComponent<Plasma>();
+            
+                if (plasmaScript != null)
+                {
+                    Vector2 initialVelocity = rb != null ? rb.linearVelocity : Vector2.zero;
+                    // ! Replace with shrapnel projectile to prevent speed modifier conflicts
+                    plasmaScript.Initialize(FiredByEnemy, 0.75f, DamageModifier, PiercingModifier, CriticalHitChanceModifier, initialVelocity, RelativeSide.Center, newDirection);
+                }
+            }
+
+            Destroy(gameObject);
+        }
     }
 }

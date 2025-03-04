@@ -1,81 +1,84 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class ShieldRegen : SkillBase
+namespace Project.Skills.Engineering
 {
-    public override string SkillName => "Shield Regen";
-    public override string Description => "Increases the shield regeneration rate.";
-    public override int MaxLevel => 3;
-
-    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public class ShieldRegen : SkillBase
     {
-        { 1, 0.025f }, // 2.5% per second
-        { 2, 0.05f },  // 5% per second
-        { 3, 0.1f }    // 10% per second
-    };
+        public override string SkillName => "Shield Regen";
+        public override string Description => "Increases the shield regeneration rate.";
+        public override int MaxLevel => 3;
 
-    private bool isRegenerating = false;
-    private Coroutine regenCoroutine;
-
-    public ShieldRegen(int level) : base(level) { }
-
-    public override void Activate()
-    {
-        TargetShip.OnHit += OnHit;
-        TargetShip.OnUpdate += OnUpdate;
-    }
-
-    private float DetermineRegenRate()
-    {
-        return GetAmountAffected(Level);
-    }
-
-    private void OnHit()
-    {
-        isRegenerating = false;
-        if (regenCoroutine != null)
+        public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
         {
-            TargetShip.StopCoroutine(regenCoroutine);
+            { 1, 0.025f }, // 2.5% per second
+            { 2, 0.05f },  // 5% per second
+            { 3, 0.1f }    // 10% per second
+        };
+
+        private bool isRegenerating = false;
+        private Coroutine regenCoroutine;
+
+        public ShieldRegen(int level) : base(level) { }
+
+        public override void Activate()
+        {
+            TargetShip.OnHit += OnHit;
+            TargetShip.OnUpdate += OnUpdate;
         }
-        regenCoroutine = TargetShip.StartCoroutine(StartRegenCountdown());
-    }
 
-    private IEnumerator StartRegenCountdown()
-    {
-        yield return new WaitForSeconds(5f);
-        isRegenerating = true;
-    }
-
-    private void OnUpdate()
-    {
-        if (isRegenerating && TargetShip.Shield < TargetShip.MaxShield)
+        private float DetermineRegenRate()
         {
-            float regenAmount = TargetShip.MaxShield * DetermineRegenRate() * Time.deltaTime;
-            TargetShip.AddShield(regenAmount);
+            return GetAmountAffected(Level);
         }
-    }
 
-    public override void Deactivate()
-    {
-        // TargetShip.OnHit -= OnHit;
-        // TargetShip.OnUpdate -= OnUpdate;
-        // if (regenCoroutine != null)
-        // {
-        //     TargetShip.StopCoroutine(regenCoroutine);
-        // }
-    }
-
-    public static float GetAmountAffected(int level)
-    {
-        if (levelEffects.TryGetValue(level, out float effect))
+        private void OnHit()
         {
-            return effect;
+            isRegenerating = false;
+            if (regenCoroutine != null)
+            {
+                TargetShip.StopCoroutine(regenCoroutine);
+            }
+            regenCoroutine = TargetShip.StartCoroutine(StartRegenCountdown());
         }
-        else
+
+        private IEnumerator StartRegenCountdown()
         {
-            Debug.LogError("Shield Regen level is invalid");
-            return 0.025f; // Default value or error handling
+            yield return new WaitForSeconds(5f);
+            isRegenerating = true;
+        }
+
+        private void OnUpdate()
+        {
+            if (isRegenerating && TargetShip.Shield < TargetShip.MaxShield)
+            {
+                float regenAmount = TargetShip.MaxShield * DetermineRegenRate() * Time.deltaTime;
+                TargetShip.AddShield(regenAmount);
+            }
+        }
+
+        public override void Deactivate()
+        {
+            // TargetShip.OnHit -= OnHit;
+            // TargetShip.OnUpdate -= OnUpdate;
+            // if (regenCoroutine != null)
+            // {
+            //     TargetShip.StopCoroutine(regenCoroutine);
+            // }
+        }
+
+        public static float GetAmountAffected(int level)
+        {
+            if (levelEffects.TryGetValue(level, out float effect))
+            {
+                return effect;
+            }
+            else
+            {
+                Debug.LogError("Shield Regen level is invalid");
+                return 0.025f; // Default value or error handling
+            }
         }
     }
 }

@@ -1,40 +1,44 @@
+using Project.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GlowEffect : MonoBehaviour
+namespace Project.UI.Components
 {
-    private Material GlowMaterial;
-    private Image ImageComponent;
-
-    void Awake()
+    public class GlowEffect : MonoBehaviour
     {
-        // Load the CellBorderGlowMat using AssetManager
-        GlowMaterial = AssetManager.LoadAsset<Material>("CellBorderGlowMat");
+        private Material GlowMaterial;
+        private Image ImageComponent;
 
-        if (GlowMaterial) GlowMaterial = new Material(GlowMaterial); // Clone to avoid modifying all materials
-        else Debug.LogError("CellBorderGlowMat not found in Addressables");
-    }
+        void Awake()
+        {
+            // Load the CellBorderGlowMat using AssetManager
+            GlowMaterial = AssetManager.LoadAsset<Material>("CellBorderGlowMat");
 
-    public void Init(Image image, Color defaultColor)
-    {
-        ImageComponent = image;
-        ImageComponent.material = GlowMaterial;
-        SetColor(defaultColor);
-        SetGlow(1f);
-    }
+            if (GlowMaterial) GlowMaterial = new Material(GlowMaterial); // Clone to avoid modifying all materials
+            else Debug.LogError("CellBorderGlowMat not found in Addressables");
+        }
 
-    public void SetColor(Color color)
-    {
-        GlowMaterial.SetColor("_BaseColor", color);
-    }
+        public void Init(Image image, Color defaultColor)
+        {
+            ImageComponent = image;
+            ImageComponent.material = GlowMaterial;
+            SetColor(defaultColor);
+            SetGlow(1f);
+        }
 
-    public void SetOpacity(float alpha)
-    {
-        GlowMaterial.SetFloat("_Alpha", alpha);
-    }
+        public void SetColor(Color color)
+        {
+            GlowMaterial.SetColor("_BaseColor", color);
+        }
 
-    public void SetGlow(float glowAmt)
-    {
-        GlowMaterial.SetFloat("_GlowIntensity", glowAmt);
+        public void SetOpacity(float alpha)
+        {
+            GlowMaterial.SetFloat("_Alpha", alpha);
+        }
+
+        public void SetGlow(float glowAmt)
+        {
+            GlowMaterial.SetFloat("_GlowIntensity", glowAmt);
+        }
     }
 }

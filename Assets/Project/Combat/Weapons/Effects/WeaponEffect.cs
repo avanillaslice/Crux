@@ -1,52 +1,57 @@
+using Project.Core;
+using Project.Ships;
 using UnityEngine;
 
-public class WeaponEffect : EffectBase
+namespace Project.Combat.Weapons.Effects
 {
-    private WeaponSlot AssignedWeaponSlot;
-    public override void Activate(GameObject targetShip)
+    public class WeaponEffect : EffectBase
     {
-        TargetShip = targetShip;
-
-        if (TargetShip.CompareTag("Player"))
+        private WeaponSlot AssignedWeaponSlot;
+        public override void Activate(GameObject targetShip)
         {
-            LoadoutManager.UnlockWeapon(SubType.ToString());
+            TargetShip = targetShip;
 
-            GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
-            if (weaponPrefab == null) return;
-
-            AssignedWeaponSlot = LoadoutManager.EquipWeapon(weaponPrefab, false);
-
-            if (AssignedWeaponSlot != null)
+            if (TargetShip.CompareTag("Player"))
             {
-                MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
-                if (AssignedWeaponSlot.WeaponType == WeaponType.Special) GameManager.HandleSpecialWeaponUnlock();
+                LoadoutManager.UnlockWeapon(SubType.ToString());
+
+                GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
+                if (weaponPrefab == null) return;
+
+                AssignedWeaponSlot = LoadoutManager.EquipWeapon(weaponPrefab, false);
+
+                if (AssignedWeaponSlot != null)
+                {
+                    MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
+                    if (AssignedWeaponSlot.WeaponType == WeaponType.Special) GameManager.HandleSpecialWeaponUnlock();
+                }
+            }
+            else
+            {
+                GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
+                if (weaponPrefab == null)
+                {
+                    Debug.LogError("Weapon prefab not found for " + targetShip.name);
+                }
+
+                ShipBase shipComponent = TargetShip.GetComponent<ShipBase>();
+                AssignedWeaponSlot = shipComponent.AttemptWeaponAttachment(weaponPrefab, false);
+            }
+
+            if (AssignedWeaponSlot == null) return;
+
+            if (Expiry == ExpiryType.Time && Duration > 0) {
+                Debug.Log($"Expiry detected for {gameObject.name} with duration {Duration}");
+                CoroutineManager.Inst.DeactivateEffectAfterDelay(this, Duration);
             }
         }
-        else
-        {
-            GameObject weaponPrefab = AssetManager.GetWeaponPrefab(SubType.ToString());
-            if (weaponPrefab == null)
-            {
-               Debug.LogError("Weapon prefab not found for " + targetShip.name);
-            }
 
+        //! REQUIRES PLAYER CENTRIC - LOADOUT MANAGER LOGIC
+        public override void Deactivate()
+        {
+            Debug.Log("Deactivating");
             ShipBase shipComponent = TargetShip.GetComponent<ShipBase>();
-            AssignedWeaponSlot = shipComponent.AttemptWeaponAttachment(weaponPrefab, false);
+            shipComponent.DetachWeaponsFromSlot(AssignedWeaponSlot);
         }
-
-        if (AssignedWeaponSlot == null) return;
-
-        if (Expiry == ExpiryType.Time && Duration > 0) {
-            Debug.Log($"Expiry detected for {gameObject.name} with duration {Duration}");
-            CoroutineManager.Inst.DeactivateEffectAfterDelay(this, Duration);
-        }
-    }
-
-    //! REQUIRES PLAYER CENTRIC - LOADOUT MANAGER LOGIC
-    public override void Deactivate()
-    {
-        Debug.Log("Deactivating");
-        ShipBase shipComponent = TargetShip.GetComponent<ShipBase>();
-        shipComponent.DetachWeaponsFromSlot(AssignedWeaponSlot);
     }
 }

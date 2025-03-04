@@ -1,11 +1,14 @@
-public class CannonSmall : SingleFireWeaponBase
+namespace Project.Combat.Weapons
 {
-    // Initialize default values
-    protected void Awake()
+    public class CannonSmall : SingleFireWeaponBase
     {
-        hasAnimation = false;
-        CurrentFireRate = BaseFireRate;
-        WeaponType = WeaponType.Primary;
-    }
+        // Initialize default values
+        protected void Awake()
+        {
+            hasAnimation = false;
+            CurrentFireRate = BaseFireRate;
+            WeaponType = WeaponType.Primary;
+        }
 
+    }
 }

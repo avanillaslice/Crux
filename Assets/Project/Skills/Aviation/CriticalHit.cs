@@ -1,51 +1,54 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class CriticalHit : SkillBase
+namespace Project.Skills.Aviation
 {
-    public override string SkillName => "Critical Hit";
-    public override string Description => "Increases the chance of dealing critical damage.";
-    public override int MaxLevel => 3;
-
-    public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
+    public class CriticalHit : SkillBase
     {
-        { 1, 0.1f },
-        { 2, 0.15f },
-        { 3, 0.2f }
-    };
+        public override string SkillName => "Critical Hit";
+        public override string Description => "Increases the chance of dealing critical damage.";
+        public override int MaxLevel => 3;
 
-    public CriticalHit(int level) : base(level) { }
-
-    public override void Activate()
-    {
-        TargetShip.OnSpawn += OnSpawn;
-    }
-
-    private float DetermineCriticalHitModifier()
-    {
-        return GetAmountAffected(Level);
-    }
-
-    private void OnSpawn()
-    {
-        TargetShip.CriticalHitChanceModifier += DetermineCriticalHitModifier();
-    }
-
-    public override void Deactivate()
-    {
-        // Implementation for CriticalHit deactivation
-    }
-
-    public static float GetAmountAffected(int level)
-    {
-        if (levelEffects.TryGetValue(level, out float effect))
+        public static readonly Dictionary<int, float> levelEffects = new Dictionary<int, float>
         {
-            return effect;
+            { 1, 0.1f },
+            { 2, 0.15f },
+            { 3, 0.2f }
+        };
+
+        public CriticalHit(int level) : base(level) { }
+
+        public override void Activate()
+        {
+            TargetShip.OnSpawn += OnSpawn;
         }
-        else
+
+        private float DetermineCriticalHitModifier()
         {
-            Debug.LogError("Critical Hit level is invalid");
-            return 0f; // Default value or error handling
+            return GetAmountAffected(Level);
+        }
+
+        private void OnSpawn()
+        {
+            TargetShip.CriticalHitChanceModifier += DetermineCriticalHitModifier();
+        }
+
+        public override void Deactivate()
+        {
+            // Implementation for CriticalHit deactivation
+        }
+
+        public static float GetAmountAffected(int level)
+        {
+            if (levelEffects.TryGetValue(level, out float effect))
+            {
+                return effect;
+            }
+            else
+            {
+                Debug.LogError("Critical Hit level is invalid");
+                return 0f; // Default value or error handling
+            }
         }
     }
 }

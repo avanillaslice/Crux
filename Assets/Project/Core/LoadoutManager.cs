@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Project.Combat.Weapons;
+using Project.Ships;
 using UnityEngine;
 
 /*
@@ -7,152 +9,155 @@ LoadoutManager
 - Manages the player's inventory of unlocked weapons
 */
 
-public static class LoadoutManager
+namespace Project.Core
 {
-	// Dictionary of unlocked weapons (prefabs)
-	private static Dictionary<string, GameObject> Inventory = new Dictionary<string, GameObject>();
-
-	// Dictionary of WeaponSlot IDs and their associated prefabs
-	private static Dictionary<int, GameObject> Loadout = new Dictionary<int, GameObject>();
-
-	// Compiles Inventory from InitialPlayerData
-	public static void InitialiseLoadout()
+	public static class LoadoutManager
 	{
-		Inventory.Clear();
-		Loadout.Clear();
+		// Dictionary of unlocked weapons (prefabs)
+		private static Dictionary<string, GameObject> Inventory = new Dictionary<string, GameObject>();
 
-		InitialShipData initialShipData = GameConfig.GetInitialPlayerData();
-		if (initialShipData == null)
+		// Dictionary of WeaponSlot IDs and their associated prefabs
+		private static Dictionary<int, GameObject> Loadout = new Dictionary<int, GameObject>();
+
+		// Compiles Inventory from InitialPlayerData
+		public static void InitialiseLoadout()
 		{
-			Debug.LogError("[LoadoutManager] Failed to fetch InitialPlayerData");
-			return;
-		}
+			Inventory.Clear();
+			Loadout.Clear();
 
-		// Iterate through weapons in initialShipData
-		foreach (var weaponEntry in initialShipData.Weapons)
-		{
-			if (weaponEntry.Value == false) continue;
-
-			// Fetch the prefab
-			GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponEntry.Key);
-			if (weaponPrefab == null)
+			InitialShipData initialShipData = GameConfig.GetInitialPlayerData();
+			if (initialShipData == null)
 			{
-				Debug.LogError($"Weapon prefab not found for {weaponEntry.Key}");
-				continue;
+				Debug.LogError("[LoadoutManager] Failed to fetch InitialPlayerData");
+				return;
 			}
 
-			// Add to inventory
-			Inventory[weaponEntry.Key] = weaponPrefab;
+			// Iterate through weapons in initialShipData
+			foreach (var weaponEntry in initialShipData.Weapons)
+			{
+				if (weaponEntry.Value == false) continue;
+
+				// Fetch the prefab
+				GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponEntry.Key);
+				if (weaponPrefab == null)
+				{
+					Debug.LogError($"Weapon prefab not found for {weaponEntry.Key}");
+					continue;
+				}
+
+				// Add to inventory
+				Inventory[weaponEntry.Key] = weaponPrefab;
+			}
 		}
-	}
 
-	// Attaches weapon to player ship
-	public static void InitialiseWeapons()
-	{
-		if (Loadout.Count > 0) AttachWeaponsFromLoadout();
-		else AttachWeaponsFromInventory();
-	}
-
-	// Iterates through the active loadout and attaches weapons to player ship
-	private static void AttachWeaponsFromLoadout()
-	{
-		foreach (var loadoutEntry in Loadout)
+		// Attaches weapon to player ship
+		public static void InitialiseWeapons()
 		{
-			int weaponSlotId = loadoutEntry.Key;
-			GameObject weaponPrefab = loadoutEntry.Value;
+			if (Loadout.Count > 0) AttachWeaponsFromLoadout();
+			else AttachWeaponsFromInventory();
+		}
+
+		// Iterates through the active loadout and attaches weapons to player ship
+		private static void AttachWeaponsFromLoadout()
+		{
+			foreach (var loadoutEntry in Loadout)
+			{
+				int weaponSlotId = loadoutEntry.Key;
+				GameObject weaponPrefab = loadoutEntry.Value;
+				WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotId, weaponPrefab);
+				if (weaponSlot == null) UnassignWeaponSlot(weaponSlotId);
+			}
+		}
+
+		// Iterates through the inventory and attempts to attach all weapons to player ship
+		private static void AttachWeaponsFromInventory()
+		{
+			if (Inventory.Count == 0)
+			{
+				Debug.LogWarning("[LoadoutManager] Inventory is empty. No weapons to initialize.");
+				return;
+			}
+
+			foreach (var weaponEntry in Inventory)
+			{
+				GameObject weaponPrefab = weaponEntry.Value;
+				WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, false);
+				if (weaponSlot != null) AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
+			}
+		}
+
+		// Adds the weaponPrefab to the inventory
+		public static void UnlockWeapon(string weaponPrefabName)
+		{
+			if (Inventory.ContainsKey(weaponPrefabName)) return;
+			GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponPrefabName);
+			if (weaponPrefab == null) return;
+			Inventory[weaponPrefabName] = weaponPrefab;
+		}
+
+		// Equips the weaponPrefab to the player ship, does not add to inventory
+		public static WeaponSlot EquipWeapon(GameObject weaponPrefab, bool force)
+		{
+			WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, force);
+			if (weaponSlot == null) return null;
+			AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
+			return weaponSlot;
+		}
+		public static WeaponSlot EquipWeaponToSlot(GameObject weaponPrefab, int weaponSlotId)
+		{
 			WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotId, weaponPrefab);
-			if (weaponSlot == null) UnassignWeaponSlot(weaponSlotId);
-		}
-	}
-
-	// Iterates through the inventory and attempts to attach all weapons to player ship
-	private static void AttachWeaponsFromInventory()
-	{
-		if (Inventory.Count == 0)
-		{
-			Debug.LogWarning("[LoadoutManager] Inventory is empty. No weapons to initialize.");
-			return;
+			if (weaponSlot == null) return null;
+			AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
+			return weaponSlot;
 		}
 
-		foreach (var weaponEntry in Inventory)
+		public static void UnequipWeapon(int weaponSlotId)
 		{
-			GameObject weaponPrefab = weaponEntry.Value;
-			WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, false);
-			if (weaponSlot != null) AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
+			PlayerManager.Inst.ActivePlayerShip.DetachWeaponsFromSlotById(weaponSlotId);
 		}
-	}
 
-	// Adds the weaponPrefab to the inventory
-	public static void UnlockWeapon(string weaponPrefabName)
-	{
-		if (Inventory.ContainsKey(weaponPrefabName)) return;
-		GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponPrefabName);
-		if (weaponPrefab == null) return;
-		Inventory[weaponPrefabName] = weaponPrefab;
-	}
-
-	// Equips the weaponPrefab to the player ship, does not add to inventory
-	public static WeaponSlot EquipWeapon(GameObject weaponPrefab, bool force)
-	{
-		WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, force);
-		if (weaponSlot == null) return null;
-		AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
-		return weaponSlot;
-	}
-	public static WeaponSlot EquipWeaponToSlot(GameObject weaponPrefab, int weaponSlotId)
-	{
-		WeaponSlot weaponSlot = PlayerManager.Inst.ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotId, weaponPrefab);
-		if (weaponSlot == null) return null;
-		AssignPrefabToWeaponSlot(weaponSlot.id, weaponPrefab);
-		return weaponSlot;
-	}
-
-	public static void UnequipWeapon(int weaponSlotId)
-	{
-		PlayerManager.Inst.ActivePlayerShip.DetachWeaponsFromSlotById(weaponSlotId);
-	}
-
-	public static List<GameObject> GetInventory()
-	{
-		List<GameObject> inventory = new List<GameObject>();
-		foreach (var weaponEntry in Inventory)
+		public static List<GameObject> GetInventory()
 		{
-			inventory.Add(weaponEntry.Value);
-		}
-		return inventory;
-	}
-
-	public static GameObject FetchWeaponPefab(WeaponBase weaponBase) {
-		foreach (var weaponEntry in Inventory)
-		{
-			GameObject weaponPrefab = weaponEntry.Value;
-			if (weaponPrefab.GetComponent<WeaponBase>() == weaponBase) return weaponPrefab;
-		}
-		return null;
-	}
-
-	public static List<WeaponBase> GetInventoryByType(SlotType type)
-	{
-		List<WeaponBase> inventory = new List<WeaponBase>();
-		foreach (var weaponEntry in Inventory)
-		{
-			WeaponBase weapon = weaponEntry.Value.GetComponent<WeaponBase>();
-			if (weaponEntry.Value.GetComponent<WeaponBase>().SlotType == type)
+			List<GameObject> inventory = new List<GameObject>();
+			foreach (var weaponEntry in Inventory)
 			{
-				inventory.Add(weapon);
+				inventory.Add(weaponEntry.Value);
 			}
+			return inventory;
 		}
-		return inventory;
-	}
 
-	private static void AssignPrefabToWeaponSlot(int id, GameObject weaponPrefab)
-	{
-		Loadout[id] = weaponPrefab;
-	}
+		public static GameObject FetchWeaponPefab(WeaponBase weaponBase) {
+			foreach (var weaponEntry in Inventory)
+			{
+				GameObject weaponPrefab = weaponEntry.Value;
+				if (weaponPrefab.GetComponent<WeaponBase>() == weaponBase) return weaponPrefab;
+			}
+			return null;
+		}
 
-	private static void UnassignWeaponSlot(int id)
-	{
-		Loadout.Remove(id);
-	}
+		public static List<WeaponBase> GetInventoryByType(SlotType type)
+		{
+			List<WeaponBase> inventory = new List<WeaponBase>();
+			foreach (var weaponEntry in Inventory)
+			{
+				WeaponBase weapon = weaponEntry.Value.GetComponent<WeaponBase>();
+				if (weaponEntry.Value.GetComponent<WeaponBase>().SlotType == type)
+				{
+					inventory.Add(weapon);
+				}
+			}
+			return inventory;
+		}
 
+		private static void AssignPrefabToWeaponSlot(int id, GameObject weaponPrefab)
+		{
+			Loadout[id] = weaponPrefab;
+		}
+
+		private static void UnassignWeaponSlot(int id)
+		{
+			Loadout.Remove(id);
+		}
+
+	}
 }

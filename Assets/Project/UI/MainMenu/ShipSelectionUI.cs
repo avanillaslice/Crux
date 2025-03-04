@@ -1,78 +1,82 @@
-using UnityEngine;
 using System.Collections.Generic;
+using Project.Core;
+using UnityEngine;
 
-public class ShipSelectionUI : UIWindowBase
+namespace Project.UI.MainMenu
 {
-    public List<GameObject> Ships;
-    public GameObject Cursor;
-
-    private int currentIndex = 0;
-    private GameObject instantiatedCursor;
-
-    void Start()
+    public class ShipSelectionUI : UIWindowBase
     {
-        if (Ships == null || Ships.Count == 0 || Cursor == null)
+        public List<GameObject> Ships;
+        public GameObject Cursor;
+
+        private int currentIndex = 0;
+        private GameObject instantiatedCursor;
+
+        void Start()
         {
-            Debug.LogError("Ships list or Cursor prefab is not set.");
-            return;
+            if (Ships == null || Ships.Count == 0 || Cursor == null)
+            {
+                Debug.LogError("Ships list or Cursor prefab is not set.");
+                return;
+            }
+
+            instantiatedCursor = Instantiate(Cursor, Ships[currentIndex].transform.position, Quaternion.identity);
         }
 
-        instantiatedCursor = Instantiate(Cursor, Ships[currentIndex].transform.position, Quaternion.identity);
-    }
-
-    public override void HandleSelect()
-    {
-        GameManager.InitiateGameplay(false);
-    }
-
-    public override void HandleMoveLeft()
-    {
-        if (Ships == null || Ships.Count == 0)
+        public override void HandleSelect()
         {
-            Debug.LogError("Ships list is not set.");
-            return;
+            GameManager.InitiateGameplay(false);
         }
 
-        currentIndex = (currentIndex - 1 + Ships.Count) % Ships.Count;
-        UpdateCursorPosition();
-    }
-
-    public override void HandleMoveRight()
-    {
-        if (Ships == null || Ships.Count == 0)
+        public override void HandleMoveLeft()
         {
-            Debug.LogError("Ships list is not set.");
-            return;
+            if (Ships == null || Ships.Count == 0)
+            {
+                Debug.LogError("Ships list is not set.");
+                return;
+            }
+
+            currentIndex = (currentIndex - 1 + Ships.Count) % Ships.Count;
+            UpdateCursorPosition();
         }
 
-        currentIndex = (currentIndex + 1) % Ships.Count;
-        UpdateCursorPosition();
-    }
-
-    private void UpdateCursorPosition()
-    {
-        if (instantiatedCursor != null)
+        public override void HandleMoveRight()
         {
-            instantiatedCursor.transform.position = Ships[currentIndex].transform.position;
+            if (Ships == null || Ships.Count == 0)
+            {
+                Debug.LogError("Ships list is not set.");
+                return;
+            }
+
+            currentIndex = (currentIndex + 1) % Ships.Count;
+            UpdateCursorPosition();
         }
-    }
 
-    public override void HandleMoveUp()
-    {
-        // Do nothing
-    }
+        private void UpdateCursorPosition()
+        {
+            if (instantiatedCursor != null)
+            {
+                instantiatedCursor.transform.position = Ships[currentIndex].transform.position;
+            }
+        }
 
-    public override void HandleMoveDown()
-    {
-        // Do nothing
-    }
-    public override void HandleExit()
-    {
-        // Do nothing
-    }
-    public override void HandleBack()
-    {
-        // Do nothing
-    }   
+        public override void HandleMoveUp()
+        {
+            // Do nothing
+        }
 
+        public override void HandleMoveDown()
+        {
+            // Do nothing
+        }
+        public override void HandleExit()
+        {
+            // Do nothing
+        }
+        public override void HandleBack()
+        {
+            // Do nothing
+        }   
+
+    }
 }

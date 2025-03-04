@@ -1,19 +1,22 @@
 using UnityEngine;
-using UnityEngine.Video;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 
-public class VideoSceneController : MonoBehaviour
+namespace Project.Utilities
 {
-    public VideoPlayer videoPlayer;
-    public string nextSceneName;
-
-    void Start()
+    public class VideoSceneController : MonoBehaviour
     {
-        videoPlayer.loopPointReached += OnVideoFinished; // Subscribe to the event
-    }
+        public VideoPlayer videoPlayer;
+        public string nextSceneName;
 
-    void OnVideoFinished(VideoPlayer vp)
-    {
-        SceneManager.LoadScene(nextSceneName); // Load the next scene
+        void Start()
+        {
+            videoPlayer.loopPointReached += OnVideoFinished; // Subscribe to the event
+        }
+
+        void OnVideoFinished(VideoPlayer vp)
+        {
+            SceneManager.LoadScene(nextSceneName); // Load the next scene
+        }
     }
 }

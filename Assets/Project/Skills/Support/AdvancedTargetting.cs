@@ -1,39 +1,43 @@
-using UnityEngine;
+using Project.Core;
+using Project.Ships;
 
-public class AdvancedTargetting : SkillBase
+namespace Project.Skills.Support
 {
-    public override string SkillName => "Advanced Targetting";
-    public override string Description => "Enables advanced targetting systems for improved accuracy.";
-    public override int MaxLevel => 1;
-
-    public AdvancedTargetting(int level) : base(level) { }
-
-    public override void Activate()
+    public class AdvancedTargetting : SkillBase
     {
-        TargetShip.OnSpawn += OnSpawn;
-        StageManager.OnStageStart += OnStageStart;
-    }
+        public override string SkillName => "Advanced Targetting";
+        public override string Description => "Enables advanced targetting systems for improved accuracy.";
+        public override int MaxLevel => 1;
 
-    private void OnSpawn()
-    {
-        TargetShip.AdvancedTargetting = true;
-    }
+        public AdvancedTargetting(int level) : base(level) { }
 
-    private void OnStageStart()
-    {
-        if (!TargetShip.AdvancedTargetting) {
+        public override void Activate()
+        {
+            TargetShip.OnSpawn += OnSpawn;
+            StageManager.OnStageStart += OnStageStart;
+        }
+
+        private void OnSpawn()
+        {
             TargetShip.AdvancedTargetting = true;
-            AttackDrones attackDroneSkill = (AttackDrones)TargetShip.ActiveSkills.FetchSkill(SkillType.AttackDrones);
-            if (attackDroneSkill != null) {
-                foreach (DroneShip drone in attackDroneSkill.ActiveDrones) {
-                    drone.AdvancedTargetting = true;
-                }
-            }
-        };
-    }
+        }
 
-    public override void Deactivate()
-    {
-        // Implementation for AdvancedTargetting deactivation
+        private void OnStageStart()
+        {
+            if (!TargetShip.AdvancedTargetting) {
+                TargetShip.AdvancedTargetting = true;
+                AttackDrones attackDroneSkill = (AttackDrones)TargetShip.ActiveSkills.FetchSkill(SkillType.AttackDrones);
+                if (attackDroneSkill != null) {
+                    foreach (DroneShip drone in attackDroneSkill.ActiveDrones) {
+                        drone.AdvancedTargetting = true;
+                    }
+                }
+            };
+        }
+
+        public override void Deactivate()
+        {
+            // Implementation for AdvancedTargetting deactivation
+        }
     }
 }

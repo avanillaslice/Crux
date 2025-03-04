@@ -1,69 +1,73 @@
 using System.Collections.Generic;
+using Project.Core;
 using UnityEngine;
 
-public static class EnemyMovementManager
+namespace Project.Ships
 {
-    private static Dictionary<string, int> LastUsedSpawnIndexes = new Dictionary<string, int>();
-
-    public static DeterminedPath GetPathData(string shipType, string pathPreset = null)
+    public static class EnemyMovementManager
     {
-        PathData pathData;
-        int spawnIndex;
+        private static Dictionary<string, int> LastUsedSpawnIndexes = new Dictionary<string, int>();
 
-        // If null, set to...
-        // This should never run because it will cause a singular batch of enemies to use different paths entirely
-        pathPreset ??= FetchValidPathPreset(shipType);
-
-        if (GameConfig.EnemyPathPresets.TryGetValue(pathPreset, out var pathPresetData))
+        public static DeterminedPath GetPathData(string shipType, string pathPreset = null)
         {
-            pathData = pathPresetData;
+            PathData pathData;
+            int spawnIndex;
+
+            // If null, set to...
+            // This should never run because it will cause a singular batch of enemies to use different paths entirely
+            pathPreset ??= FetchValidPathPreset(shipType);
+
+            if (GameConfig.EnemyPathPresets.TryGetValue(pathPreset, out var pathPresetData))
+            {
+                pathData = pathPresetData;
+            }
+            else
+            {
+                Debug.LogError($"Invalid PathPreset: {pathPreset}");
+                return null;
+            }
+
+            spawnIndex = DetermineSpawnIndex(pathPreset, pathData.spawns);
+
+            return new DeterminedPath
+            {
+                spawnIndex = spawnIndex,
+                pathData = pathData
+            };
         }
-        else
-        {
-            Debug.LogError($"Invalid PathPreset: {pathPreset}");
-            return null;
-        }
 
-        spawnIndex = DetermineSpawnIndex(pathPreset, pathData.spawns);
-
-        return new DeterminedPath
+        public static string FetchValidPathPreset(string shipType)
         {
-            spawnIndex = spawnIndex,
-            pathData = pathData
-        };
-    }
-
-    public static string FetchValidPathPreset(string shipType)
-    {
-        if (!GameConfig.EnemyPaths.TryGetValue(shipType, out var pathList))
-        {
-            Debug.LogError($"No path data found for ship type: {shipType}");
-            return null;
-        }
+            if (!GameConfig.EnemyPaths.TryGetValue(shipType, out var pathList))
+            {
+                Debug.LogError($"No path data found for ship type: {shipType}");
+                return null;
+            }
     
-        if (pathList == null || pathList.Count == 0)
-        {
-            Debug.LogError($"Path list is empty for ship type: {shipType}");
-            return null;
-        }
+            if (pathList == null || pathList.Count == 0)
+            {
+                Debug.LogError($"Path list is empty for ship type: {shipType}");
+                return null;
+            }
     
-        return pathList[Random.Range(0, pathList.Count)];
-    }
-
-
-    private static int DetermineSpawnIndex(string pathPreset, List<int> spawnList)
-    {
-        if (!LastUsedSpawnIndexes.ContainsKey(pathPreset))
-        {
-            LastUsedSpawnIndexes[pathPreset] = 0;
+            return pathList[Random.Range(0, pathList.Count)];
         }
 
-        int lastIndex = LastUsedSpawnIndexes[pathPreset];
-        int nextIndex = (lastIndex + 1) % spawnList.Count;
 
-        LastUsedSpawnIndexes[pathPreset] = nextIndex;
+        private static int DetermineSpawnIndex(string pathPreset, List<int> spawnList)
+        {
+            if (!LastUsedSpawnIndexes.ContainsKey(pathPreset))
+            {
+                LastUsedSpawnIndexes[pathPreset] = 0;
+            }
 
-        int spawnIndex = spawnList[nextIndex];
-        return spawnIndex;
+            int lastIndex = LastUsedSpawnIndexes[pathPreset];
+            int nextIndex = (lastIndex + 1) % spawnList.Count;
+
+            LastUsedSpawnIndexes[pathPreset] = nextIndex;
+
+            int spawnIndex = spawnList[nextIndex];
+            return spawnIndex;
+        }
     }
 }

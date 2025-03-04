@@ -1,62 +1,66 @@
+using Project.Ships;
 using UnityEngine;
 
-public enum WeaponType
+namespace Project.Combat.Weapons
 {
-    Primary,
-    Secondary,
-    Special
-}
-
-public abstract class WeaponBase : MonoBehaviour
-{
-    // Public variables to be set from the inspector in derived classes
-    public GameObject ProjectilePrefab;
-    public Transform FirePoint;
-
-    // Protected variables
-    protected bool hasAnimation;
-    [SerializeField] protected float BaseFireRate;
-    protected float CurrentFireRate;
-    protected float fireRateTimer;
-
-    public SlotType SlotType;
-    public WeaponType WeaponType;
-    public string WeaponName;
-	public string Description;
-	public Sprite WeaponIcon;
-
-    // Reference to the Rigidbody2D component of the weapon
-    protected Rigidbody2D rb;
-
-    // Add the Side field
-    public RelativeSide Side { get; set; }
-
-    protected ShipBase ParentShip;
-
-    void Start()
+    public enum WeaponType
     {
-        ParentShip = GetComponentInParent<ShipBase>();
-        if (ParentShip == null)
-        {
-            Debug.LogError("SingleFireWeaponBase: No ShipBase component found on parent GameObject.");
-        }
+        Primary,
+        Secondary,
+        Special
     }
 
-    // Abstract methods to be implemented by derived classes
-    public abstract void AttemptFire(bool isEnemy);
-    public abstract void AttemptCeaseFire();
-
-    protected virtual void StartAnimation()
+    public abstract class WeaponBase : MonoBehaviour
     {
-        if (hasAnimation)
+        // Public variables to be set from the inspector in derived classes
+        public GameObject ProjectilePrefab;
+        public Transform FirePoint;
+
+        // Protected variables
+        protected bool hasAnimation;
+        [SerializeField] protected float BaseFireRate;
+        protected float CurrentFireRate;
+        protected float fireRateTimer;
+
+        public SlotType SlotType;
+        public WeaponType WeaponType;
+        public string WeaponName;
+        public string Description;
+        public Sprite WeaponIcon;
+
+        // Reference to the Rigidbody2D component of the weapon
+        protected Rigidbody2D rb;
+
+        // Add the Side field
+        public RelativeSide Side { get; set; }
+
+        protected ShipBase ParentShip;
+
+        void Start()
         {
-            // Animation logic here
+            ParentShip = GetComponentInParent<ShipBase>();
+            if (ParentShip == null)
+            {
+                Debug.LogError("SingleFireWeaponBase: No ShipBase component found on parent GameObject.");
+            }
         }
-    }
 
-    protected virtual void Update()
-    {
-        // Update the shooting timer
-        fireRateTimer += Time.deltaTime;
+        // Abstract methods to be implemented by derived classes
+        public abstract void AttemptFire(bool isEnemy);
+        public abstract void AttemptCeaseFire();
+
+        protected virtual void StartAnimation()
+        {
+            if (hasAnimation)
+            {
+                // Animation logic here
+            }
+        }
+
+        protected virtual void Update()
+        {
+            // Update the shooting timer
+            fireRateTimer += Time.deltaTime;
+        }
     }
 }

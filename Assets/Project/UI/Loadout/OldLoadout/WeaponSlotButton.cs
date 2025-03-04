@@ -1,51 +1,55 @@
+using Project.Ships;
 using TMPro;
 using UnityEngine;
 
-public class WeaponSlotButton : MonoBehaviour
+namespace Project.UI.Loadout.OldLoadout
 {
-    public GameObject HighlightLayer;
-    public SlotType SlotType;
-    public TextMeshProUGUI WeaponName;
-    public WeaponSlot WeaponSlot;
-    public bool IsEmpty = true;
-    public bool IsSelected;
-    public int ListIndex;
-
-    public void SetWeaponSlot(WeaponSlot weaponSlot)
+    public class WeaponSlotButton : MonoBehaviour
     {
-        WeaponSlot = weaponSlot;
-        if (!weaponSlot.IsEmpty)
+        public GameObject HighlightLayer;
+        public SlotType SlotType;
+        public TextMeshProUGUI WeaponName;
+        public WeaponSlot WeaponSlot;
+        public bool IsEmpty = true;
+        public bool IsSelected;
+        public int ListIndex;
+
+        public void SetWeaponSlot(WeaponSlot weaponSlot)
         {
-            WeaponName.text = weaponSlot.WeaponName;
-            IsEmpty = false;
+            WeaponSlot = weaponSlot;
+            if (!weaponSlot.IsEmpty)
+            {
+                WeaponName.text = weaponSlot.WeaponName;
+                IsEmpty = false;
+            }
         }
-    }
 
-    public void Clear()
-    {
-        WeaponName.text = "Empty";
-        IsEmpty = true;
-    }
+        public void Clear()
+        {
+            WeaponName.text = "Empty";
+            IsEmpty = true;
+        }
 
-    public void HandleClicked()
-    {
-        if (OldLoadoutUI.Inst.ActiveContainer == "Inventory") return;
-        OldLoadoutUI.Inst.HandleSelect();
-    }
+        public void HandleClicked()
+        {
+            if (OldLoadoutUI.Inst.ActiveContainer == "Inventory") return;
+            OldLoadoutUI.Inst.HandleSelect();
+        }
     
-    public void HandlePointerEnter()
-    {
-        if (OldLoadoutUI.Inst.ActiveContainer == "Inventory") return;
-        OldLoadoutUI.Inst.SetSelectedWeaponSlotButton(ListIndex);
-    }
+        public void HandlePointerEnter()
+        {
+            if (OldLoadoutUI.Inst.ActiveContainer == "Inventory") return;
+            OldLoadoutUI.Inst.SetSelectedWeaponSlotButton(ListIndex);
+        }
 
-    public void Select()
-    {
-        HighlightLayer.SetActive(true);
-        IsSelected = true;
-    }
-    public void Deselect(){
-        HighlightLayer.SetActive(false);
-        IsSelected = false;
+        public void Select()
+        {
+            HighlightLayer.SetActive(true);
+            IsSelected = true;
+        }
+        public void Deselect(){
+            HighlightLayer.SetActive(false);
+            IsSelected = false;
+        }
     }
 }

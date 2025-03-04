@@ -2,265 +2,270 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Project.Ships;
+using Project.UI.Background;
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour
+namespace Project.Core
 {
-    // Game Data
-    public static PlayerManager Inst { get; private set; }
-
-    // Player Data
-    private InitialShipData InitialShipData;
-    public int Lives { get; set; }
-    public PlayerShip ActivePlayerShip { get; set; }
-    private AudioSource AudioSource;
-    public bool IsRespawning { get; set; }
-    public Vector3 FlyIntoSceneSpawnTarget = new Vector3(0, -7, 10);
-    public Vector3 FlyIntoSceneTarget = new Vector3(0, -3, 10);
-    public Vector3 DefaultSpawnTarget = new Vector3(0, -4, 10);
-
-    // Relevant GameObjects
-    public GameObject BottomPlayerBoundary;
-    public GameObject TopPlayerBoundary;
-
-    // Store active weapon prefabs
-    private Dictionary<int, string> WeaponSlotStates = new Dictionary<int, string>();
-
-    // Store Unlocked Skills
-    private ShipSkillManager.ShipSkills ActiveSkills;
-
-    // Events
-    public event Action OnFlyIntoSceneEnd;
-
-    void Awake()
+    public class PlayerManager : MonoBehaviour
     {
-        if (Inst != null && Inst != this)
-        {
-            Debug.Log("PlayerManager already exists");
-            Destroy(gameObject);
-            return;  // Ensure no further code execution in this instance
-        }
-        Inst = this;
-        AudioSource = GetComponent<AudioSource>();
-        InitialisePlayerData();
-    }
+        // Game Data
+        public static PlayerManager Inst { get; private set; }
 
-    private void InitialisePlayerData()
-    {
-        InitialShipData = GameConfig.GetInitialPlayerData();
-        if (InitialShipData == null)
+        // Player Data
+        private InitialShipData InitialShipData;
+        public int Lives { get; set; }
+        public PlayerShip ActivePlayerShip { get; set; }
+        private AudioSource AudioSource;
+        public bool IsRespawning { get; set; }
+        public Vector3 FlyIntoSceneSpawnTarget = new Vector3(0, -7, 10);
+        public Vector3 FlyIntoSceneTarget = new Vector3(0, -3, 10);
+        public Vector3 DefaultSpawnTarget = new Vector3(0, -4, 10);
+
+        // Relevant GameObjects
+        public GameObject BottomPlayerBoundary;
+        public GameObject TopPlayerBoundary;
+
+        // Store active weapon prefabs
+        private Dictionary<int, string> WeaponSlotStates = new Dictionary<int, string>();
+
+        // Store Unlocked Skills
+        private ShipSkillManager.ShipSkills ActiveSkills;
+
+        // Events
+        public event Action OnFlyIntoSceneEnd;
+
+        void Awake()
         {
-            Debug.LogError("[PlayerManager] Failed to fetch InitialPlayerData");
-            return;
+            if (Inst != null && Inst != this)
+            {
+                Debug.Log("PlayerManager already exists");
+                Destroy(gameObject);
+                return;  // Ensure no further code execution in this instance
+            }
+            Inst = this;
+            AudioSource = GetComponent<AudioSource>();
+            InitialisePlayerData();
         }
 
-    }
-
-    public void HandlePlayerDestroyed()
-    {
-        PlayExplosionSound();
-        ActivePlayerShip.DisablePrimaryFire();
-        ActivePlayerShip.DisableSpecialFire();
-        ActivePlayerShip.DisableShooting();
-        // SetWeaponSlotStates();
-        SetActiveShipToNull();
-
-        Lives -= 1;
-        if (Lives > 0)
+        private void InitialisePlayerData()
         {
+            InitialShipData = GameConfig.GetInitialPlayerData();
+            if (InitialShipData == null)
+            {
+                Debug.LogError("[PlayerManager] Failed to fetch InitialPlayerData");
+                return;
+            }
+
+        }
+
+        public void HandlePlayerDestroyed()
+        {
+            PlayExplosionSound();
+            ActivePlayerShip.DisablePrimaryFire();
+            ActivePlayerShip.DisableSpecialFire();
+            ActivePlayerShip.DisableShooting();
+            // SetWeaponSlotStates();
+            SetActiveShipToNull();
+
+            Lives -= 1;
+            if (Lives > 0)
+            {
+                HUDManager.Inst.UpdateLivesDisplay();
+                RespawnPlayer();
+            }
+            else
+            {
+                // Game Over
+                GameManager.HandleGameOver();
+            }
+        }
+
+        // Function called when the player is destroyed
+        public void RespawnPlayer()
+        {
+            Debug.Log("Player destroyed. Respawning in 2 seconds...");
+            IsRespawning = true;
+            StartCoroutine(DelayedRespawn(GameConfig.RespawnTimer)); // 2 seconds delay
+        }
+
+        // Coroutine to delay the respawn
+        private IEnumerator DelayedRespawn(float delayInSeconds)
+        {
+            yield return new WaitForSeconds(delayInSeconds);
+            _ = SpawnPlayerAsync();
+        }
+
+        public async Task FlyOutOfScene()
+        {
+            if (ActivePlayerShip == null) await AwaitPlayerRespawn();
+            TopPlayerBoundary.SetActive(false);
+            var tcs = new TaskCompletionSource<bool>();
+            StartCoroutine(MoveOutOfSceneWithAcceleration(ActivePlayerShip.transform, 3.0f, 1f, tcs));
+            await tcs.Task; // Wait for the movement to complete
+            TopPlayerBoundary.SetActive(true);
+        }
+
+        private async Task AwaitPlayerRespawn()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            StartCoroutine(WaitForPlayerRespawn(tcs));
+            await tcs.Task;
+        }
+
+        private IEnumerator WaitForPlayerRespawn(TaskCompletionSource<bool> tcs)
+        {
+            while (ActivePlayerShip == null)
+            {
+                yield return null;
+            }
+            tcs.SetResult(true);
+        }
+
+        private IEnumerator MoveOutOfSceneWithAcceleration(Transform transform, float initialSpeed, float acceleration, TaskCompletionSource<bool> tcs)
+        {
+            float currentSpeed = initialSpeed;
+
+            while (transform.position.y <= 7)
+            {
+                // Accelerate the ship
+                currentSpeed += acceleration * Time.deltaTime;
+                BackgroundManager.Inst.ScrollSpeedModifier = 1 + currentSpeed * 3;
+
+                // Move the ship upwards
+                transform.position += Vector3.up * currentSpeed * Time.deltaTime;
+
+                yield return null;
+            }
+
+            tcs.SetResult(true); // Signal that the movement is complete
+        }
+
+        public async Task SpawnPlayerAsync(bool flyIntoScene = false)
+        {
+            Vector3 spawnPosition = flyIntoScene ? FlyIntoSceneSpawnTarget : DefaultSpawnTarget;
+
+            if (ActivePlayerShip != null)
+            {
+                ActivePlayerShip.transform.position = spawnPosition;
+                ActivePlayerShip.SetPosition(spawnPosition);
+            }
+            else
+            {
+                ActivePlayerShip = Instantiate(AssetManager.PlayerPrefab, spawnPosition, Quaternion.identity);
+                // Sets the players ship for each still and attemps activation (if not already)
+                Debug.Log("ActiveSkills: " + ActiveSkills);
+                Debug.Log("ActivePlayerShip: " + ActivePlayerShip);
+                ActiveSkills.AssignShip(ActivePlayerShip);
+                // Reattach saved weapon prefabs
+                LoadoutManager.InitialiseWeapons();
+            }
+
+            if (flyIntoScene) await FlyIntoScene();
+            IsRespawning = false;
+        }
+
+        public async Task FlyIntoScene()
+        {
+            BottomPlayerBoundary.SetActive(false);
+            var tcs = new TaskCompletionSource<bool>();
+            StartCoroutine(MoveToPositionWithDeceleration(ActivePlayerShip.transform, FlyIntoSceneTarget, 3.0f, 1f, tcs));
+            await tcs.Task; // Wait for the movement to complete
+            BottomPlayerBoundary.SetActive(true);
+            OnFlyIntoSceneEnd?.Invoke();
+        }
+
+        private IEnumerator MoveToPositionWithDeceleration(Transform transform, Vector3 targetPosition, float initialSpeed, float decelerationDistance, TaskCompletionSource<bool> tcs)
+        {
+            float currentSpeed = initialSpeed;
+
+            while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+            {
+                float distanceRemaining = Vector3.Distance(transform.position, targetPosition);
+
+                // If within deceleration distance, reduce speed
+                if (distanceRemaining < decelerationDistance)
+                {
+                    currentSpeed = Mathf.Lerp(0, initialSpeed, distanceRemaining / decelerationDistance);
+                }
+                BackgroundManager.Inst.ScrollSpeedModifier = 1 + currentSpeed * 3;
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
+                yield return null;
+            }
+
+            tcs.SetResult(true); // Signal that the movement is complete
+        }
+
+        public void BuildInitialSkills()
+        {
+            ActiveSkills = ShipSkillManager.BuildShipSkills(InitialShipData);
+        }
+
+        private void ReattachWeapons()
+        {
+            if (WeaponSlotStates.Count == 0)
+            {
+                // Needs to use the list of strings to fetch prefabs and attach to first available slot
+                AttachWeaponsFromInitialPlayerData();
+            }
+            else
+            {
+                AttachWeaponsFromWeaponSlotStates();
+                // Needs to use the existing dictionary of WeaponSlotStates to reattach weapons to specific slots
+            }
+        }
+
+        private void AttachWeaponsFromInitialPlayerData()
+        {
+            foreach (var weapon in InitialShipData.Weapons)
+            {
+                if (weapon.Value == false) continue;
+
+                GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weapon.Key);
+                if (weaponPrefab == null)
+                {
+                    Debug.LogError($"Weapon prefab not found for {weapon.Key}");
+                    continue;
+                }
+
+                ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, false);
+            }
+        }
+
+        private void AttachWeaponsFromWeaponSlotStates()
+        {
+            foreach (var weaponSlotState in WeaponSlotStates)
+            {
+                if (weaponSlotState.Value == null) continue;
+
+                GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponSlotState.Value);
+                if (weaponPrefab == null)
+                {
+                    Debug.LogError($"Weapon prefab not found for {weaponSlotState.Value}");
+                    continue;
+                }
+                ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotState.Key, weaponPrefab);
+            }
+        }
+
+        private void PlayExplosionSound()
+        {
+            if (AudioSource != null)
+            {
+                AudioSource.Play();
+            }
+        }
+
+        public void IncrementLives(int amt)
+        {
+            Lives += amt;
             HUDManager.Inst.UpdateLivesDisplay();
-            RespawnPlayer();
         }
-        else
+
+        public void SetActiveShipToNull()
         {
-            // Game Over
-            GameManager.HandleGameOver();
+            ActivePlayerShip = null;
         }
-    }
-
-    // Function called when the player is destroyed
-    public void RespawnPlayer()
-    {
-        Debug.Log("Player destroyed. Respawning in 2 seconds...");
-        IsRespawning = true;
-        StartCoroutine(DelayedRespawn(GameConfig.RespawnTimer)); // 2 seconds delay
-    }
-
-    // Coroutine to delay the respawn
-    private IEnumerator DelayedRespawn(float delayInSeconds)
-    {
-        yield return new WaitForSeconds(delayInSeconds);
-        _ = SpawnPlayerAsync();
-    }
-
-    public async Task FlyOutOfScene()
-    {
-        if (ActivePlayerShip == null) await AwaitPlayerRespawn();
-        TopPlayerBoundary.SetActive(false);
-        var tcs = new TaskCompletionSource<bool>();
-        StartCoroutine(MoveOutOfSceneWithAcceleration(ActivePlayerShip.transform, 3.0f, 1f, tcs));
-        await tcs.Task; // Wait for the movement to complete
-        TopPlayerBoundary.SetActive(true);
-    }
-
-    private async Task AwaitPlayerRespawn()
-    {
-        var tcs = new TaskCompletionSource<bool>();
-        StartCoroutine(WaitForPlayerRespawn(tcs));
-        await tcs.Task;
-    }
-
-    private IEnumerator WaitForPlayerRespawn(TaskCompletionSource<bool> tcs)
-    {
-        while (ActivePlayerShip == null)
-        {
-            yield return null;
-        }
-        tcs.SetResult(true);
-    }
-
-    private IEnumerator MoveOutOfSceneWithAcceleration(Transform transform, float initialSpeed, float acceleration, TaskCompletionSource<bool> tcs)
-    {
-        float currentSpeed = initialSpeed;
-
-        while (transform.position.y <= 7)
-        {
-            // Accelerate the ship
-            currentSpeed += acceleration * Time.deltaTime;
-            BackgroundManager.Inst.ScrollSpeedModifier = 1 + currentSpeed * 3;
-
-            // Move the ship upwards
-            transform.position += Vector3.up * currentSpeed * Time.deltaTime;
-
-            yield return null;
-        }
-
-        tcs.SetResult(true); // Signal that the movement is complete
-    }
-
-    public async Task SpawnPlayerAsync(bool flyIntoScene = false)
-    {
-        Vector3 spawnPosition = flyIntoScene ? FlyIntoSceneSpawnTarget : DefaultSpawnTarget;
-
-        if (ActivePlayerShip != null)
-        {
-            ActivePlayerShip.transform.position = spawnPosition;
-            ActivePlayerShip.SetPosition(spawnPosition);
-        }
-        else
-        {
-            ActivePlayerShip = Instantiate(AssetManager.PlayerPrefab, spawnPosition, Quaternion.identity);
-            // Sets the players ship for each still and attemps activation (if not already)
-            Debug.Log("ActiveSkills: " + ActiveSkills);
-            Debug.Log("ActivePlayerShip: " + ActivePlayerShip);
-            ActiveSkills.AssignShip(ActivePlayerShip);
-            // Reattach saved weapon prefabs
-            LoadoutManager.InitialiseWeapons();
-        }
-
-        if (flyIntoScene) await FlyIntoScene();
-        IsRespawning = false;
-    }
-
-    public async Task FlyIntoScene()
-    {
-        BottomPlayerBoundary.SetActive(false);
-        var tcs = new TaskCompletionSource<bool>();
-        StartCoroutine(MoveToPositionWithDeceleration(ActivePlayerShip.transform, FlyIntoSceneTarget, 3.0f, 1f, tcs));
-        await tcs.Task; // Wait for the movement to complete
-        BottomPlayerBoundary.SetActive(true);
-        OnFlyIntoSceneEnd?.Invoke();
-    }
-
-    private IEnumerator MoveToPositionWithDeceleration(Transform transform, Vector3 targetPosition, float initialSpeed, float decelerationDistance, TaskCompletionSource<bool> tcs)
-    {
-        float currentSpeed = initialSpeed;
-
-        while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
-        {
-            float distanceRemaining = Vector3.Distance(transform.position, targetPosition);
-
-            // If within deceleration distance, reduce speed
-            if (distanceRemaining < decelerationDistance)
-            {
-                currentSpeed = Mathf.Lerp(0, initialSpeed, distanceRemaining / decelerationDistance);
-            }
-            BackgroundManager.Inst.ScrollSpeedModifier = 1 + currentSpeed * 3;
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
-            yield return null;
-        }
-
-        tcs.SetResult(true); // Signal that the movement is complete
-    }
-
-    public void BuildInitialSkills()
-    {
-        ActiveSkills = ShipSkillManager.BuildShipSkills(InitialShipData);
-    }
-
-    private void ReattachWeapons()
-    {
-        if (WeaponSlotStates.Count == 0)
-        {
-            // Needs to use the list of strings to fetch prefabs and attach to first available slot
-            AttachWeaponsFromInitialPlayerData();
-        }
-        else
-        {
-            AttachWeaponsFromWeaponSlotStates();
-            // Needs to use the existing dictionary of WeaponSlotStates to reattach weapons to specific slots
-        }
-    }
-
-    private void AttachWeaponsFromInitialPlayerData()
-    {
-        foreach (var weapon in InitialShipData.Weapons)
-        {
-            if (weapon.Value == false) continue;
-
-            GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weapon.Key);
-            if (weaponPrefab == null)
-            {
-                Debug.LogError($"Weapon prefab not found for {weapon.Key}");
-                continue;
-            }
-
-            ActivePlayerShip.AttemptWeaponAttachment(weaponPrefab, false);
-        }
-    }
-
-    private void AttachWeaponsFromWeaponSlotStates()
-    {
-        foreach (var weaponSlotState in WeaponSlotStates)
-        {
-            if (weaponSlotState.Value == null) continue;
-
-            GameObject weaponPrefab = AssetManager.GetWeaponPrefab(weaponSlotState.Value);
-            if (weaponPrefab == null)
-            {
-                Debug.LogError($"Weapon prefab not found for {weaponSlotState.Value}");
-                continue;
-            }
-            ActivePlayerShip.AttemptWeaponAttachmentToSlot(weaponSlotState.Key, weaponPrefab);
-        }
-    }
-
-    private void PlayExplosionSound()
-    {
-        if (AudioSource != null)
-        {
-            AudioSource.Play();
-        }
-    }
-
-    public void IncrementLives(int amt)
-    {
-        Lives += amt;
-        HUDManager.Inst.UpdateLivesDisplay();
-    }
-
-    public void SetActiveShipToNull()
-    {
-        ActivePlayerShip = null;
     }
 }

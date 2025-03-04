@@ -1,21 +1,23 @@
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Diagnostics;
 
-public class GameLoader : MonoBehaviour
+namespace Project.Core
 {
+  public class GameLoader : MonoBehaviour
+  {
     private bool WasNotLoaded { get; set; }
     void Awake()
     {
-        if (!GameConfig.HasBeenLoaded)
-        {
-          Stopwatch stopwatch = Stopwatch.StartNew();
-          UnityEngine.Debug.Log("Starting game configuration loading...");
-          WasNotLoaded = true;
-          GameConfig.Initialise();
-          stopwatch.Stop();
-          UnityEngine.Debug.Log($"Game configuration loaded in {stopwatch.ElapsedMilliseconds}ms");
-        }
+      if (!GameConfig.HasBeenLoaded)
+      {
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        UnityEngine.Debug.Log("Starting game configuration loading...");
+        WasNotLoaded = true;
+        GameConfig.Initialise();
+        stopwatch.Stop();
+        UnityEngine.Debug.Log($"Game configuration loaded in {stopwatch.ElapsedMilliseconds}ms");
+      }
     }
 
     void Start()
@@ -29,4 +31,5 @@ public class GameLoader : MonoBehaviour
         }
       }
     }
+  }
 }

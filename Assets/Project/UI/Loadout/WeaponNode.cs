@@ -1,166 +1,170 @@
+using System.Collections.Generic;
+using Project.Ships;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using TMPro;
 
-public class WeaponNode : MonoBehaviour
+namespace Project.UI.Loadout
 {
-	// Inspector
-	public Color HoverColor;
-	public Color SelectedColor;
-	public TextMeshProUGUI ID;
-
-	// Data
-	private bool Initialised = false;
-	[HideInInspector] public float XPos;
-	[HideInInspector] public float YPos;
-	[HideInInspector] public RelativeSide Side;
-	[HideInInspector] public WeaponNodeSelector WeaponNodeSelector;
-	[HideInInspector] public NodeState State;
-	private Image ColorComponent;
-	private Color DefaultColor;
-	private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
-	private AttachPoint AttachPoint;
-	public WeaponSlot WeaponSlot;
-
-	// Temp
-	int NodeId;
-
-	// Types
-	public enum NodeState
+	public class WeaponNode : MonoBehaviour
 	{
-		Default,
-		Hover,
-		Selected
-	}
+		// Inspector
+		public Color HoverColor;
+		public Color SelectedColor;
+		public TextMeshProUGUI ID;
 
-	void Awake() {
-		ColorComponent = gameObject.GetComponent<Image>();
-		DefaultColor = ColorComponent.color;
-		State = NodeState.Default;
-	}
+		// Data
+		private bool Initialised = false;
+		[HideInInspector] public float XPos;
+		[HideInInspector] public float YPos;
+		[HideInInspector] public RelativeSide Side;
+		[HideInInspector] public WeaponNodeSelector WeaponNodeSelector;
+		[HideInInspector] public NodeState State;
+		private Image ColorComponent;
+		private Color DefaultColor;
+		private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
+		private AttachPoint AttachPoint;
+		public WeaponSlot WeaponSlot;
 
-	public void Init(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
-	{
-		NodeId = nodeId;
-		ID.text = NodeId.ToString();
-		WeaponSlot = weaponSlot;
-		AttachPoint = attachPoint;
-		Side = AttachPoint.Side;
-		XPos = attachPoint.transform.localPosition.x;
-		YPos = attachPoint.transform.localPosition.y;
-		// Debug.Log("NEW NODE POSTION X: " + XPos + " Y: " + YPos);
-	}
+		// Temp
+		int NodeId;
 
-	public void AssignSelector(WeaponNodeSelector weaponNodeSelector)
-	{
-		if (weaponNodeSelector == null)
+		// Types
+		public enum NodeState
 		{
-			Debug.LogError("Cannot assign null WeaponNodeSelector");
-			return;
+			Default,
+			Hover,
+			Selected
 		}
 
-		if (WeaponSlot == null) Debug.LogWarning("WeaponSlot not set on Node");
-		if (AttachPoint == null) Debug.LogWarning("AttachPoint not set on Node");
-
-		WeaponNodeSelector = weaponNodeSelector;
-		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
-		Initialised = true;
-	}
-
-	public void RefreshSelector() {
-		WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
-	}
-
-	public void SetRelatedNodes(List<WeaponNode> weaponNodes)
-	{
-		foreach (WeaponNode weaponNode in weaponNodes)
-		{
-			if (weaponNode != this) LinkedWeaponNodes.Add(weaponNode);
+		void Awake() {
+			ColorComponent = gameObject.GetComponent<Image>();
+			DefaultColor = ColorComponent.color;
+			State = NodeState.Default;
 		}
-	}
 
-	public void HandlePointerEnter() {
-		if (!Initialised) return;
-		LoadoutUI.Inst.HandlePointerEnterOnNode(this);
-	}
+		public void Init(AttachPoint attachPoint, WeaponSlot weaponSlot, int nodeId)
+		{
+			NodeId = nodeId;
+			ID.text = NodeId.ToString();
+			WeaponSlot = weaponSlot;
+			AttachPoint = attachPoint;
+			Side = AttachPoint.Side;
+			XPos = attachPoint.transform.localPosition.x;
+			YPos = attachPoint.transform.localPosition.y;
+			// Debug.Log("NEW NODE POSTION X: " + XPos + " Y: " + YPos);
+		}
 
-	public void HandlePointerExit() {
-		if (!Initialised) return;
-		LoadoutUI.Inst.HandlePointerExitOnNode(this);
-	}
+		public void AssignSelector(WeaponNodeSelector weaponNodeSelector)
+		{
+			if (weaponNodeSelector == null)
+			{
+				Debug.LogError("Cannot assign null WeaponNodeSelector");
+				return;
+			}
 
-	public void HandlePointerClick() {
-		if (!Initialised) return;
-		LoadoutUI.Inst.HandlePointerClickOnNode(this);
-	}
+			if (WeaponSlot == null) Debug.LogWarning("WeaponSlot not set on Node");
+			if (AttachPoint == null) Debug.LogWarning("AttachPoint not set on Node");
 
-	public void EnableHover()
-	{
-		if (!Initialised) return;
-		if (State == NodeState.Hover || State == NodeState.Selected) return;
-		SetState(NodeState.Hover);
-	}
+			WeaponNodeSelector = weaponNodeSelector;
+			WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
+			Initialised = true;
+		}
 
-	public void DisableHover()
-	{
-		if (!Initialised) return;
-		if (State != NodeState.Hover || State == NodeState.Selected) return;
-		SetState(NodeState.Default);
-	}
+		public void RefreshSelector() {
+			WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
+		}
+
+		public void SetRelatedNodes(List<WeaponNode> weaponNodes)
+		{
+			foreach (WeaponNode weaponNode in weaponNodes)
+			{
+				if (weaponNode != this) LinkedWeaponNodes.Add(weaponNode);
+			}
+		}
+
+		public void HandlePointerEnter() {
+			if (!Initialised) return;
+			LoadoutUI.Inst.HandlePointerEnterOnNode(this);
+		}
+
+		public void HandlePointerExit() {
+			if (!Initialised) return;
+			LoadoutUI.Inst.HandlePointerExitOnNode(this);
+		}
+
+		public void HandlePointerClick() {
+			if (!Initialised) return;
+			LoadoutUI.Inst.HandlePointerClickOnNode(this);
+		}
+
+		public void EnableHover()
+		{
+			if (!Initialised) return;
+			if (State == NodeState.Hover || State == NodeState.Selected) return;
+			SetState(NodeState.Hover);
+		}
+
+		public void DisableHover()
+		{
+			if (!Initialised) return;
+			if (State != NodeState.Hover || State == NodeState.Selected) return;
+			SetState(NodeState.Default);
+		}
 	
-	public void HandleSelect()
-	{
-		if (!Initialised || State == NodeState.Default) return;
-		else if (State == NodeState.Hover) {
-			SetState(NodeState.Selected);
-			WeaponNodeSelector.HandleSelect();
-			return;
-		}
-		WeaponNodeSelector.HandleSelect();
-		AssignSelector(WeaponNodeSelector);
-		SetState(NodeState.Hover);
-		foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
-			weaponNode.RefreshSelector();
-		}
-	}
-
-	public void HandleDeselect()
-	{
-		if (!Initialised) return;
-		if (State != NodeState.Selected) return;
-		SetState(NodeState.Hover);
-		WeaponNodeSelector.HandleDeselect();
-	}
-
-	internal void SetState(NodeState state)
-	{
-		if (!Initialised) return;
-		switch (state)
+		public void HandleSelect()
 		{
-			case NodeState.Default: {
-				ColorComponent.color = DefaultColor;
-				if (State == NodeState.Hover) WeaponNodeSelector.DisableHoverState();
-				if (State == NodeState.Selected) WeaponNodeSelector.HandleDeselect();
-				break;
+			if (!Initialised || State == NodeState.Default) return;
+			else if (State == NodeState.Hover) {
+				SetState(NodeState.Selected);
+				WeaponNodeSelector.HandleSelect();
+				return;
 			}
-			case NodeState.Hover: {
-				if (State == NodeState.Selected) {
-					WeaponNodeSelector.HandleDeselect();
-					foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Default);
-				}
-				ColorComponent.color = HoverColor;
-				WeaponNodeSelector.EnableHoverState();
-				break;
-			}
-			case NodeState.Selected: {
-				ColorComponent.color = SelectedColor;
-				if (State == NodeState.Hover) {
-					foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Selected);
-				}
-				break;
+			WeaponNodeSelector.HandleSelect();
+			AssignSelector(WeaponNodeSelector);
+			SetState(NodeState.Hover);
+			foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
+				weaponNode.RefreshSelector();
 			}
 		}
-		State = state;
+
+		public void HandleDeselect()
+		{
+			if (!Initialised) return;
+			if (State != NodeState.Selected) return;
+			SetState(NodeState.Hover);
+			WeaponNodeSelector.HandleDeselect();
+		}
+
+		internal void SetState(NodeState state)
+		{
+			if (!Initialised) return;
+			switch (state)
+			{
+				case NodeState.Default: {
+					ColorComponent.color = DefaultColor;
+					if (State == NodeState.Hover) WeaponNodeSelector.DisableHoverState();
+					if (State == NodeState.Selected) WeaponNodeSelector.HandleDeselect();
+					break;
+				}
+				case NodeState.Hover: {
+					if (State == NodeState.Selected) {
+						WeaponNodeSelector.HandleDeselect();
+						foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Default);
+					}
+					ColorComponent.color = HoverColor;
+					WeaponNodeSelector.EnableHoverState();
+					break;
+				}
+				case NodeState.Selected: {
+					ColorComponent.color = SelectedColor;
+					if (State == NodeState.Hover) {
+						foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Selected);
+					}
+					break;
+				}
+			}
+			State = state;
+		}
 	}
 }

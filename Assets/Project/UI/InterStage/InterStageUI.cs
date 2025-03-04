@@ -1,28 +1,32 @@
+using Project.Core;
 using UnityEngine;
 
-public class InterStageUI : MonoBehaviour
+namespace Project.UI.InterStage
 {
-    public void Continue()
+    public class InterStageUI : MonoBehaviour
     {
-        GameManager.HandleInterStageCompleted();
-    }
+        public void Continue()
+        {
+            GameManager.HandleInterStageCompleted();
+        }
 
-    public void SkillTree()
-    {
-        UIManager.Inst.TransitionToSkillTree();
-    }
+        public void SkillTree()
+        {
+            UIManager.Inst.TransitionToSkillTree();
+        }
 
-    public void Loadout()
-    {
-        UIManager.Inst.TransitionToLoadout();
-    }
+        public void Loadout()
+        {
+            UIManager.Inst.TransitionToLoadout();
+        }
 
-		public void OldLoadout()
-    {
-        UIManager.Inst.TransitionToOldLoadout();
-    }
+        public void OldLoadout()
+        {
+            UIManager.Inst.TransitionToOldLoadout();
+        }
 
-    public void Skills()
-    {
+        public void Skills()
+        {
+        }
     }
 }

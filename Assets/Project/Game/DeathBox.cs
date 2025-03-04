@@ -1,10 +1,13 @@
 using UnityEngine;
 
-public class DeathBox : MonoBehaviour
+namespace Project.Game
 {
-    private void OnTriggerEnter2D(Collider2D other)
+    public class DeathBox : MonoBehaviour
     {
-        // Destroy the other GameObject
-        Destroy(other.gameObject);
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            // Destroy the other GameObject
+            Destroy(other.gameObject);
+        }
     }
 }
