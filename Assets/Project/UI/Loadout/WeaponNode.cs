@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using Project.Ships;
+using Project.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +14,26 @@ namespace Project.UI.Loadout
 		public Color HoverColor;
 		public Color SelectedColor;
 		public TextMeshProUGUI ID;
+		
+		[Header("Connection Line Settings")]
+		public Color LineDefaultColor = new Color(0.5f, 0.5f, 1f, 0.8f);
+		public Color LinePulseColor = new Color(1f, 1f, 1f, 1f);
+		public float LineWidth = 0.05f;
+		public float DrawDuration = 0.5f;
+		public float PulseDuration = 0.3f;
+		public float PulseSpeed = 2f;
+		[Tooltip("Adjust this value to fine-tune the connection point offset")]
+		public float ConnectionPointOffset = 0.1f;
+		[Tooltip("Enable to visualize connection points for debugging")]
+		public bool DebugConnectionPoints = false;
+		[Tooltip("Distance in world units for the horizontal segment of the connection line")]
+		public float HorizontalLineDistance = 2.0f;
+
+		[Header("Cell Size Settings")]
+		[Tooltip("Base width of the selector cell for line connection calculations")]
+		public float CellBaseWidth = 2.0f;
+		[Tooltip("Base height of the selector cell for line connection calculations")]
+		public float CellBaseHeight = 1.0f;
 
 		// Data
 		private bool Initialised = false;
@@ -25,6 +47,12 @@ namespace Project.UI.Loadout
 		private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
 		private AttachPoint AttachPoint;
 		public WeaponSlot WeaponSlot;
+		
+		// Connection Line
+		private GameObject lineObject;
+		private LineRenderer lineRenderer;
+		private bool isLineActive = false;
+		private Coroutine activeLineCoroutine;
 
 		// Temp
 		int NodeId;
@@ -69,6 +97,434 @@ namespace Project.UI.Loadout
 			WeaponNodeSelector = weaponNodeSelector;
 			WeaponNodeSelector.UpdateContent(AttachPoint, WeaponSlot, this, NodeId);
 			Initialised = true;
+			
+			// Create connection line
+			CreateConnectionLine();
+		}
+		
+		private void CreateConnectionLine()
+		{
+			// Create a new GameObject for the line
+			lineObject = new GameObject($"ConnectionLine_{NodeId}");
+			lineObject.transform.SetParent(LoadoutUI.Inst.WeaponUIContainer.transform);
+			
+			// Add the LineRenderer component
+			lineRenderer = lineObject.AddComponent<LineRenderer>();
+			
+			// Configure LineRenderer
+			lineRenderer.startWidth = LineWidth;
+			lineRenderer.endWidth = LineWidth;
+			
+			// Ensure the LineRenderer uses world space positions
+			lineRenderer.useWorldSpace = true;
+			
+			// Set position count to 3 for the two-segment line (node -> horizontal point -> cell)
+			lineRenderer.positionCount = 3;
+			
+			lineRenderer.startColor = LineDefaultColor;
+			lineRenderer.endColor = LineDefaultColor;
+			
+			// Try to use our custom shader or fall back to a built-in shader
+			Shader connectionLineShader = Shader.Find("Custom/ConnectionLine");
+			if (connectionLineShader != null)
+			{
+				lineRenderer.material = new Material(connectionLineShader);
+				lineRenderer.material.SetColor("_Color", LineDefaultColor);
+				lineRenderer.material.SetColor("_EmissionColor", LinePulseColor);
+				lineRenderer.material.SetFloat("_EmissionIntensity", 2f);
+			}
+			else
+			{
+				// Fall back to built-in shader
+				lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+			}
+			
+			// Initially hide the line
+			lineRenderer.enabled = false;
+		}
+		
+		private Vector3 CalculateLineStartPosition()
+		{
+			// Get the node's position (this WeaponNode) in world space
+			Vector3 nodePosition = transform.position;
+			
+			// Get the node's size (assuming it has a RectTransform)
+			RectTransform nodeRectTransform = GetComponent<RectTransform>();
+			if (nodeRectTransform == null)
+			{
+				Debug.LogWarning("WeaponNode missing RectTransform component");
+				return nodePosition;
+			}
+			
+			// Convert the RectTransform size to world space units
+			// For UI elements, we need to account for the Canvas scaling
+			Canvas canvas = GetComponentInParent<Canvas>();
+			float worldSpaceScaleFactor = 1f;
+			if (canvas != null && canvas.renderMode != RenderMode.WorldSpace)
+			{
+				// For screen space canvases, we need to convert from screen to world units
+				worldSpaceScaleFactor = 0.01f; // Approximate conversion factor
+			}
+			
+			// Calculate the edge offset in world space
+			float nodeWidth = nodeRectTransform.rect.width * 0.5f * worldSpaceScaleFactor;
+			
+			// Determine which side to start from based on the node's side
+			// float xOffset = Side == RelativeSide.Left ? nodeWidth : -nodeWidth;
+			
+			// Start from the appropriate edge of the node
+			Vector3 startPos = nodePosition;
+			
+			// Debug visualization
+			if (DebugConnectionPoints)
+			{
+				Debug.DrawLine(nodePosition, startPos, Color.red, 0.5f);
+				Debug.Log($"Node position: {nodePosition}, Start position: {startPos}, Node width: {nodeWidth}, Side: {Side}, Scale factor: {worldSpaceScaleFactor}");
+			}
+			
+			return startPos;
+		}
+		
+		private Vector3 CalculateHorizontalPoint()
+		{
+			// Get the start position (from the WeaponNode)
+			Vector3 startPos = CalculateLineStartPosition();
+			
+			// Get the end position (at the WeaponNodeSelector)
+			Vector3 endPos = CalculateLineEndPosition();
+			
+			// Get the selector's position
+			Vector3 selectorPosition = WeaponNodeSelector.transform.position;
+			
+			// Calculate the intermediate point based on the RelativeSide
+			Vector3 intermediatePoint;
+			
+			switch (Side)
+			{
+				case RelativeSide.Left:
+					// For left side: Create a point that matches the selector's X coordinate
+					// This creates a diagonal line to the left, then a vertical line to the selector
+					intermediatePoint = new Vector3(
+						selectorPosition.x + HorizontalLineDistance, // Match the selector's X coordinate
+						selectorPosition.y,         // Keep the same Y as the start point
+						selectorPosition.z
+					);
+					break;
+					
+				case RelativeSide.Right:
+					// For right side: Create a point that matches the selector's X coordinate
+					// This creates a diagonal line to the right, then a vertical line to the selector
+					intermediatePoint = new Vector3(
+						selectorPosition.x - HorizontalLineDistance, // Match the selector's X coordinate
+						selectorPosition.y,         // Keep the same Y as the start point
+						selectorPosition.z
+					);
+					break;
+					
+				case RelativeSide.Center:
+					// For center: Create a point directly above/below the start point
+					// This will be halfway between the start and end points
+					float midY = (startPos.y + endPos.y) * 0.5f;
+					intermediatePoint = new Vector3(
+						startPos.x,  // Keep the same X as the start point
+						midY,        // Halfway between start and end Y
+						startPos.z
+					);
+					break;
+					
+				default:
+					// Fallback case
+					intermediatePoint = new Vector3(
+						startPos.x + (Side == RelativeSide.Left ? HorizontalLineDistance : -HorizontalLineDistance),
+						startPos.y,
+						startPos.z
+					);
+					break;
+			}
+			
+			// Debug visualization
+			if (DebugConnectionPoints)
+			{
+				Debug.DrawLine(startPos, intermediatePoint, Color.yellow, 0.5f);
+				Debug.DrawLine(intermediatePoint, endPos, Color.cyan, 0.5f);
+				Debug.Log($"Intermediate point: {intermediatePoint}, Side: {Side}, Selector position: {selectorPosition}");
+			}
+			
+			return intermediatePoint;
+		}
+
+		
+		
+		private Vector3 CalculateLineEndPosition()
+		{
+			WeaponNodeSelectorListCell activeCell = WeaponNodeSelector.List.ActiveCell;
+			// Get the WeaponNodeSelector's position
+			if (WeaponNodeSelector == null)
+			{
+				Debug.LogWarning("WeaponNodeSelector is null when calculating line end position");
+				return transform.position; // Fallback to node position
+			}
+			
+			// Use the appropriate port position based on the node's side
+			if (Side == RelativeSide.Left)
+			{
+				// For nodes on the left side, connect to the left port of the selector
+				
+				return WeaponNodeSelector.GetRightPortPosition();
+			}
+			else if (Side == RelativeSide.Right)
+			{
+				// For nodes on the right side, connect to the right port of the selector
+				return WeaponNodeSelector.GetLeftPortPosition();
+			}
+			else if (Side == RelativeSide.Center)
+			{
+				// Get the WeaponNodeSelector's ActiveCell
+				if (activeCell == null)
+				{
+					// Fall back to the selector's position if ActiveCell is not available
+					Vector3 selectorPosition = WeaponNodeSelector.transform.position;
+
+					if (DebugConnectionPoints)
+					{
+						Debug.Log($"Using selector position as end point: {selectorPosition}");
+					}
+
+					return selectorPosition;
+				}
+			}
+			
+			// Get the ActiveCell's position in world space
+			Vector3 activeCellPosition = activeCell.transform.position;
+			
+			// Calculate the cell's dimensions based on its scale and base size
+			Vector2 cellSize = EstimateCellSize(activeCell);
+			
+			// Convert the cell size to world space units
+			Canvas canvas = activeCell.GetComponentInParent<Canvas>();
+			float worldSpaceScaleFactor = 1f;
+			if (canvas != null && canvas.renderMode != RenderMode.WorldSpace)
+			{
+				// For screen space canvases, we need to convert from screen to world units
+				worldSpaceScaleFactor = 0.01f; // Approximate conversion factor
+			}
+			
+			float cellWidth = cellSize.x * 0.5f * worldSpaceScaleFactor;
+			float cellHeight = cellSize.y * 0.5f * worldSpaceScaleFactor;
+			
+			// Determine connection point based on the RelativeSide
+			Vector3 endPos;
+			
+			switch (Side)
+			{
+				case RelativeSide.Left:
+				case RelativeSide.Right:
+					// For left/right sides: Connect to the left/right edge of the cell
+					float xOffset = Side == RelativeSide.Left ? -cellWidth : cellWidth;
+					endPos = activeCellPosition + new Vector3(xOffset, 0, 0);
+					break;
+					
+				case RelativeSide.Center:
+					// For center: Connect to the top/bottom edge of the cell
+					// Determine if the node is above or below the cell
+					bool isNodeAboveCell = transform.position.y > activeCellPosition.y;
+					float yOffset = isNodeAboveCell ? -cellHeight : cellHeight;
+					endPos = activeCellPosition + new Vector3(0, yOffset, 0);
+					break;
+					
+				default:
+					// Fallback case
+					endPos = activeCellPosition;
+					break;
+			}
+			
+			// Debug visualization
+			if (DebugConnectionPoints)
+			{
+				Debug.DrawLine(activeCellPosition, endPos, Color.green, 0.5f);
+				VisualizeActiveCellBounds(activeCell, cellWidth, cellHeight);
+				Debug.Log($"ActiveCell position: {activeCellPosition}, End position: {endPos}, Cell size: {cellWidth}x{cellHeight}, Side: {Side}");
+			}
+			
+			return endPos;
+		}
+		
+		private Vector2 EstimateCellSize(WeaponNodeSelectorListCell cell)
+		{
+			// Default to the inspector values if we can't find better estimates
+			Vector2 size = new Vector2(CellBaseWidth * cell.transform.localScale.x, CellBaseHeight * cell.transform.localScale.y);
+			
+			// Try to find renderers to get a better estimate
+			SpriteRenderer[] renderers = cell.GetComponentsInChildren<SpriteRenderer>();
+			if (renderers.Length > 0)
+			{
+				// Find the bounds that encompass all renderers
+				Bounds bounds = new Bounds(cell.transform.position, Vector3.zero);
+				foreach (SpriteRenderer renderer in renderers)
+				{
+					bounds.Encapsulate(renderer.bounds);
+				}
+				
+				// Use the bounds size for a more accurate estimate
+				size.x = bounds.size.x;
+				size.y = bounds.size.y;
+				
+				if (DebugConnectionPoints)
+				{
+					Debug.Log($"Estimated cell size from renderers: {size}");
+				}
+			}
+			
+			return size;
+		}
+		
+		private void VisualizeActiveCellBounds(WeaponNodeSelectorListCell activeCell, float halfWidth, float halfHeight)
+		{
+			if (!DebugConnectionPoints || activeCell == null) return;
+			
+			Vector3 center = activeCell.transform.position;
+			Vector3 topLeft = center + new Vector3(-halfWidth, halfHeight, 0);
+			Vector3 topRight = center + new Vector3(halfWidth, halfHeight, 0);
+			Vector3 bottomLeft = center + new Vector3(-halfWidth, -halfHeight, 0);
+			Vector3 bottomRight = center + new Vector3(halfWidth, -halfHeight, 0);
+			
+			// Draw the rectangle with longer duration for better visibility
+			Debug.DrawLine(topLeft, topRight, Color.blue, 0.5f);
+			Debug.DrawLine(topRight, bottomRight, Color.blue, 0.5f);
+			Debug.DrawLine(bottomRight, bottomLeft, Color.blue, 0.5f);
+			Debug.DrawLine(bottomLeft, topLeft, Color.blue, 0.5f);
+			
+			// Draw the center point
+			Debug.DrawLine(center + Vector3.up * 0.1f, center + Vector3.down * 0.1f, Color.red, 0.5f);
+			Debug.DrawLine(center + Vector3.left * 0.1f, center + Vector3.right * 0.1f, Color.red, 0.5f);
+			
+			// Log the bounds
+			Debug.Log($"Cell bounds: Center={center}, Width={halfWidth*2}, Height={halfHeight*2}");
+		}
+		
+		private IEnumerator DrawLineCoroutine()
+		{
+			float elapsedTime = 0f;
+			
+			// Calculate the three points for our line
+			Vector3 startPos = CalculateLineStartPosition();
+			Vector3 endPos = CalculateLineEndPosition();
+			Vector3 horizontalPoint = CalculateHorizontalPoint();
+			
+			// Debug the positions
+			if (DebugConnectionPoints)
+			{
+				Debug.Log($"Drawing line from Node {NodeId} at {startPos} to horizontal point at {horizontalPoint} to ActiveCell at {endPos}");
+			}
+			
+			// Set initial positions (all at start)
+			lineRenderer.SetPosition(0, startPos);
+			lineRenderer.SetPosition(1, startPos);
+			lineRenderer.SetPosition(2, startPos);
+			
+			while (elapsedTime < DrawDuration)
+			{
+				elapsedTime += Time.deltaTime;
+				float t = Mathf.Clamp01(elapsedTime / DrawDuration);
+				
+				// First segment: from start to horizontal point
+				lineRenderer.SetPosition(0, startPos);
+				
+				if (t <= 0.5f)
+				{
+					// First half of the animation: draw from start to horizontal point
+					float segmentT = t * 2f; // Scale t to [0,1] for this segment
+					lineRenderer.SetPosition(1, Vector3.Lerp(startPos, horizontalPoint, segmentT));
+					lineRenderer.SetPosition(2, Vector3.Lerp(startPos, horizontalPoint, segmentT));
+				}
+				else
+				{
+					// Second half of the animation: draw from horizontal point to end
+					float segmentT = (t - 0.5f) * 2f; // Scale t to [0,1] for this segment
+					lineRenderer.SetPosition(1, horizontalPoint);
+					lineRenderer.SetPosition(2, Vector3.Lerp(horizontalPoint, endPos, segmentT));
+				}
+				
+				yield return null;
+			}
+			
+			// Ensure the line is fully drawn
+			lineRenderer.SetPosition(0, startPos);
+			lineRenderer.SetPosition(1, horizontalPoint);
+			lineRenderer.SetPosition(2, endPos);
+			
+			// Start the pulse effect
+			activeLineCoroutine = StartCoroutine(PulseEffect());
+		}
+		
+		private IEnumerator PulseEffect()
+		{
+			float elapsedTime = 0f;
+			
+			while (elapsedTime < PulseDuration && isLineActive)
+			{
+				elapsedTime += Time.deltaTime;
+				float t = Mathf.Clamp01(elapsedTime / PulseDuration);
+				
+				// Create a pulse that travels from start to end
+				float pulsePosition = Mathf.PingPong(t * PulseSpeed, 1f);
+				
+				// For straight lines, use a simple gradient
+				Gradient gradient = new Gradient();
+				GradientColorKey[] colorKeys = new GradientColorKey[3];
+				GradientAlphaKey[] alphaKeys = new GradientAlphaKey[3];
+				
+				// Start with default color
+				colorKeys[0] = new GradientColorKey(LineDefaultColor, 0f);
+				alphaKeys[0] = new GradientAlphaKey(LineDefaultColor.a, 0f);
+				
+				// Pulse position with pulse color
+				colorKeys[1] = new GradientColorKey(LinePulseColor, pulsePosition);
+				alphaKeys[1] = new GradientAlphaKey(LinePulseColor.a, pulsePosition);
+				
+				// End with default color
+				colorKeys[2] = new GradientColorKey(LineDefaultColor, 1f);
+				alphaKeys[2] = new GradientAlphaKey(LineDefaultColor.a, 1f);
+				
+				gradient.SetKeys(colorKeys, alphaKeys);
+				lineRenderer.colorGradient = gradient;
+				
+				// Update positions to ensure they stay current
+				Vector3 startPos = CalculateLineStartPosition();
+				Vector3 endPos = CalculateLineEndPosition();
+				Vector3 horizontalPoint = CalculateHorizontalPoint();
+				
+				lineRenderer.SetPosition(0, startPos);
+				lineRenderer.SetPosition(1, horizontalPoint);
+				lineRenderer.SetPosition(2, endPos);
+				
+				yield return null;
+			}
+			
+			// Reset to default color after pulse
+			lineRenderer.startColor = LineDefaultColor;
+			lineRenderer.endColor = LineDefaultColor;
+			
+			// Keep updating the line positions while active
+			activeLineCoroutine = StartCoroutine(UpdateLinePositions());
+		}
+		
+		private IEnumerator UpdateLinePositions()
+		{
+			while (isLineActive && lineRenderer != null)
+			{
+				// Calculate the three points for our line
+				Vector3 startPos = CalculateLineStartPosition();
+				Vector3 endPos = CalculateLineEndPosition();
+				Vector3 horizontalPoint = CalculateHorizontalPoint();
+				
+				// Update line positions
+				lineRenderer.SetPosition(0, startPos);
+				lineRenderer.SetPosition(1, horizontalPoint);
+				lineRenderer.SetPosition(2, endPos);
+				
+				yield return null;
+			}
 		}
 
 		public void RefreshSelector() {
@@ -102,13 +558,23 @@ namespace Project.UI.Loadout
 		{
 			if (!Initialised) return;
 			if (State == NodeState.Hover || State == NodeState.Selected) return;
+			
+			// Set state first
 			SetState(NodeState.Hover);
+			
+			// Then activate the line - this ensures the line is drawn even if we quickly hover in and out
+			ActivateLine();
 		}
 
 		public void DisableHover()
 		{
 			if (!Initialised) return;
 			if (State != NodeState.Hover || State == NodeState.Selected) return;
+			
+			// Deactivate the line first - this ensures the line is hidden immediately
+			DeactivateLine();
+			
+			// Then set state
 			SetState(NodeState.Default);
 		}
 	
@@ -118,6 +584,9 @@ namespace Project.UI.Loadout
 			else if (State == NodeState.Hover) {
 				SetState(NodeState.Selected);
 				WeaponNodeSelector.HandleSelect();
+				
+				// Keep the line active when selected
+				ActivateLine();
 				return;
 			}
 			WeaponNodeSelector.HandleSelect();
@@ -126,14 +595,21 @@ namespace Project.UI.Loadout
 			foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
 				weaponNode.RefreshSelector();
 			}
+			
+			// Activate the line when selected
+			ActivateLine();
 		}
 
 		public void HandleDeselect()
 		{
 			if (!Initialised) return;
 			if (State != NodeState.Selected) return;
+			
 			SetState(NodeState.Hover);
 			WeaponNodeSelector.HandleDeselect();
+			
+			// Keep the line active when returning to hover state
+			ActivateLine();
 		}
 
 		internal void SetState(NodeState state)
@@ -165,6 +641,90 @@ namespace Project.UI.Loadout
 				}
 			}
 			State = state;
+		}
+		
+		private void OnDestroy()
+		{
+			// Clean up the line object when the node is destroyed
+			if (lineObject != null)
+			{
+				Destroy(lineObject);
+			}
+			
+			// Stop any active coroutines
+			if (activeLineCoroutine != null)
+			{
+				StopCoroutine(activeLineCoroutine);
+				activeLineCoroutine = null;
+			}
+		}
+
+		private void OnValidate()
+		{
+			// Ensure cell size parameters are positive
+			CellBaseWidth = Mathf.Max(0.1f, CellBaseWidth);
+			CellBaseHeight = Mathf.Max(0.1f, CellBaseHeight);
+			
+			// Ensure connection point offset is not negative
+			ConnectionPointOffset = Mathf.Max(0f, ConnectionPointOffset);
+			
+			// Ensure horizontal line distance is positive
+			HorizontalLineDistance = Mathf.Max(0.1f, HorizontalLineDistance);
+		}
+
+		private void ActivateLine()
+		{
+			// Check if lineRenderer exists
+			if (lineRenderer == null)
+			{
+				return;
+			}
+			
+			// Always reset the line state, even if it was already active
+			// This ensures we can restart the animation immediately
+			
+			// Stop any existing coroutine
+			if (activeLineCoroutine != null)
+			{
+				StopCoroutine(activeLineCoroutine);
+				activeLineCoroutine = null;
+			}
+			
+			// Reset the line state
+			isLineActive = true;
+			lineRenderer.enabled = true;
+			
+			// Start the drawing coroutine
+			activeLineCoroutine = StartCoroutine(DrawLineCoroutine());
+		}
+		
+		private void DeactivateLine()
+		{
+			if (isLineActive && lineRenderer != null)
+			{
+				isLineActive = false;
+				
+				// Stop any existing coroutine
+				if (activeLineCoroutine != null)
+				{
+					StopCoroutine(activeLineCoroutine);
+					activeLineCoroutine = null;
+				}
+				
+				// Immediately hide the line instead of fading it out
+				// This ensures it's ready to be drawn again immediately
+				lineRenderer.enabled = false;
+				
+				// Reset the line renderer to its initial state
+				Vector3 startPos = transform.position;
+				lineRenderer.SetPosition(0, startPos);
+				lineRenderer.SetPosition(1, startPos);
+				lineRenderer.SetPosition(2, startPos);
+				
+				// Reset colors
+				lineRenderer.startColor = LineDefaultColor;
+				lineRenderer.endColor = LineDefaultColor;
+			}
 		}
 	}
 }

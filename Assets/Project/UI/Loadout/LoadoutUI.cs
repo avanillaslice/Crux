@@ -59,6 +59,15 @@ namespace Project.UI.Loadout
 		void OnDisable()
 		{
 			PlayerManager.Inst.ActivePlayerShip.transform.localScale -= new Vector3(1f, 1f, 1f);
+			
+			// Reset cursor state to avoid lingering visual effects
+			if (WeaponNodeCursor != null)
+			{
+				WeaponNodeCursor.SetState(WeaponNode.NodeState.Default);
+				WeaponNodeCursor = null;
+			}
+			
+			// Clean up all UI elements
 			foreach (Transform child in WeaponUIContainer.transform)
 			{
 				Destroy(child.gameObject);

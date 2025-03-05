@@ -15,12 +15,22 @@ namespace Project.UI.Loadout
 		public TextMeshProUGUI ID;
 		// public GameObject HoverStateComponent; // Contains Light/Medium/Heavy
 
+		[Header("Connection Ports")]
+		public GameObject PortLeft;
+		public GameObject PortRight;
+
 		// Data
 		private SlotType SlotType;
 		private WeaponNode WeaponNode;
 
 		void Awake()
 		{
+			// Validate port references
+			if (PortLeft == null || PortRight == null)
+			{
+				Debug.LogWarning("PortLeft or PortRight references are missing on WeaponNodeSelector");
+			}
+			
 			// Disable Hover and Selected components
 			// HoverStateComponent.SetActive(false);
 		}
@@ -77,7 +87,9 @@ namespace Project.UI.Loadout
 				SelectWeapon();
 				DeactivateList();
 			}
-			else ActivateList();
+			else {
+				ActivateList();
+			}
 		}
 
 		public void HandleDeselect()
@@ -113,6 +125,7 @@ namespace Project.UI.Loadout
 			// Enables SlotTypeUIComponent
 			// HoverStateComponent.SetActive(true);
 		}
+		
 		public void DisableHoverState()
 		{
 			List.DisableHoverState();
@@ -120,5 +133,20 @@ namespace Project.UI.Loadout
 			// HoverStateComponent.SetActive(false);
 		}
 
+		/// <summary>
+		/// Returns the world position of the left connection port
+		/// </summary>
+		public Vector3 GetLeftPortPosition()
+		{
+			return PortLeft.transform.position;
+		}
+
+		/// <summary>
+		/// Returns the world position of the right connection port
+		/// </summary>
+		public Vector3 GetRightPortPosition()
+		{
+			return PortRight.transform.position;
+		}
 	}
 }
