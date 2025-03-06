@@ -218,15 +218,15 @@ namespace Project.UI.Loadout
 			}
 			
 			// Shorten the line with the appropriate distance over 0.2 seconds
-			yield return StartCoroutine(connectionLine.ShortenConnectionLine(shortenDistance, 0.1f));
+			yield return StartCoroutine(connectionLine.ShortenConnectionLine(shortenDistance, 0.125f));
 			
 			// Create branching lines from the shortened end point with appropriate distances
 			// Parameters: branchLength, secondaryBranchLength, firstBranchDuration, secondaryBranchDuration
 			yield return StartCoroutine(connectionLine.CreateBranchingLines(
 				branchLength, 
 				secondaryBranchLength, 
-				0.1f,  // Keep first branch duration the same
-				0.05f  // Keep secondary branch duration the same
+				0.2f,  // Keep first branch duration the same
+				0.075f  // Keep secondary branch duration the same
 			));
 			
 			// After the line is shortened and branches are created, activate the weapon list
@@ -272,9 +272,17 @@ namespace Project.UI.Loadout
 			// First deactivate the list
 			WeaponNodeSelector.HandleDeselect();
 			
-			// Then restore the line over 0.2 seconds
-			// This will also clear any branching lines
-			yield return StartCoroutine(connectionLine.RestoreConnectionLine(0.2f));
+			// Define animation durations
+			float secondaryBranchShortenDuration = 0.1f;
+			float primaryBranchShortenDuration = 0.15f;
+			float mainLineDuration = 0.2f;
+			
+			// First, animate the shortening of all branching lines
+			// This will handle secondary branches first, then primary branches
+			yield return StartCoroutine(connectionLine.ShortenBranchingLines(primaryBranchShortenDuration, secondaryBranchShortenDuration));
+			
+			// Then restore the main connection line
+			yield return StartCoroutine(connectionLine.RestoreConnectionLine(mainLineDuration));
 		}
 
 		/// <summary>

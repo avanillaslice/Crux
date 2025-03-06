@@ -437,8 +437,8 @@ namespace Project.UI.Loadout
                 firstBranchDuration, 
                 $"Branch2_{nodeId}");
             
-            // Add a small delay between creating branches
-            yield return new WaitForSeconds(firstBranchDuration * 0.5f);
+            // Wait for the first branch animation to complete fully
+            yield return new WaitForSeconds(firstBranchDuration);
             
             // Create the first secondary branch
             CreateSecondaryBranch(
@@ -456,7 +456,7 @@ namespace Project.UI.Loadout
                 secondaryBranchDuration, 
                 $"SecBranch2_{nodeId}");
             
-            // Wait for the animation to complete
+            // Wait for the secondary branch animations to complete
             yield return new WaitForSeconds(secondaryBranchDuration);
         }
         
@@ -478,14 +478,141 @@ namespace Project.UI.Loadout
         }
         
         /// <summary>
+        /// Animates the shortening of branching lines before removing them
+        /// </summary>
+        /// <param name="primaryDuration">Duration of the primary branch shortening animation</param>
+        /// <param name="secondaryDuration">Duration of the secondary branch shortening animation</param>
+        /// <returns>Coroutine that can be awaited</returns>
+        public IEnumerator ShortenBranchingLines(float primaryDuration, float secondaryDuration)
+        {
+            // Find all secondary branch objects first
+            List<LineRenderer> secondaryBranchRenderers = new List<LineRenderer>();
+            Dictionary<LineRenderer, Vector3> secondaryStartPositions = new Dictionary<LineRenderer, Vector3>();
+            Dictionary<LineRenderer, Vector3> secondaryEndPositions = new Dictionary<LineRenderer, Vector3>();
+            
+            // Find all primary branch objects
+            List<LineRenderer> primaryBranchRenderers = new List<LineRenderer>();
+            Dictionary<LineRenderer, Vector3> primaryStartPositions = new Dictionary<LineRenderer, Vector3>();
+            Dictionary<LineRenderer, Vector3> primaryEndPositions = new Dictionary<LineRenderer, Vector3>();
+            
+            foreach (Transform child in transform)
+            {
+                if (child.name.Contains("Secondary"))
+                {
+                    // This is a secondary branch
+                    LineRenderer branchRenderer = child.GetComponent<LineRenderer>();
+                    if (branchRenderer != null)
+                    {
+                        secondaryBranchRenderers.Add(branchRenderer);
+                        
+                        // Store the start and end positions
+                        secondaryStartPositions[branchRenderer] = branchRenderer.GetPosition(0);
+                        secondaryEndPositions[branchRenderer] = branchRenderer.GetPosition(1);
+                    }
+                }
+                else if (child.name.Contains("Branch"))
+                {
+                    // This is a primary branch
+                    LineRenderer branchRenderer = child.GetComponent<LineRenderer>();
+                    if (branchRenderer != null)
+                    {
+                        primaryBranchRenderers.Add(branchRenderer);
+                        
+                        // Store the start and end positions
+                        primaryStartPositions[branchRenderer] = branchRenderer.GetPosition(0);
+                        primaryEndPositions[branchRenderer] = branchRenderer.GetPosition(1);
+                    }
+                }
+            }
+            
+            // Step 1: Animate the shortening of secondary branching lines
+            if (secondaryBranchRenderers.Count > 0)
+            {
+                float elapsedTime = 0f;
+                while (elapsedTime < secondaryDuration)
+                {
+                    elapsedTime += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsedTime / secondaryDuration);
+                    
+                    // For each secondary branch, shorten it by moving the end point towards the start point
+                    foreach (LineRenderer branchRenderer in secondaryBranchRenderers)
+                    {
+                        if (branchRenderer != null)
+                        {
+                            Vector3 startPos = secondaryStartPositions[branchRenderer];
+                            Vector3 endPos = secondaryEndPositions[branchRenderer];
+                            
+                            // Lerp from end position to start position
+                            Vector3 newEndPos = Vector3.Lerp(endPos, startPos, t);
+                            
+                            // Update the line renderer
+                            branchRenderer.SetPosition(1, newEndPos);
+                        }
+                    }
+                    
+                    yield return null;
+                }
+                
+                // After animation is complete, destroy all secondary branch objects
+                foreach (LineRenderer branchRenderer in secondaryBranchRenderers)
+                {
+                    if (branchRenderer != null)
+                    {
+                        Destroy(branchRenderer.gameObject);
+                    }
+                }
+            }
+            
+            // Step 2: Animate the shortening of primary branching lines
+            if (primaryBranchRenderers.Count > 0)
+            {
+                float elapsedTime = 0f;
+                while (elapsedTime < primaryDuration)
+                {
+                    elapsedTime += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsedTime / primaryDuration);
+                    
+                    // For each primary branch, shorten it by moving the end point towards the start point
+                    foreach (LineRenderer branchRenderer in primaryBranchRenderers)
+                    {
+                        if (branchRenderer != null)
+                        {
+                            Vector3 startPos = primaryStartPositions[branchRenderer];
+                            Vector3 endPos = primaryEndPositions[branchRenderer];
+                            
+                            // Lerp from end position to start position
+                            Vector3 newEndPos = Vector3.Lerp(endPos, startPos, t);
+                            
+                            // Update the line renderer
+                            branchRenderer.SetPosition(1, newEndPos);
+                        }
+                    }
+                    
+                    yield return null;
+                }
+                
+                // After animation is complete, destroy all primary branch objects
+                foreach (LineRenderer branchRenderer in primaryBranchRenderers)
+                {
+                    if (branchRenderer != null)
+                    {
+                        Destroy(branchRenderer.gameObject);
+                    }
+                }
+            }
+            
+            // Clear the list of branching lines
+            branchingLines.Clear();
+        }
+        
+        /// <summary>
         /// Restores the connection line to its original length
         /// </summary>
         /// <param name="duration">Duration of the restoration animation</param>
         /// <returns>Coroutine that can be awaited</returns>
         public IEnumerator RestoreConnectionLine(float duration)
         {
-            // Clear any branching lines first
-            ClearBranchingLines();
+            // Don't clear branching lines immediately anymore, we'll animate them first
             
             if (!isShortened)
             {
