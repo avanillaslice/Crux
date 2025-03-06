@@ -424,6 +424,7 @@ namespace Project.UI.Loadout
 			}
 			else
 			{
+				if (WeaponNodeCursor.IsDrawingLine) return;
 				WeaponNodeCursor.WeaponNodeSelector.ScrollUp();
 			}
 		}
@@ -438,6 +439,7 @@ namespace Project.UI.Loadout
 			}
 			else
 			{
+				if (WeaponNodeCursor.IsDrawingLine) return;
 				WeaponNodeCursor.WeaponNodeSelector.ScrollDown();
 			}
 		}

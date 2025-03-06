@@ -33,6 +33,7 @@ namespace Project.UI.Loadout
 		private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
 		private AttachPoint AttachPoint;
 		public WeaponSlot WeaponSlot;
+		public bool IsDrawingLine = false;
 		
 		// Connection Line
 		private WeaponNodeConnection connectionLine;
@@ -196,6 +197,7 @@ namespace Project.UI.Loadout
 		/// </summary>
 		private IEnumerator ShortenLineAndActivateList()
 		{
+			IsDrawingLine = true;
 			// Define distances based on the node's side
 			float shortenDistance;
 			float branchLength;
@@ -228,6 +230,8 @@ namespace Project.UI.Loadout
 				0.2f,  // Keep first branch duration the same
 				0.075f  // Keep secondary branch duration the same
 			));
+
+			IsDrawingLine = false;
 			
 			// After the line is shortened and branches are created, activate the weapon list
 			WeaponNodeSelector.HandleSelect();
@@ -269,6 +273,7 @@ namespace Project.UI.Loadout
 		/// </summary>
 		private IEnumerator RestoreLineAndDeactivateList()
 		{
+			IsDrawingLine = true;
 			// First deactivate the list
 			WeaponNodeSelector.HandleDeselect();
 			
@@ -283,6 +288,8 @@ namespace Project.UI.Loadout
 			
 			// Then restore the main connection line
 			yield return StartCoroutine(connectionLine.RestoreConnectionLine(mainLineDuration));
+
+			IsDrawingLine = false;
 		}
 
 		/// <summary>
