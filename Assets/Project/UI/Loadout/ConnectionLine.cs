@@ -306,5 +306,147 @@ namespace Project.UI.Loadout
                 lineRenderer.endWidth = width;
             }
         }
+        
+        /// <summary>
+        /// Shortens the end point of the line by moving it towards the middle point by the specified amount.
+        /// Returns a coroutine that can be awaited to know when the animation is complete.
+        /// </summary>
+        /// <param name="shortenAmount">Amount to shorten the line by</param>
+        /// <param name="duration">Duration of the shortening animation</param>
+        /// <returns>Coroutine that can be awaited</returns>
+        public virtual IEnumerator ShortenEndPoint(float shortenAmount, float duration)
+        {
+            if (lineRenderer == null || !isLineActive)
+            {
+                yield break;
+            }
+            
+            // Get the current positions
+            Vector3 startPos = linePositions[0];
+            Vector3 middlePos = linePositions[1];
+            Vector3 endPos = linePositions[2];
+            
+            // Calculate the direction from end to middle
+            Vector3 direction = (middlePos - endPos).normalized;
+            
+            // Calculate the target position (moved towards middle by shortenAmount)
+            Vector3 targetEndPos = endPos + (direction * shortenAmount);
+            
+            // Animate the shortening
+            float elapsedTime = 0f;
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsedTime / duration);
+                
+                // Lerp from current end position to target end position
+                Vector3 newEndPos = Vector3.Lerp(endPos, targetEndPos, t);
+                
+                // Update the line renderer
+                lineRenderer.SetPosition(2, newEndPos);
+                
+                yield return null;
+            }
+            
+            // Ensure we set the final position
+            lineRenderer.SetPosition(2, targetEndPos);
+            
+            // Update the stored position
+            linePositions[2] = targetEndPos;
+        }
+        
+        /// <summary>
+        /// Creates a new line that branches from a specified point in a specified direction.
+        /// </summary>
+        /// <param name="startPoint">The starting point of the branch</param>
+        /// <param name="direction">The direction the branch should extend</param>
+        /// <param name="length">The length of the branch</param>
+        /// <param name="duration">Duration of the drawing animation</param>
+        /// <param name="lineId">Identifier for the new line</param>
+        /// <returns>The end point of the branch</returns>
+        public virtual Vector3 CreateBranchingLine(Vector3 startPoint, Vector3 direction, float length, float duration, string lineId)
+        {
+            // Create a new GameObject for the branching line
+            GameObject branchLineObject = new GameObject($"{lineId}_Branch");
+            branchLineObject.transform.SetParent(transform);
+            
+            // Add the LineRenderer component
+            LineRenderer branchLineRenderer = branchLineObject.AddComponent<LineRenderer>();
+            
+            // Set the line width using the LineWidth property
+            branchLineRenderer.startWidth = LineWidth;
+            branchLineRenderer.endWidth = LineWidth;
+            
+            // Ensure the LineRenderer uses world space positions
+            branchLineRenderer.useWorldSpace = true;
+            
+            // Set position count to 2 for a straight line
+            branchLineRenderer.positionCount = 2;
+            
+            // Use the same material as the main line
+            if (lineRenderer != null && lineRenderer.material != null)
+            {
+                branchLineRenderer.material = new Material(lineRenderer.material);
+            }
+            else
+            {
+                // Fallback to a default material
+                branchLineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+            }
+            
+            // Calculate the end point
+            Vector3 endPoint = startPoint + (direction.normalized * length);
+            
+            // Set initial positions (both at start)
+            branchLineRenderer.SetPosition(0, startPoint);
+            branchLineRenderer.SetPosition(1, startPoint);
+            
+            // Enable the line renderer
+            branchLineRenderer.enabled = true;
+            
+            // Start the animation coroutine
+            StartCoroutine(AnimateBranchingLine(branchLineRenderer, startPoint, endPoint, duration));
+            
+            // Return the end point immediately
+            return endPoint;
+        }
+        
+        /// <summary>
+        /// Animates the drawing of a branching line.
+        /// </summary>
+        private IEnumerator AnimateBranchingLine(LineRenderer branchLineRenderer, Vector3 startPoint, Vector3 endPoint, float duration)
+        {
+            // Animate the drawing of the line
+            float elapsedTime = 0f;
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsedTime / duration);
+                
+                // Lerp from start to end
+                Vector3 currentEndPoint = Vector3.Lerp(startPoint, endPoint, t);
+                branchLineRenderer.SetPosition(1, currentEndPoint);
+                
+                yield return null;
+            }
+            
+            // Ensure the line is fully drawn
+            branchLineRenderer.SetPosition(1, endPoint);
+        }
+        
+        /// <summary>
+        /// Creates a secondary branch from the end of an existing branch.
+        /// </summary>
+        /// <param name="startPoint">The starting point (end of previous branch)</param>
+        /// <param name="direction">The direction the secondary branch should extend</param>
+        /// <param name="length">The length of the secondary branch</param>
+        /// <param name="duration">Duration of the drawing animation</param>
+        /// <param name="lineId">Identifier for the new line</param>
+        /// <returns>The end point of the secondary branch</returns>
+        public virtual Vector3 CreateSecondaryBranch(Vector3 startPoint, Vector3 direction, float length, float duration, string lineId)
+        {
+            // This is essentially the same as CreateBranchingLine but with a different naming convention
+            return CreateBranchingLine(startPoint, direction, length, duration, $"{lineId}_Secondary");
+        }
     }
 } 

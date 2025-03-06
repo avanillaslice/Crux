@@ -2,6 +2,7 @@ using System.Collections;
 using Project.Ships;
 using UnityEngine;
 using Crux.Utilities;
+using System.Collections.Generic;
 
 namespace Project.UI.Loadout
 {
@@ -24,6 +25,14 @@ namespace Project.UI.Loadout
         private RelativeSide side;
         private int nodeId;
         private WeaponNodeSelector selector;
+        
+        // Track if the line is in a shortened state
+        private bool isShortened = false;
+        private Vector3 shortenedEndPoint;
+        private float shortenAmount = 0f;
+        
+        // Track branching lines
+        private List<GameObject> branchingLines = new List<GameObject>();
         
         /// <summary>
         /// Initialize the weapon node connection with the necessary transforms and side information
@@ -58,6 +67,17 @@ namespace Project.UI.Loadout
             Vector3 startPos = CalculateStartPosition();
             Vector3 middlePos = CalculateMiddlePosition(startPos);
             Vector3 endPos = CalculateEndPosition();
+            
+            // If the line is shortened, adjust the end position
+            if (isShortened && lineRenderer != null)
+            {
+                // Calculate the direction from end to middle
+                Vector3 direction = (middlePos - endPos).normalized;
+                
+                // Apply the shortening
+                endPos = endPos + (direction * shortenAmount);
+                shortenedEndPoint = endPos;
+            }
             
             // Set the three positions for our weapon node connection
             SetLinePositions(startPos, middlePos, endPos);
@@ -306,6 +326,215 @@ namespace Project.UI.Loadout
                 UpdateLinePositions();
                 yield return null;
             }
+        }
+        
+        /// <summary>
+        /// Shortens the connection line by moving the end point towards the middle point.
+        /// Returns a coroutine that can be awaited to know when the animation is complete.
+        /// </summary>
+        /// <param name="shortenAmount">Amount to shorten the line by</param>
+        /// <param name="duration">Duration of the shortening animation</param>
+        /// <returns>Coroutine that can be awaited</returns>
+        public IEnumerator ShortenConnectionLine(float shortenAmount, float duration)
+        {
+            // Stop continuous updates temporarily
+            if (activeLineCoroutine != null)
+            {
+                StopCoroutine(activeLineCoroutine);
+                activeLineCoroutine = null;
+            }
+            
+            // Store the shorten amount for future updates
+            this.shortenAmount = shortenAmount;
+            this.isShortened = true;
+            
+            // Call the base class method to shorten the end point
+            yield return StartCoroutine(ShortenEndPoint(shortenAmount, duration));
+            
+            // Resume continuous updates after shortening is complete
+            activeLineCoroutine = StartCoroutine(ContinuousPositionUpdates());
+        }
+        
+        /// <summary>
+        /// Creates branching lines from the shortened end point based on the node's side.
+        /// </summary>
+        /// <param name="branchLength">Length of the first branch</param>
+        /// <param name="secondaryBranchLength">Length of the secondary branch</param>
+        /// <param name="firstBranchDuration">Duration of the first branch drawing animation</param>
+        /// <param name="secondaryBranchDuration">Duration of the secondary branch drawing animation</param>
+        /// <returns>Coroutine that can be awaited</returns>
+        public IEnumerator CreateBranchingLines(float branchLength, float secondaryBranchLength, float firstBranchDuration, float secondaryBranchDuration)
+        {
+            if (!isShortened || lineRenderer == null)
+            {
+                yield break;
+            }
+            
+            // Clear any existing branching lines
+            ClearBranchingLines();
+            
+            // Get the shortened end point
+            Vector3 branchStartPoint = linePositions[2];
+            
+            // Determine the directions for the branches based on the node's side
+            Vector3 firstBranchDir1, firstBranchDir2;
+            Vector3 secondaryBranchDir1, secondaryBranchDir2;
+            
+            if (side == RelativeSide.Left || side == RelativeSide.Right)
+            {
+                // For Left or Right sides, branches go up and down
+                firstBranchDir1 = Vector3.up;
+                firstBranchDir2 = Vector3.down;
+                
+                // Secondary branches direction depends on the side
+                if (side == RelativeSide.Left)
+                {
+                    // For Left side, secondary branches go left (negative X)
+                    secondaryBranchDir1 = Vector3.left;
+                    secondaryBranchDir2 = Vector3.left;
+                }
+                else
+                {
+                    // For Right side, secondary branches go right (positive X)
+                    secondaryBranchDir1 = Vector3.right;
+                    secondaryBranchDir2 = Vector3.right;
+                }
+            }
+            else // Center
+            {
+                // For Center, branches go left and right
+                firstBranchDir1 = Vector3.left;
+                firstBranchDir2 = Vector3.right;
+                
+                // Secondary branches direction depends on the Y position of the selector
+                if (selectorTransform.position.y > 0)
+                {
+                    // If Y is positive, secondary branches go up
+                    secondaryBranchDir1 = Vector3.up;
+                    secondaryBranchDir2 = Vector3.up;
+                }
+                else
+                {
+                    // If Y is negative or zero, secondary branches go down
+                    secondaryBranchDir1 = Vector3.down;
+                    secondaryBranchDir2 = Vector3.down;
+                }
+            }
+            
+            // Create the first branch (up or left)
+            Vector3 branch1EndPoint = CreateBranchingLine(
+                branchStartPoint, 
+                firstBranchDir1, 
+                branchLength, 
+                firstBranchDuration, 
+                $"Branch1_{nodeId}");
+            
+            // Create the second branch (down or right)
+            Vector3 branch2EndPoint = CreateBranchingLine(
+                branchStartPoint, 
+                firstBranchDir2, 
+                branchLength, 
+                firstBranchDuration, 
+                $"Branch2_{nodeId}");
+            
+            // Add a small delay between creating branches
+            yield return new WaitForSeconds(firstBranchDuration * 0.5f);
+            
+            // Create the first secondary branch
+            CreateSecondaryBranch(
+                branch1EndPoint, 
+                secondaryBranchDir1, 
+                secondaryBranchLength, 
+                secondaryBranchDuration, 
+                $"SecBranch1_{nodeId}");
+            
+            // Create the second secondary branch
+            CreateSecondaryBranch(
+                branch2EndPoint, 
+                secondaryBranchDir2, 
+                secondaryBranchLength, 
+                secondaryBranchDuration, 
+                $"SecBranch2_{nodeId}");
+            
+            // Wait for the animation to complete
+            yield return new WaitForSeconds(secondaryBranchDuration);
+        }
+        
+        /// <summary>
+        /// Clears all branching lines
+        /// </summary>
+        private void ClearBranchingLines()
+        {
+            // Find all child objects with names containing "Branch"
+            foreach (Transform child in transform)
+            {
+                if (child.name.Contains("Branch"))
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+            
+            branchingLines.Clear();
+        }
+        
+        /// <summary>
+        /// Restores the connection line to its original length
+        /// </summary>
+        /// <param name="duration">Duration of the restoration animation</param>
+        /// <returns>Coroutine that can be awaited</returns>
+        public IEnumerator RestoreConnectionLine(float duration)
+        {
+            // Clear any branching lines first
+            ClearBranchingLines();
+            
+            if (!isShortened)
+            {
+                yield break;
+            }
+            
+            // Stop continuous updates temporarily
+            if (activeLineCoroutine != null)
+            {
+                StopCoroutine(activeLineCoroutine);
+                activeLineCoroutine = null;
+            }
+            
+            // Get the current positions
+            Vector3 startPos = linePositions[0];
+            Vector3 middlePos = linePositions[1];
+            Vector3 shortenedEndPos = linePositions[2];
+            
+            // Calculate the original end position
+            Vector3 originalEndPos = CalculateEndPosition();
+            
+            // Animate the restoration
+            float elapsedTime = 0f;
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsedTime / duration);
+                
+                // Lerp from shortened end position to original end position
+                Vector3 newEndPos = Vector3.Lerp(shortenedEndPos, originalEndPos, t);
+                
+                // Update the line renderer
+                lineRenderer.SetPosition(2, newEndPos);
+                
+                yield return null;
+            }
+            
+            // Ensure we set the final position
+            lineRenderer.SetPosition(2, originalEndPos);
+            
+            // Update the stored position
+            linePositions[2] = originalEndPos;
+            
+            // Reset the shortened state
+            isShortened = false;
+            shortenAmount = 0f;
+            
+            // Resume continuous updates
+            activeLineCoroutine = StartCoroutine(ContinuousPositionUpdates());
         }
     }
 } 

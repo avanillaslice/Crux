@@ -29,11 +29,11 @@ namespace Project.UI.Loadout
 		// This is to prevent an entry without a position AND avoiding the creation of cells
 		public readonly Dictionary<int, PosData> PosDataDict = new Dictionary<int, PosData>
 		{
-			{ 1, new PosData { Position = 1, YPos = 170f,	Scale = 0.6f, Opacity = 0.0f } },	// Next top cell
-			{ 2, new PosData { Position = 2, YPos = 95f, 	Scale = 0.8f, Opacity = 0.5f } },	// Above cell
+			{ 1, new PosData { Position = 1, YPos = 130f,	Scale = 0.6f, Opacity = 0.0f } },	// Next top cell
+			{ 2, new PosData { Position = 2, YPos = 95f, 	Scale = 0.8f, Opacity = 0.35f } },	// Above cell
 			{ 3, new PosData { Position = 3, YPos = 0f, 	Scale = 1.0f, Opacity = 1.0f } },	// Active cell
-			{ 4, new PosData { Position = 4, YPos = -95f,	Scale = 0.8f, Opacity = 0.5f } },	// Below cell
-			{ 5, new PosData { Position = 5, YPos = -170f,	Scale = 0.6f, Opacity = 0.25f } },	// Bottom cell
+			{ 4, new PosData { Position = 4, YPos = -95f,	Scale = 0.8f, Opacity = 0.35f } },	// Below cell
+			{ 5, new PosData { Position = 5, YPos = -130f,	Scale = 0.6f, Opacity = 0.0f } },	// Bottom cell
 			{ 6, new PosData { Position = 6, YPos = -245f,	Scale = 0.4f, Opacity = 0.0f } },	// Next bottom cell
 		};
 

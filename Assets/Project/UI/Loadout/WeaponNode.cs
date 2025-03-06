@@ -166,7 +166,18 @@ namespace Project.UI.Loadout
 					// Transition from hover to selected state
 					SetState(NodeState.Selected);
 					// This will activate the weapon list
-					WeaponNodeSelector.HandleSelect();
+					
+					// Shorten the connection line before activating the list
+					if (connectionLine != null)
+					{
+						// Start a coroutine to shorten the line and wait for it to complete
+						StartCoroutine(ShortenLineAndActivateList());
+					}
+					else
+					{
+						// If no connection line, just activate the list directly
+						WeaponNodeSelector.HandleSelect();
+					}
 					break;
 					
 				case NodeState.Selected:
@@ -179,22 +190,91 @@ namespace Project.UI.Loadout
 					break;
 			}
 		}
+		
+		/// <summary>
+		/// Coroutine that shortens the connection line and then activates the weapon list
+		/// </summary>
+		private IEnumerator ShortenLineAndActivateList()
+		{
+			// Define distances based on the node's side
+			float shortenDistance;
+			float branchLength;
+			float secondaryBranchLength;
+			
+			// Adjust distances based on the node's side
+			if (Side == RelativeSide.Center)
+			{
+				// For center nodes, use larger distances
+				shortenDistance = 0.8f;
+				branchLength = 1.1f;
+				secondaryBranchLength = 0.1f;
+			}
+			else
+			{
+				// For left/right nodes, use the original distances
+				shortenDistance = 0.1f;
+				branchLength = 0.35f;
+				secondaryBranchLength = 0.1f;
+			}
+			
+			// Shorten the line with the appropriate distance over 0.2 seconds
+			yield return StartCoroutine(connectionLine.ShortenConnectionLine(shortenDistance, 0.1f));
+			
+			// Create branching lines from the shortened end point with appropriate distances
+			// Parameters: branchLength, secondaryBranchLength, firstBranchDuration, secondaryBranchDuration
+			yield return StartCoroutine(connectionLine.CreateBranchingLines(
+				branchLength, 
+				secondaryBranchLength, 
+				0.1f,  // Keep first branch duration the same
+				0.05f  // Keep secondary branch duration the same
+			));
+			
+			// After the line is shortened and branches are created, activate the weapon list
+			WeaponNodeSelector.HandleSelect();
+		}
 
 		/// <summary>
 		/// Handles deselection logic for the weapon node.
 		/// </summary>
 		public void HandleDeselect()
 		{
-			if (!Initialised || State != NodeState.Selected) return;
+			if (!Initialised) return;
 			
-			// Reset all linked nodes to Default state first
-			foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
-				weaponNode.SetState(NodeState.Default);
+			// If we're in selected state, transition back to hover state
+			if (State == NodeState.Selected)
+			{
+				// Reset all linked nodes to Default state first
+				foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
+					weaponNode.SetState(NodeState.Default);
+				}
+				
+				// Then set this node to Hover state
+				SetState(NodeState.Hover);
+				
+				// Restore the connection line to its original length
+				if (connectionLine != null)
+				{
+					StartCoroutine(RestoreLineAndDeactivateList());
+				}
+				else
+				{
+					// If no connection line, just deactivate the list directly
+					WeaponNodeSelector.HandleDeselect();
+				}
 			}
-			
-			// Then set this node to Hover state
-			SetState(NodeState.Hover);
+		}
+		
+		/// <summary>
+		/// Coroutine that restores the connection line and then deactivates the weapon list
+		/// </summary>
+		private IEnumerator RestoreLineAndDeactivateList()
+		{
+			// First deactivate the list
 			WeaponNodeSelector.HandleDeselect();
+			
+			// Then restore the line over 0.2 seconds
+			// This will also clear any branching lines
+			yield return StartCoroutine(connectionLine.RestoreConnectionLine(0.2f));
 		}
 
 		/// <summary>
@@ -212,13 +292,14 @@ namespace Project.UI.Loadout
 			switch (State)
 			{
 				case NodeState.Hover:
-					if (newState != NodeState.Hover)
+					if (newState == NodeState.Default)
 						WeaponNodeSelector.DisableHoverState();
 					break;
 					
 				case NodeState.Selected:
-					if (newState != NodeState.Selected)
-						WeaponNodeSelector.HandleDeselect();
+					// We'll handle deselection in the HandleDeselect method
+					// to properly manage the connection line restoration
+					// So we don't call WeaponNodeSelector.HandleDeselect() here
 					break;
 			}
 			
