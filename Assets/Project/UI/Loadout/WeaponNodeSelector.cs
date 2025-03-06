@@ -25,6 +25,10 @@ namespace Project.UI.Loadout
 		private SlotType SlotType;
 		private WeaponNode WeaponNode;
 
+		// State tracking
+		private bool IsHovered = false;
+		private bool IsSelected = false;
+
 		void Awake()
 		{
 			// Validate port references
@@ -83,53 +87,93 @@ namespace Project.UI.Loadout
 			List.ScrollDown();
 		}
 
+		/// <summary>
+		/// Handles selection state changes. If the list is active, selects the current weapon and deactivates the list.
+		/// If the list is not active, activates the list.
+		/// </summary>
 		public void HandleSelect()
 		{
 			if (List.State == WeaponNodeSelectorList.ListState.Active) {
+				// List is open, so select the current weapon and close the list
 				SelectWeapon();
 				DeactivateList();
+				IsSelected = false;
 			}
-			else ActivateList();
+			else {
+				// List is closed, so open it
+				ActivateList();
+				IsSelected = true;
+			}
 		}
 
+		/// <summary>
+		/// Handles deselection by deactivating the list if it's active.
+		/// </summary>
 		public void HandleDeselect()
 		{
-			if (List.State != WeaponNodeSelectorList.ListState.Active) return;
-			DeactivateList();
+			if (List.State == WeaponNodeSelectorList.ListState.Active) {
+				DeactivateList();
+			}
+			IsSelected = false;
 		}
 
+		/// <summary>
+		/// Selects the currently active weapon in the list and equips it to the weapon slot.
+		/// </summary>
 		private void SelectWeapon() {
 			GameObject targetWeaponPrefab = LoadoutManager.FetchWeaponPefab(List.AvailableWeapons[List.ActiveCell.WeaponListIndex]);
 			if (targetWeaponPrefab == null) {
 				Debug.LogError("Could not identify weapon");
 				return;
 			}
+			
 			WeaponSlot weaponSlot = LoadoutManager.EquipWeaponToSlot(targetWeaponPrefab, WeaponNode.WeaponSlot.id);
-			if (weaponSlot == null) Debug.LogError($"Failed to equip weapom: {List.AvailableWeapons[List.ActiveCell.WeaponListIndex].WeaponName}");
-			else MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
+			if (weaponSlot == null) {
+				Debug.LogError($"Failed to equip weapon: {List.AvailableWeapons[List.ActiveCell.WeaponListIndex].WeaponName}");
+			}
+			else {
+				MusicManager.Inst.PlaySoundEffect("GunLoad", 1f);
+				// Refresh the node to reflect the new weapon
+				WeaponNode.RefreshSelector();
+			}
 		}
 
+		/// <summary>
+		/// Activates the weapon list for selection.
+		/// </summary>
 		private void ActivateList()
 		{
-			List.ActivateList(); // OnEnable animation?
+			List.ActivateList();
 		}
 
+		/// <summary>
+		/// Deactivates the weapon list.
+		/// </summary>
 		private void DeactivateList()
 		{
-			List.DeactivateList(); // OnDisable animation
+			List.DeactivateList();
 		}
 
+		/// <summary>
+		/// Enables the hover state visual effects.
+		/// </summary>
 		public void EnableHoverState()
 		{
+			if (IsHovered) return;
+			
 			List.EnableHoverState();
-			// Enables SlotTypeUIComponent
-			// HoverStateComponent.SetActive(true);
+			IsHovered = true;
 		}
+
+		/// <summary>
+		/// Disables the hover state visual effects.
+		/// </summary>
 		public void DisableHoverState()
 		{
+			if (!IsHovered) return;
+			
 			List.DisableHoverState();
-			// Disables SlotTypeUIComponent
-			// HoverStateComponent.SetActive(false);
+			IsHovered = false;
 		}
 
 		// Returns the position of the left port for line connections

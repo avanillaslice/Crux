@@ -27,7 +27,7 @@ namespace Project.UI.Loadout
 		[HideInInspector] public float YPos;
 		[HideInInspector] public RelativeSide Side;
 		[HideInInspector] public WeaponNodeSelector WeaponNodeSelector;
-		[HideInInspector] public NodeState State;
+		[HideInInspector] public NodeState State { get; private set; }
 		private Image ColorComponent;
 		private Color DefaultColor;
 		private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
@@ -63,7 +63,6 @@ namespace Project.UI.Loadout
 			Side = AttachPoint.Side;
 			XPos = attachPoint.transform.localPosition.x;
 			YPos = attachPoint.transform.localPosition.y;
-			// Debug.Log("NEW NODE POSTION X: " + XPos + " Y: " + YPos);
 		}
 
 		public void AssignSelector(WeaponNodeSelector weaponNodeSelector)
@@ -140,107 +139,113 @@ namespace Project.UI.Loadout
 
 		public void EnableHover()
 		{
-			if (!Initialised) return;
-			if (State == NodeState.Hover || State == NodeState.Selected) return;
-			
-			// Set state first
+			if (!Initialised || State == NodeState.Hover || State == NodeState.Selected) return;
 			SetState(NodeState.Hover);
-			
-			// Then activate the line - this ensures the line is drawn even if we quickly hover in and out
-			if (connectionLine != null)
-			{
-				connectionLine.ActivateLine();
-			}
 		}
 
 		public void DisableHover()
 		{
-			if (!Initialised) return;
-			if (State != NodeState.Hover || State == NodeState.Selected) return;
-			
-			// No longer deactivate the line - we want it to remain visible permanently
-			// if (connectionLine != null)
-			// {
-			//     connectionLine.DeactivateLine();
-			// }
-			
-			// Then set state
+			if (!Initialised || State != NodeState.Hover || State == NodeState.Selected) return;
 			SetState(NodeState.Default);
 		}
 	
+		/// <summary>
+		/// Handles selection logic for the weapon node based on its current state.
+		/// </summary>
 		public void HandleSelect()
 		{
-			if (!Initialised || State == NodeState.Default) return;
-			else if (State == NodeState.Hover) {
-				SetState(NodeState.Selected);
-				WeaponNodeSelector.HandleSelect();
-				
-				// Keep the line active when selected
-				if (connectionLine != null)
-				{
-					connectionLine.ActivateLine();
-				}
-				return;
-			}
+			if (!Initialised) return;
 			
-			WeaponNodeSelector.HandleSelect();
-			AssignSelector(WeaponNodeSelector);
-			SetState(NodeState.Hover);
-			foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
-				weaponNode.RefreshSelector();
-			}
-			
-			// Activate the line when selected
-			if (connectionLine != null)
+			switch (State)
 			{
-				connectionLine.ActivateLine();
+				case NodeState.Default:
+					// Do nothing when in default state
+					return;
+					
+				case NodeState.Hover:
+					// Transition from hover to selected state
+					SetState(NodeState.Selected);
+					// This will activate the weapon list
+					WeaponNodeSelector.HandleSelect();
+					break;
+					
+				case NodeState.Selected:
+					// Already selected, so this is a second click
+					// This will select the current weapon and close the list
+					WeaponNodeSelector.HandleSelect();
+					
+					// After selecting a weapon, we should remain in hover state
+					// The list will be closed by WeaponNodeSelector.HandleSelect()
+					break;
 			}
 		}
 
+		/// <summary>
+		/// Handles deselection logic for the weapon node.
+		/// </summary>
 		public void HandleDeselect()
 		{
-			if (!Initialised) return;
-			if (State != NodeState.Selected) return;
+			if (!Initialised || State != NodeState.Selected) return;
 			
+			// Reset all linked nodes to Default state first
+			foreach (WeaponNode weaponNode in LinkedWeaponNodes) {
+				weaponNode.SetState(NodeState.Default);
+			}
+			
+			// Then set this node to Hover state
 			SetState(NodeState.Hover);
 			WeaponNodeSelector.HandleDeselect();
-			
-			// Keep the line active when returning to hover state
-			if (connectionLine != null)
-			{
-				connectionLine.ActivateLine();
-			}
 		}
 
-		internal void SetState(NodeState state)
+		/// <summary>
+		/// Sets the visual state of the node and handles related state transitions.
+		/// </summary>
+		/// <param name="newState">The target state to transition to</param>
+		internal void SetState(NodeState newState)
 		{
 			if (!Initialised) return;
-			switch (state)
+			
+			// Don't process if already in the target state
+			if (State == newState) return;
+			
+			// Handle exit actions for current state
+			switch (State)
 			{
-				case NodeState.Default: {
-					ColorComponent.color = DefaultColor;
-					if (State == NodeState.Hover) WeaponNodeSelector.DisableHoverState();
-					if (State == NodeState.Selected) WeaponNodeSelector.HandleDeselect();
+				case NodeState.Hover:
+					if (newState != NodeState.Hover)
+						WeaponNodeSelector.DisableHoverState();
 					break;
-				}
-				case NodeState.Hover: {
-					if (State == NodeState.Selected) {
+					
+				case NodeState.Selected:
+					if (newState != NodeState.Selected)
 						WeaponNodeSelector.HandleDeselect();
-						foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Default);
-					}
+					break;
+			}
+			
+			// Handle enter actions for new state
+			switch (newState)
+			{
+				case NodeState.Default:
+					ColorComponent.color = DefaultColor;
+					break;
+					
+				case NodeState.Hover:
 					ColorComponent.color = HoverColor;
 					WeaponNodeSelector.EnableHoverState();
 					break;
-				}
-				case NodeState.Selected: {
+					
+				case NodeState.Selected:
 					ColorComponent.color = SelectedColor;
+					// When transitioning to selected, also select linked nodes
 					if (State == NodeState.Hover) {
-						foreach (WeaponNode weaponNode in LinkedWeaponNodes) weaponNode.SetState(NodeState.Selected);
+						foreach (WeaponNode weaponNode in LinkedWeaponNodes) 
+							weaponNode.SetState(NodeState.Selected);
 					}
 					break;
-				}
 			}
-			State = state;
+			
+			// Update the state
+			State = newState;
 		}
 		
 		private void OnDestroy()

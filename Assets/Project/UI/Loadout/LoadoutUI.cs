@@ -343,32 +343,45 @@ namespace Project.UI.Loadout
 
 		public void HandlePointerEnterOnNode(WeaponNode weaponNode)
 		{
-			if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+			// Don't change cursor if a node is already selected
+			if (WeaponNodeCursor != null && WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
 			SetCursor(weaponNode);
 		}
 
 		public void HandlePointerExitOnNode(WeaponNode weaponNode)
 		{
+			// Only disable hover if this is the current cursor and not in selected state
 			if (WeaponNodeCursor != weaponNode || WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
 			WeaponNodeCursor.DisableHover();
 		}
 
 		public void HandlePointerClickOnNode(WeaponNode weaponNode)
 		{
-			if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+			// If another node is already selected, ignore clicks on other nodes
+			if (WeaponNodeCursor != null && WeaponNodeCursor != weaponNode && 
+			    WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+			
+			// Set as cursor if it's not already
 			if (WeaponNodeCursor != weaponNode) SetCursor(weaponNode);
+			
+			// Handle the selection
 			WeaponNodeCursor.HandleSelect();
 		}
 
 		public override void HandleSelect()
 		{
+			// Forward the select action to the current cursor node
 			WeaponNodeCursor?.HandleSelect();
 		}
 
 		public override void HandleBack()
 		{
-			if (WeaponNodeCursor.State == WeaponNode.NodeState.Selected) WeaponNodeCursor.HandleDeselect();
-			else HandleExit();
+			// If a node is selected, deselect it, otherwise handle normal back behavior
+			if (WeaponNodeCursor != null && WeaponNodeCursor.State == WeaponNode.NodeState.Selected) 
+				WeaponNodeCursor.HandleDeselect();
+			else
+				// Handle normal back behavior (e.g., exit the loadout screen)
+				HandleExit();
 		}
 
 		public override void HandleExit()

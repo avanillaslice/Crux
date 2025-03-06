@@ -13,7 +13,7 @@ namespace Project.UI.Loadout
     {
         [Header("Line Settings")]
         [Tooltip("Width of the connection line")]
-        public float LineWidth = 0.035f;
+        protected float LineWidth = 0.035f;
         
         [Tooltip("Duration of the line drawing animation")]
         public float DrawDuration = 1f;
@@ -75,6 +75,7 @@ namespace Project.UI.Loadout
             // Add the LineRenderer component
             lineRenderer = lineObject.AddComponent<LineRenderer>();
             
+            // Set the line width using the LineWidth property
             lineRenderer.startWidth = LineWidth;
             lineRenderer.endWidth = LineWidth;
             
@@ -288,6 +289,21 @@ namespace Project.UI.Loadout
             if (lineObject != null)
             {
                 Destroy(lineObject);
+            }
+        }
+        
+        /// <summary>
+        /// Set the width of the line
+        /// </summary>
+        public virtual void SetLineWidth(float width)
+        {
+            LineWidth = width;
+            
+            // Update the line renderer if it exists
+            if (lineRenderer != null)
+            {
+                lineRenderer.startWidth = width;
+                lineRenderer.endWidth = width;
             }
         }
     }

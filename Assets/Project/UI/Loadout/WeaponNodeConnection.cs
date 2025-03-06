@@ -15,6 +15,9 @@ namespace Project.UI.Loadout
         [Tooltip("Distance in world units for the horizontal segment of the connection line")]
         public float HorizontalLineDistance = 2f;
         
+        [Tooltip("Width of the weapon node connection line")]
+        public float WeaponNodeLineWidth = 0.035f;
+        
         // Connection points
         private Transform nodeTransform;
         private Transform selectorTransform;
@@ -39,6 +42,9 @@ namespace Project.UI.Loadout
             
             // Call the base initialization
             base.Initialize($"WeaponNodeConnection_{id}");
+            
+            // Set the line width
+            SetLineWidth(WeaponNodeLineWidth);
             
             // Calculate and set the initial line positions
             UpdateLinePositions();
