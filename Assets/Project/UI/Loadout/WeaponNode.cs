@@ -1,11 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using Project.Ships;
-using Project.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Crux.Utilities; // Add this for ColorManager
+using Crux.Utilities;
 
 namespace Project.UI.Loadout
 {
@@ -17,18 +16,13 @@ namespace Project.UI.Loadout
 		public TextMeshProUGUI ID;
 		
 		[Header("Connection Line Settings")]
-		public Color LineDefaultColor;
-		public Color LinePulseColor = new Color(1f, 1f, 1f, 1f);
-		public float LineWidth = 0.005f;
-		public float DrawDuration = 1.5f;
-		public float PulseDuration = 5f;
-		public float PulseSpeed = 0.5f;
-		[Tooltip("Adjust this value to fine-tune the connection point offset")]
-		public float ConnectionPointOffset = 0.1f;
-		[Tooltip("Enable to visualize connection points for debugging")]
-		public bool DebugConnectionPoints = false;
+		private Color LineDefaultColor;
+		private float LineWidth { get { return 0.035f; }}
+		private float DrawDuration { get { return 1f; }}
 		[Tooltip("Distance in world units for the horizontal segment of the connection line")]
-		public float HorizontalLineDistance = 2.0f;
+		private float HorizontalLineDistance { get { return 2f; }}
+		[Tooltip("Enable to visualize connection points for debugging")]
+		private bool DebugConnectionPoints = false;
 
 		[Header("Cell Size Settings")]
 		[Tooltip("Base width of the selector cell for line connection calculations")]
@@ -36,6 +30,7 @@ namespace Project.UI.Loadout
 		[Tooltip("Base height of the selector cell for line connection calculations")]
 		public float CellBaseHeight = 1.0f;
 
+	
 		// Data
 		private bool Initialised = false;
 		[HideInInspector] public float XPos;
@@ -116,7 +111,6 @@ namespace Project.UI.Loadout
 			// Add the LineRenderer component
 			lineRenderer = lineObject.AddComponent<LineRenderer>();
 			
-			// Configure LineRenderer
 			lineRenderer.startWidth = LineWidth;
 			lineRenderer.endWidth = LineWidth;
 			
@@ -152,16 +146,6 @@ namespace Project.UI.Loadout
 				lineRenderer.material.SetColor("_Color", borderColor);
 				lineRenderer.material.SetColor("_EmissionColor", borderColor);
 				lineRenderer.material.SetFloat("_EmissionIntensity", 1f);
-				
-				// Set up pulse-specific properties if they exist
-				if (lineRenderer.material.HasProperty("_PulsePosition"))
-				{
-					lineRenderer.material.SetFloat("_PulsePosition", 0f);
-					lineRenderer.material.SetColor("_PulseColor", LinePulseColor);
-					lineRenderer.material.SetFloat("_PulseWidth", 0.1f);
-					lineRenderer.material.SetColor("_PulseEmissionColor", LinePulseColor);
-					lineRenderer.material.SetFloat("_PulseEmissionIntensity", 2f);
-				}
 			}
 			
 			// Initially hide the line
@@ -475,11 +459,11 @@ namespace Project.UI.Loadout
 			lineRenderer.SetPosition(1, horizontalPoint);
 			lineRenderer.SetPosition(2, endPos);
 			
-			// Start the pulse effect
-			activeLineCoroutine = StartCoroutine(PulseEffect());
+			// Start the connection effect
+			activeLineCoroutine = StartCoroutine(ConnectionEffect());
 		}
 		
-		private IEnumerator PulseEffect()
+		private IEnumerator ConnectionEffect()
 		{
 			// Wait for the line to be fully drawn
 			// yield return new WaitForSeconds(DrawDuration);
@@ -699,35 +683,6 @@ namespace Project.UI.Loadout
 				}
 			}
 			State = state;
-		}
-		
-		private void OnDestroy()
-		{
-			// Clean up the line object when the node is destroyed
-			if (lineObject != null)
-			{
-				Destroy(lineObject);
-			}
-			
-			// Stop any active coroutines
-			if (activeLineCoroutine != null)
-			{
-				StopCoroutine(activeLineCoroutine);
-				activeLineCoroutine = null;
-			}
-		}
-
-		private void OnValidate()
-		{
-			// Ensure cell size parameters are positive
-			CellBaseWidth = Mathf.Max(0.1f, CellBaseWidth);
-			CellBaseHeight = Mathf.Max(0.1f, CellBaseHeight);
-			
-			// Ensure connection point offset is not negative
-			ConnectionPointOffset = Mathf.Max(0f, ConnectionPointOffset);
-			
-			// Ensure horizontal line distance is positive
-			HorizontalLineDistance = Mathf.Max(0.1f, HorizontalLineDistance);
 		}
 
 		private void ActivateLine()
