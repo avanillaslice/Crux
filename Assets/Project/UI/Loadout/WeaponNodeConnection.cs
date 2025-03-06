@@ -83,6 +83,9 @@ namespace Project.UI.Loadout
             // Get the selector's position
             Vector3 selectorPosition = selectorTransform.position;
             
+            // Calculate the adjusted horizontal distance based on selector's X position
+            float adjustedHorizontalDistance = CalculateAdjustedHorizontalDistance(selectorPosition.x);
+            
             // Calculate the intermediate point based on the RelativeSide
             Vector3 intermediatePoint;
             
@@ -91,7 +94,7 @@ namespace Project.UI.Loadout
                 case RelativeSide.Left:
                     // For left side: Create a point that matches the selector's X coordinate
                     intermediatePoint = new Vector3(
-                        selectorPosition.x + HorizontalLineDistance,
+                        selectorPosition.x + adjustedHorizontalDistance,
                         selectorPosition.y,
                         selectorPosition.z
                     );
@@ -100,7 +103,7 @@ namespace Project.UI.Loadout
                 case RelativeSide.Right:
                     // For right side: Create a point that matches the selector's X coordinate
                     intermediatePoint = new Vector3(
-                        selectorPosition.x - HorizontalLineDistance,
+                        selectorPosition.x - adjustedHorizontalDistance,
                         selectorPosition.y,
                         selectorPosition.z
                     );
@@ -119,7 +122,7 @@ namespace Project.UI.Loadout
                 default:
                     // Fallback case
                     intermediatePoint = new Vector3(
-                        startPos.x + (side == RelativeSide.Left ? HorizontalLineDistance : -HorizontalLineDistance),
+                        startPos.x + (side == RelativeSide.Left ? adjustedHorizontalDistance : -adjustedHorizontalDistance),
                         startPos.y,
                         startPos.z
                     );
@@ -131,10 +134,38 @@ namespace Project.UI.Loadout
             {
                 Debug.DrawLine(startPos, intermediatePoint, Color.yellow, 0.5f);
                 Debug.DrawLine(intermediatePoint, endPos, Color.cyan, 0.5f);
-                Debug.Log($"Intermediate point: {intermediatePoint}, Side: {side}");
+                Debug.Log($"Intermediate point: {intermediatePoint}, Side: {side}, Adjusted Distance: {adjustedHorizontalDistance}");
             }
             
             return intermediatePoint;
+        }
+        
+        /// <summary>
+        /// Calculates an adjusted horizontal distance based on the selector's X position.
+        /// The further from X:0, the more the distance is shortened (max 50% reduction).
+        /// </summary>
+        private float CalculateAdjustedHorizontalDistance(float selectorX)
+        {
+            // Define the threshold at which we start applying the reduction
+            float thresholdX = 2.0f;
+            
+            // Define the X value at which we reach maximum reduction (50%)
+            float maxReductionX = 8.0f;
+            
+            // Calculate the absolute X position
+            float absX = Mathf.Abs(selectorX);
+            
+            // If below threshold, use the full distance
+            if (absX <= thresholdX)
+                return HorizontalLineDistance;
+                
+            // If beyond max reduction point, use 50% of the distance
+            if (absX >= maxReductionX)
+                return HorizontalLineDistance * 0.5f;
+                
+            // Otherwise, linearly interpolate between full and half distance
+            float t = (absX - thresholdX) / (maxReductionX - thresholdX);
+            return Mathf.Lerp(HorizontalLineDistance, HorizontalLineDistance * 0.5f, t);
         }
         
         /// <summary>

@@ -274,7 +274,7 @@ namespace Project.UI.Loadout
 			else
 			{
 				FirstWeaponNodeIsCentered = false;
-				FirstWeaponNodeSelectorPosition = CalculateLocalPosition((anglePerSelector / 2));
+				FirstWeaponNodeSelectorPosition = CalculateLocalPosition(anglePerSelector / 2);
 			}
 
 			// Calculate each position and add to list
@@ -323,6 +323,7 @@ namespace Project.UI.Loadout
 			// Debug.Log("ANGLEDEGREES: " + angleDegrees + " DISTANCE MODIFIER: " + distanceModifier);
 			float offsetX = -Mathf.Cos(adjustedAngle * Mathf.Deg2Rad) * (WeaponNodeSelectorDistance * (1f + distanceModifier));
 			float offsetY = Mathf.Sin(adjustedAngle * Mathf.Deg2Rad) * WeaponNodeSelectorDistance;
+			offsetY *= angleDegrees % 90 == 0 ? 1f : 0.9f;
 
 			// Create the new position vector
 			Vector3 offset = new Vector3(offsetX, offsetY, 0);
