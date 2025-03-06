@@ -1,7 +1,5 @@
 # Common Unity file types
 *.prefab
-*.shader
-*.shadergraph
 *.inputactions
 *.anim
 *.meta

@@ -5,6 +5,7 @@ using Project.UI.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Crux.Utilities; // Add this for ColorManager
 
 namespace Project.UI.Loadout
 {
@@ -181,16 +182,21 @@ namespace Project.UI.Loadout
 		public void EnableHover()
 		{
 			Debug.Log("Enabling Hover State");
+			
+			// Get the WeaponNodeHover color from ColorManager if available
+			Color hoverColor = ColorManager.Instance.GetColor("WeaponNodeBorderHover");
+
 			// Set the vertex color of the TextMeshPro component
-			Name.color = Color.white;
+			Name.color = hoverColor;
 
 			// Set the glow color in the default TextMeshPro shader
 			Material textMaterial = Name.fontMaterial;
-			textMaterial.SetColor("_GlowColor", Color.white);
+			textMaterial.SetColor("_GlowColor", hoverColor);
 			textMaterial.SetFloat("_GlowPower", 1.0f); // Set the glow intensity to full
+			
 			foreach (var borderComponent in BorderComponents)
 			{
-				borderComponent.SetColor(Color.white);
+				borderComponent.SetColor(hoverColor);
 				borderComponent.EnableGlow();
 			}
 		}

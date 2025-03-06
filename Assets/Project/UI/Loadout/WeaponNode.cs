@@ -5,6 +5,7 @@ using Project.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Crux.Utilities; // Add this for ColorManager
 
 namespace Project.UI.Loadout
 {
@@ -16,12 +17,12 @@ namespace Project.UI.Loadout
 		public TextMeshProUGUI ID;
 		
 		[Header("Connection Line Settings")]
-		public Color LineDefaultColor = new Color(0.5f, 0.5f, 1f, 0.8f);
+		public Color LineDefaultColor;
 		public Color LinePulseColor = new Color(1f, 1f, 1f, 1f);
-		public float LineWidth = 0.05f;
-		public float DrawDuration = 0.5f;
-		public float PulseDuration = 0.3f;
-		public float PulseSpeed = 2f;
+		public float LineWidth = 0.005f;
+		public float DrawDuration = 1.5f;
+		public float PulseDuration = 5f;
+		public float PulseSpeed = 0.5f;
 		[Tooltip("Adjust this value to fine-tune the connection point offset")]
 		public float ConnectionPointOffset = 0.1f;
 		[Tooltip("Enable to visualize connection points for debugging")]
@@ -68,6 +69,7 @@ namespace Project.UI.Loadout
 		void Awake() {
 			ColorComponent = gameObject.GetComponent<Image>();
 			DefaultColor = ColorComponent.color;
+			LineDefaultColor = ColorManager.Instance.GetColor("WeaponNodeBorder");
 			State = NodeState.Default;
 		}
 
@@ -100,6 +102,9 @@ namespace Project.UI.Loadout
 			
 			// Create connection line
 			CreateConnectionLine();
+			
+			// Activate the line and keep it permanently drawn
+			ActivateLine();
 		}
 		
 		private void CreateConnectionLine()
@@ -121,22 +126,42 @@ namespace Project.UI.Loadout
 			// Set position count to 3 for the two-segment line (node -> horizontal point -> cell)
 			lineRenderer.positionCount = 3;
 			
-			lineRenderer.startColor = LineDefaultColor;
-			lineRenderer.endColor = LineDefaultColor;
-			
 			// Try to use our custom shader or fall back to a built-in shader
 			Shader connectionLineShader = Shader.Find("Custom/ConnectionLine");
-			if (connectionLineShader != null)
+			if (connectionLineShader == null)
 			{
-				lineRenderer.material = new Material(connectionLineShader);
-				lineRenderer.material.SetColor("_Color", LineDefaultColor);
-				lineRenderer.material.SetColor("_EmissionColor", LinePulseColor);
-				lineRenderer.material.SetFloat("_EmissionIntensity", 2f);
+				// Try to load from Resources folder as fallback
+				Material connectionLineMaterial = Resources.Load<Material>("Materials/ConnectionLine");
+				if (connectionLineMaterial != null)
+				{
+					lineRenderer.material = new Material(connectionLineMaterial);
+				}
+				else
+				{
+					// Fall back to built-in shader
+					Debug.LogWarning("ConnectionLine shader not found. Using fallback shader.");
+					lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+				}
 			}
 			else
 			{
-				// Fall back to built-in shader
-				lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+				lineRenderer.material = new Material(connectionLineShader);
+				
+				// Set up base material properties using WeaponNodeBorder color from ColorManager
+				Color borderColor = ColorManager.Instance.GetColor("WeaponNodeBorder");
+				lineRenderer.material.SetColor("_Color", borderColor);
+				lineRenderer.material.SetColor("_EmissionColor", borderColor);
+				lineRenderer.material.SetFloat("_EmissionIntensity", 1f);
+				
+				// Set up pulse-specific properties if they exist
+				if (lineRenderer.material.HasProperty("_PulsePosition"))
+				{
+					lineRenderer.material.SetFloat("_PulsePosition", 0f);
+					lineRenderer.material.SetColor("_PulseColor", LinePulseColor);
+					lineRenderer.material.SetFloat("_PulseWidth", 0.1f);
+					lineRenderer.material.SetColor("_PulseEmissionColor", LinePulseColor);
+					lineRenderer.material.SetFloat("_PulseEmissionIntensity", 2f);
+				}
 			}
 			
 			// Initially hide the line
@@ -279,18 +304,15 @@ namespace Project.UI.Loadout
 			}
 			else if (Side == RelativeSide.Center)
 			{
-				// Get the WeaponNodeSelector's ActiveCell
-				if (activeCell == null)
+				if (WeaponNodeSelector.transform.position.y > 0)
 				{
-					// Fall back to the selector's position if ActiveCell is not available
-					Vector3 selectorPosition = WeaponNodeSelector.transform.position;
-
-					if (DebugConnectionPoints)
-					{
-						Debug.Log($"Using selector position as end point: {selectorPosition}");
-					}
-
-					return selectorPosition;
+					// Use the TopPort if the Y value is positive
+					return WeaponNodeSelector.GetBottomPortPosition();
+				}
+				else
+				{
+					// Use the BottomPort if the Y value is not positive
+					return WeaponNodeSelector.GetTopPortPosition();
 				}
 			}
 			
@@ -459,54 +481,89 @@ namespace Project.UI.Loadout
 		
 		private IEnumerator PulseEffect()
 		{
-			float elapsedTime = 0f;
+			// Wait for the line to be fully drawn
+			// yield return new WaitForSeconds(DrawDuration);
 			
-			while (elapsedTime < PulseDuration && isLineActive)
+			if (isLineActive)
 			{
-				elapsedTime += Time.deltaTime;
-				float t = Mathf.Clamp01(elapsedTime / PulseDuration);
+				// Switch from WeaponNodeBorder to WeaponNodeBorderHover
+				Color borderColor = ColorManager.Instance.GetColor("WeaponNodeBorder");
+				Color borderHoverColor = ColorManager.Instance.GetColor("WeaponNodeBorderHover");
 				
-				// Create a pulse that travels from start to end
-				float pulsePosition = Mathf.PingPong(t * PulseSpeed, 1f);
+				// Set initial emission intensity values
+				float initialIntensity = 0.5f;  // Starting intensity
+				float peakIntensity = 1.25f;    // Peak intensity to ramp up to
+				float finalIntensity = 0.25f;   // Final intensity to settle at
 				
-				// For straight lines, use a simple gradient
-				Gradient gradient = new Gradient();
-				GradientColorKey[] colorKeys = new GradientColorKey[3];
-				GradientAlphaKey[] alphaKeys = new GradientAlphaKey[3];
+				// Duration settings
+				float rampUpDuration = 0.2f;    // Quick ramp up time
+				float fadeDownDuration = 0.75f; // Existing fade down time
 				
-				// Start with default color
-				colorKeys[0] = new GradientColorKey(LineDefaultColor, 0f);
-				alphaKeys[0] = new GradientAlphaKey(LineDefaultColor.a, 0f);
+				// Apply the hover color
+				if (lineRenderer.material.HasProperty("_Color"))
+				{
+					lineRenderer.material.SetColor("_Color", borderHoverColor);
+				}
 				
-				// Pulse position with pulse color
-				colorKeys[1] = new GradientColorKey(LinePulseColor, pulsePosition);
-				alphaKeys[1] = new GradientAlphaKey(LinePulseColor.a, pulsePosition);
+				if (lineRenderer.material.HasProperty("_EmissionColor"))
+				{
+					lineRenderer.material.SetColor("_EmissionColor", borderHoverColor);
+				}
 				
-				// End with default color
-				colorKeys[2] = new GradientColorKey(LineDefaultColor, 1f);
-				alphaKeys[2] = new GradientAlphaKey(LineDefaultColor.a, 1f);
+				// Set the initial intensity
+				if (lineRenderer.material.HasProperty("_EmissionIntensity"))
+				{
+					lineRenderer.material.SetFloat("_EmissionIntensity", initialIntensity);
+				}
 				
-				gradient.SetKeys(colorKeys, alphaKeys);
-				lineRenderer.colorGradient = gradient;
+				// First phase: Quickly ramp up to peak intensity
+				float elapsedTime = 0f;
+				while (elapsedTime < rampUpDuration && isLineActive)
+				{
+					elapsedTime += Time.deltaTime;
+					float t = Mathf.Clamp01(elapsedTime / rampUpDuration);
+					
+					// Lerp from initialIntensity to peakIntensity
+					float currentIntensity = Mathf.Lerp(initialIntensity, peakIntensity, t);
+					
+					if (lineRenderer.material.HasProperty("_EmissionIntensity"))
+					{
+						lineRenderer.material.SetFloat("_EmissionIntensity", currentIntensity);
+					}
+					
+					yield return null;
+				}
 				
-				// Update positions to ensure they stay current
-				Vector3 startPos = CalculateLineStartPosition();
-				Vector3 endPos = CalculateLineEndPosition();
-				Vector3 horizontalPoint = CalculateHorizontalPoint();
+				// Ensure we set the peak intensity value
+				if (isLineActive && lineRenderer.material.HasProperty("_EmissionIntensity"))
+				{
+					lineRenderer.material.SetFloat("_EmissionIntensity", peakIntensity);
+				}
 				
-				lineRenderer.SetPosition(0, startPos);
-				lineRenderer.SetPosition(1, horizontalPoint);
-				lineRenderer.SetPosition(2, endPos);
+				// Second phase: Gradually reduce from peak to final intensity
+				elapsedTime = 0f;
+				while (elapsedTime < fadeDownDuration && isLineActive)
+				{
+					elapsedTime += Time.deltaTime;
+					float t = Mathf.Clamp01(elapsedTime / fadeDownDuration);
+					
+					// Lerp from peakIntensity to finalIntensity
+					float currentIntensity = Mathf.Lerp(peakIntensity, finalIntensity, t);
+					
+					if (lineRenderer.material.HasProperty("_EmissionIntensity"))
+					{
+						lineRenderer.material.SetFloat("_EmissionIntensity", currentIntensity);
+					}
+					
+					yield return null;
+				}
 				
-				yield return null;
+				// Ensure we set the final intensity value
+				if (isLineActive && lineRenderer.material.HasProperty("_EmissionIntensity"))
+				{
+					lineRenderer.material.SetFloat("_EmissionIntensity", finalIntensity);
+				}
 			}
-			
-			// Reset to default color after pulse
-			lineRenderer.startColor = LineDefaultColor;
-			lineRenderer.endColor = LineDefaultColor;
-			
-			// Keep updating the line positions while active
-			activeLineCoroutine = StartCoroutine(UpdateLinePositions());
 		}
 		
 		private IEnumerator UpdateLinePositions()
@@ -571,8 +628,8 @@ namespace Project.UI.Loadout
 			if (!Initialised) return;
 			if (State != NodeState.Hover || State == NodeState.Selected) return;
 			
-			// Deactivate the line first - this ensures the line is hidden immediately
-			DeactivateLine();
+			// No longer deactivate the line - we want it to remain visible permanently
+			// DeactivateLine();
 			
 			// Then set state
 			SetState(NodeState.Default);
@@ -589,6 +646,7 @@ namespace Project.UI.Loadout
 				ActivateLine();
 				return;
 			}
+			
 			WeaponNodeSelector.HandleSelect();
 			AssignSelector(WeaponNodeSelector);
 			SetState(NodeState.Hover);
@@ -680,8 +738,11 @@ namespace Project.UI.Loadout
 				return;
 			}
 			
-			// Always reset the line state, even if it was already active
-			// This ensures we can restart the animation immediately
+			// If the line is already active, don't restart the animation
+			if (isLineActive && activeLineCoroutine != null)
+			{
+				return;
+			}
 			
 			// Stop any existing coroutine
 			if (activeLineCoroutine != null)

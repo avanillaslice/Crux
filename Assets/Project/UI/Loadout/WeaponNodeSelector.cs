@@ -16,8 +16,10 @@ namespace Project.UI.Loadout
 		// public GameObject HoverStateComponent; // Contains Light/Medium/Heavy
 
 		[Header("Connection Ports")]
-		public GameObject PortLeft;
-		public GameObject PortRight;
+		public GameObject LeftPort;
+		public GameObject RightPort;
+		public GameObject TopPort;
+		public GameObject BottomPort;
 
 		// Data
 		private SlotType SlotType;
@@ -26,9 +28,9 @@ namespace Project.UI.Loadout
 		void Awake()
 		{
 			// Validate port references
-			if (PortLeft == null || PortRight == null)
+			if (LeftPort == null || RightPort == null || TopPort == null || BottomPort == null)
 			{
-				Debug.LogWarning("PortLeft or PortRight references are missing on WeaponNodeSelector");
+				Debug.LogWarning("Port references are missing on WeaponNodeSelector");
 			}
 			
 			// Disable Hover and Selected components
@@ -87,9 +89,7 @@ namespace Project.UI.Loadout
 				SelectWeapon();
 				DeactivateList();
 			}
-			else {
-				ActivateList();
-			}
+			else ActivateList();
 		}
 
 		public void HandleDeselect()
@@ -125,7 +125,6 @@ namespace Project.UI.Loadout
 			// Enables SlotTypeUIComponent
 			// HoverStateComponent.SetActive(true);
 		}
-		
 		public void DisableHoverState()
 		{
 			List.DisableHoverState();
@@ -133,20 +132,50 @@ namespace Project.UI.Loadout
 			// HoverStateComponent.SetActive(false);
 		}
 
-		/// <summary>
-		/// Returns the world position of the left connection port
-		/// </summary>
+		// Returns the position of the left port for line connections
 		public Vector3 GetLeftPortPosition()
 		{
-			return PortLeft.transform.position;
+			if (LeftPort != null)
+			{
+				return LeftPort.transform.position;
+			}
+			
+			// Fallback to the selector's position if the port is missing
+			return transform.position;
 		}
-
-		/// <summary>
-		/// Returns the world position of the right connection port
-		/// </summary>
+		
+		// Returns the position of the right port for line connections
 		public Vector3 GetRightPortPosition()
 		{
-			return PortRight.transform.position;
+			if (RightPort != null)
+			{
+				return RightPort.transform.position;
+			}
+			
+			// Fallback to the selector's position if the port is missing
+			return transform.position;
+		}
+
+		public Vector3 GetTopPortPosition()
+		{
+			if (TopPort != null)
+			{
+				return TopPort.transform.position;
+			}
+
+			// Fallback to the selector's position if the port is missing
+			return transform.position;
+		}
+
+		public Vector3 GetBottomPortPosition()
+		{
+			if (BottomPort != null)
+			{
+				return BottomPort.transform.position;
+			}
+
+			// Fallback to the selector's position if the port is missing
+			return transform.position;
 		}
 	}
 }

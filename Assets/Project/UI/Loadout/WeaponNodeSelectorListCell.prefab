@@ -2086,6 +2086,8 @@ MonoBehaviour:
   - {fileID: 5624627774411190804}
   - {fileID: 1699336500671007156}
   Animator: {fileID: 5329908350919921202}
+  PortTop: {fileID: 0}
+  PortBottom: {fileID: 0}
   ListIndexText: {fileID: 3296812782055388812}
   ListId: 0
   ListPosition: 0
