@@ -1,51 +1,54 @@
 using UnityEngine;
 
-public class MainMenuInputHandler : MonoBehaviour
+namespace Project.Core
 {
-    private GameControls controls;
-
-    private void Awake()
+    public class MainMenuInputHandler : MonoBehaviour
     {
-        controls = new GameControls();
-        controls.MenuNavigation.MoveUp.performed += ctx => MoveUp();
-        controls.MenuNavigation.MoveDown.performed += ctx => MoveDown();
-        controls.MenuNavigation.MoveLeft.performed += ctx => MoveLeft();
-        controls.MenuNavigation.MoveRight.performed += ctx => MoveRight();
-        controls.MenuNavigation.Select.performed += ctx => Select();
-    }
+        private GameControls controls;
 
-    private void OnEnable()
-    {
-        controls.MenuNavigation.Enable();
-    }
+        private void Awake()
+        {
+            controls = new GameControls();
+            controls.MenuNavigation.MoveUp.performed += ctx => MoveUp();
+            controls.MenuNavigation.MoveDown.performed += ctx => MoveDown();
+            controls.MenuNavigation.MoveLeft.performed += ctx => MoveLeft();
+            controls.MenuNavigation.MoveRight.performed += ctx => MoveRight();
+            controls.MenuNavigation.Select.performed += ctx => Select();
+        }
 
-    private void OnDisable()
-    {
-        controls.MenuNavigation.Disable();
-    }
+        private void OnEnable()
+        {
+            controls.MenuNavigation.Enable();
+        }
 
-    private void MoveUp()
-    {
-        UIManager.Inst.HandleMoveUp();
-    }
+        private void OnDisable()
+        {
+            controls.MenuNavigation.Disable();
+        }
 
-    private void MoveDown()
-    {
-        UIManager.Inst.HandleMoveDown();
-    }
+        private void MoveUp()
+        {
+            UIManager.Inst.HandleMoveUp();
+        }
 
-    private void MoveLeft()
-    {
-        UIManager.Inst.HandleMoveLeft();
-    }
+        private void MoveDown()
+        {
+            UIManager.Inst.HandleMoveDown();
+        }
 
-    private void MoveRight()
-    {
-        UIManager.Inst.HandleMoveRight();
-    }
+        private void MoveLeft()
+        {
+            UIManager.Inst.HandleMoveLeft();
+        }
 
-    private void Select()
-    {
-        UIManager.Inst.HandleSelect();
+        private void MoveRight()
+        {
+            UIManager.Inst.HandleMoveRight();
+        }
+
+        private void Select()
+        {
+            UIManager.Inst.HandleSelect();
+        }
     }
 }

@@ -1,71 +1,76 @@
+using Project.Core;
+using Project.Ships;
 using UnityEngine;
 
-public class ShipEffect : EffectBase
+namespace Project.Combat.Weapons.Effects
 {
-    public override void Activate(GameObject targetShip)
+    public class ShipEffect : EffectBase
     {
-        TargetShip = targetShip;
-        switch (SubType)
+        public override void Activate(GameObject targetShip)
         {
-            case EffectSubType.FireRate:
-                ActivateFireRateEffect();
-                break;
-            case EffectSubType.Health:
-                ActivateHealthEffect();
-                break;
-            case EffectSubType.Damage:
-                ActivateDamageEffect();
-                break;
-            default:
-                Debug.LogError("Unknown effect sub type");
-                return;
+            TargetShip = targetShip;
+            switch (SubType)
+            {
+                case EffectSubType.FireRate:
+                    ActivateFireRateEffect();
+                    break;
+                case EffectSubType.Health:
+                    ActivateHealthEffect();
+                    break;
+                case EffectSubType.Damage:
+                    ActivateDamageEffect();
+                    break;
+                default:
+                    Debug.LogError("Unknown effect sub type");
+                    return;
+            }
+
+            if (Expiry == ExpiryType.Time && Duration > 0) {
+                Debug.Log($"Expiry deteceted for {gameObject.name} with duration {Duration}");
+                CoroutineManager.Inst.DeactivateEffectAfterDelay(this, Duration);
+            }
         }
 
-        if (Expiry == ExpiryType.Time && Duration > 0) {
-            Debug.Log($"Expiry deteceted for {gameObject.name} with duration {Duration}");
-            CoroutineManager.Inst.DeactivateEffectAfterDelay(this, Duration);
-        }
-    }
-
-    public override void Deactivate()
-    {
-        switch (SubType)
+        public override void Deactivate()
         {
-            case EffectSubType.FireRate:
-                DeactivateFireRateEffect();
-                break;
-            case EffectSubType.Damage:
-                DeactivateDamageEffect();
-                break;
-            default:
-                Debug.LogError("Unknown effect sub type");
-                return;
+            switch (SubType)
+            {
+                case EffectSubType.FireRate:
+                    DeactivateFireRateEffect();
+                    break;
+                case EffectSubType.Damage:
+                    DeactivateDamageEffect();
+                    break;
+                default:
+                    Debug.LogError("Unknown effect sub type");
+                    return;
+            }
         }
-    }
 
-    private void ActivateHealthEffect()
-    {
-        ShipBase ship = TargetShip.GetComponent<ShipBase>();
-        ship.AddHealth(Amt);
-    }
+        private void ActivateHealthEffect()
+        {
+            ShipBase ship = TargetShip.GetComponent<ShipBase>();
+            ship.AddHealth(Amt);
+        }
 
-    private void ActivateDamageEffect()
-    {
-        TargetShip.GetComponent<ShipBase>().DamageModifier += Amt;
-    }
+        private void ActivateDamageEffect()
+        {
+            TargetShip.GetComponent<ShipBase>().DamageModifier += Amt;
+        }
 
-    private void DeactivateDamageEffect()
-    {
-        TargetShip.GetComponent<ShipBase>().DamageModifier -= Amt;
-    }
+        private void DeactivateDamageEffect()
+        {
+            TargetShip.GetComponent<ShipBase>().DamageModifier -= Amt;
+        }
 
-    private void ActivateFireRateEffect()
-    {
-        TargetShip.GetComponent<ShipBase>().FireRateModifier += Amt;
-    }
+        private void ActivateFireRateEffect()
+        {
+            TargetShip.GetComponent<ShipBase>().FireRateModifier += Amt;
+        }
 
-    private void DeactivateFireRateEffect()
-    {
-        TargetShip.GetComponent<ShipBase>().FireRateModifier -= Amt;
+        private void DeactivateFireRateEffect()
+        {
+            TargetShip.GetComponent<ShipBase>().FireRateModifier -= Amt;
+        }
     }
 }

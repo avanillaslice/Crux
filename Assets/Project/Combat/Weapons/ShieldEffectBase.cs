@@ -1,12 +1,15 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Collider2D))]
-public abstract class ShieldEffectBase : MonoBehaviour
+namespace Project.Combat.Weapons
 {
-    public bool IsEnemyShield;
+    [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Collider2D))]
+    public abstract class ShieldEffectBase : MonoBehaviour
+    {
+        public bool IsEnemyShield;
 
-    public abstract void HandleHit(float damage);
+        public abstract void HandleHit(float damage);
 
-    protected abstract void OnTriggerEnter2D(Collider2D other);
+        protected abstract void OnTriggerEnter2D(Collider2D other);
+    }
 }

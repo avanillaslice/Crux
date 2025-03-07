@@ -1,12 +1,16 @@
+using Project.Ships;
 using UnityEngine;
 
-public class PlasmaLight : ProjectileBase
+namespace Project.Combat.Projectiles
 {
-    protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
+    public class PlasmaLight : ProjectileBase
     {
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        protected override void InitializeBehaviour(Vector2 initialVelocity, RelativeSide side, Vector2? direction)
+        {
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
-        // Set the velocity of the projectile
-        rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
+            // Set the velocity of the projectile
+            rb.linearVelocity = initialVelocity + (Vector2)(transform.up * BaseSpeed * SpeedModifier);
+        }
     }
 }

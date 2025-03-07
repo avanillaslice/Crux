@@ -1,291 +1,296 @@
 using System.Collections.Generic;
+using Project.Core;
+using Project.Ships;
 using UnityEngine;
 
-public class OldLoadoutUI : UIWindowBase
+namespace Project.UI.Loadout.OldLoadout
 {
-	public static OldLoadoutUI Inst { get; private set; }
-
-	// WEAPON SLOTS
-	public GameObject WeaponSlotContainer;
-	private List<WeaponSlotButton> WeaponSlotButtons;
-	private WeaponSlotButton CurrentWeaponSlotButton;
-	private int CurrentWeaponSlotButtonIndex;
-
-	// INVENTORY
-	public GameObject InventorySlotContainer;
-	private List<InventorySlotButton> InventorySlotButtons;
-	private List<InventorySlotButton> ActiveInventorySlotButtons;
-	private List<InventorySlotButton> ValidInventorySlotButtons;
-	private InventorySlotButton CurrentInventorySlotButton;
-	private int CurrentInventorySlotButtonIndex;
-
-	// UTILITY
-	public string ActiveContainer = "WeaponSlots";
-
-	void Awake()
+	public class OldLoadoutUI : UIWindowBase
 	{
-		if (Inst != null && Inst != this)
+		public static OldLoadoutUI Inst { get; private set; }
+
+		// WEAPON SLOTS
+		public GameObject WeaponSlotContainer;
+		private List<WeaponSlotButton> WeaponSlotButtons;
+		private WeaponSlotButton CurrentWeaponSlotButton;
+		private int CurrentWeaponSlotButtonIndex;
+
+		// INVENTORY
+		public GameObject InventorySlotContainer;
+		private List<InventorySlotButton> InventorySlotButtons;
+		private List<InventorySlotButton> ActiveInventorySlotButtons;
+		private List<InventorySlotButton> ValidInventorySlotButtons;
+		private InventorySlotButton CurrentInventorySlotButton;
+		private int CurrentInventorySlotButtonIndex;
+
+		// UTILITY
+		public string ActiveContainer = "WeaponSlots";
+
+		void Awake()
 		{
-			Debug.Log("Loadout already exists");
-			Destroy(gameObject);
-			return;  // Ensure no further code execution in this instance
-		}
-		Inst = this;
-		InitialiseWeaponSlotButtons();
-		InitialiseInventorySlotButtons();
-	}
-
-	void OnEnable()
-	{
-		SetWeaponSlots();
-		SetInventory();
-		SetSelectedWeaponSlotButton(0);
-	}
-
-	void OnDisable()
-	{
-		ClearWeaponSlots();
-		ClearInventorySlots();
-	}
-
-	public override void HandleBack() { }
-
-	public override void HandleExit()
-	{
-		UIManager.Inst.DisableOldLoadoutUI();
-		UIManager.Inst.EnableInterStageUI();
-	}
-
-	private void InitialiseInventorySlotButtons()
-	{
-		InventorySlotButtons = new List<InventorySlotButton>();
-		int i = 0;
-		foreach (Transform child in InventorySlotContainer.transform)
-		{
-			InventorySlotButton inventorySlotButton = child.GetComponent<InventorySlotButton>();
-			inventorySlotButton.ListIndex = i;
-			InventorySlotButtons.Add(child.GetComponent<InventorySlotButton>());
-			i++;
-		}
-	}
-
-	private void InitialiseWeaponSlotButtons()
-	{
-		WeaponSlotButtons = new List<WeaponSlotButton>();
-		int i = 0;
-		foreach (Transform child in WeaponSlotContainer.transform)
-		{
-			WeaponSlotButton weaponSlotButton = child.GetComponent<WeaponSlotButton>();
-			weaponSlotButton.ListIndex = i;
-			WeaponSlotButtons.Add(weaponSlotButton);
-			i++;
-		}
-	}
-
-	private void SetWeaponSlots()
-	{
-		List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.GetWeaponSlots();
-
-		foreach (WeaponSlot weaponSlot in weaponSlots)
-		{
-			bool foundValidWeaponSlotButton = false;
-
-			foreach (WeaponSlotButton weaponSlotButton in WeaponSlotButtons)
+			if (Inst != null && Inst != this)
 			{
-				if (!weaponSlotButton.IsEmpty || weaponSlotButton.SlotType != weaponSlot.Type) continue;
-				weaponSlotButton.SetWeaponSlot(weaponSlot);
-				foundValidWeaponSlotButton = true;
-				break;
+				Debug.Log("Loadout already exists");
+				Destroy(gameObject);
+				return;  // Ensure no further code execution in this instance
 			}
-
-			if (!foundValidWeaponSlotButton)
-			{
-				Debug.Log("Unable to find WeaponSlotButton for weapon slot of type: " + weaponSlot.Type);
-			}
+			Inst = this;
+			InitialiseWeaponSlotButtons();
+			InitialiseInventorySlotButtons();
 		}
-	}
 
-	private void SetInventory()
-	{
-		ActiveInventorySlotButtons = new List<InventorySlotButton>();
-		List<GameObject> inventory = LoadoutManager.GetInventory();
-
-		int i = 0;
-		bool emptyInventorySlotIsCreated = false;
-		foreach (InventorySlotButton inventorySlotButton in InventorySlotButtons)
+		void OnEnable()
 		{
-			if (inventorySlotButton.IsEmpty && inventory.Count > i)
+			SetWeaponSlots();
+			SetInventory();
+			SetSelectedWeaponSlotButton(0);
+		}
+
+		void OnDisable()
+		{
+			ClearWeaponSlots();
+			ClearInventorySlots();
+		}
+
+		public override void HandleBack() { }
+
+		public override void HandleExit()
+		{
+			UIManager.Inst.DisableOldLoadoutUI();
+			UIManager.Inst.EnableInterStageUI();
+		}
+
+		private void InitialiseInventorySlotButtons()
+		{
+			InventorySlotButtons = new List<InventorySlotButton>();
+			int i = 0;
+			foreach (Transform child in InventorySlotContainer.transform)
 			{
-				inventorySlotButton.gameObject.SetActive(true);
-				inventorySlotButton.SetWeapon(inventory[i]);
-				ActiveInventorySlotButtons.Add(inventorySlotButton);
+				InventorySlotButton inventorySlotButton = child.GetComponent<InventorySlotButton>();
+				inventorySlotButton.ListIndex = i;
+				InventorySlotButtons.Add(child.GetComponent<InventorySlotButton>());
 				i++;
 			}
-			else if (!emptyInventorySlotIsCreated)
+		}
+
+		private void InitialiseWeaponSlotButtons()
+		{
+			WeaponSlotButtons = new List<WeaponSlotButton>();
+			int i = 0;
+			foreach (Transform child in WeaponSlotContainer.transform)
 			{
-				inventorySlotButton.gameObject.SetActive(true);
-				inventorySlotButton.SetWeapon(null);
-				inventorySlotButton.ListIndex--;
-				ActiveInventorySlotButtons.Add(inventorySlotButton);
-				emptyInventorySlotIsCreated = true;
+				WeaponSlotButton weaponSlotButton = child.GetComponent<WeaponSlotButton>();
+				weaponSlotButton.ListIndex = i;
+				WeaponSlotButtons.Add(weaponSlotButton);
+				i++;
+			}
+		}
+
+		private void SetWeaponSlots()
+		{
+			List<WeaponSlot> weaponSlots = PlayerManager.Inst.ActivePlayerShip.GetWeaponSlots();
+
+			foreach (WeaponSlot weaponSlot in weaponSlots)
+			{
+				bool foundValidWeaponSlotButton = false;
+
+				foreach (WeaponSlotButton weaponSlotButton in WeaponSlotButtons)
+				{
+					if (!weaponSlotButton.IsEmpty || weaponSlotButton.SlotType != weaponSlot.Type) continue;
+					weaponSlotButton.SetWeaponSlot(weaponSlot);
+					foundValidWeaponSlotButton = true;
+					break;
+				}
+
+				if (!foundValidWeaponSlotButton)
+				{
+					Debug.Log("Unable to find WeaponSlotButton for weapon slot of type: " + weaponSlot.Type);
+				}
+			}
+		}
+
+		private void SetInventory()
+		{
+			ActiveInventorySlotButtons = new List<InventorySlotButton>();
+			List<GameObject> inventory = LoadoutManager.GetInventory();
+
+			int i = 0;
+			bool emptyInventorySlotIsCreated = false;
+			foreach (InventorySlotButton inventorySlotButton in InventorySlotButtons)
+			{
+				if (inventorySlotButton.IsEmpty && inventory.Count > i)
+				{
+					inventorySlotButton.gameObject.SetActive(true);
+					inventorySlotButton.SetWeapon(inventory[i]);
+					ActiveInventorySlotButtons.Add(inventorySlotButton);
+					i++;
+				}
+				else if (!emptyInventorySlotIsCreated)
+				{
+					inventorySlotButton.gameObject.SetActive(true);
+					inventorySlotButton.SetWeapon(null);
+					inventorySlotButton.ListIndex--;
+					ActiveInventorySlotButtons.Add(inventorySlotButton);
+					emptyInventorySlotIsCreated = true;
+				}
+				else
+				{
+					inventorySlotButton.Clear();
+					inventorySlotButton.gameObject.SetActive(false);
+				}
+			}
+		}
+
+		private bool EitherCurrentSlotsAreSelected()
+		{
+			if ((CurrentInventorySlotButton != null && CurrentInventorySlotButton.IsSelected)
+			    || (CurrentWeaponSlotButton != null && CurrentWeaponSlotButton.IsSelected))
+			{
+				return true;
+			}
+			else return false;
+		}
+
+		public override void HandleMoveLeft()
+		{
+			// if (ActiveContainer == "WeaponSlots") return;
+			// SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
+		}
+		public override void HandleMoveRight()
+		{
+			// if (ActiveContainer == "Inventory") return;
+			// SetSelectedInventorySlotButton(0);
+		}
+		public override void HandleMoveUp()
+		{
+			if (ActiveContainer == "Inventory")
+			{
+				if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex - 1 + ValidInventorySlotButtons.Count) % ValidInventorySlotButtons.Count;
+				SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
 			}
 			else
 			{
-				inventorySlotButton.Clear();
-				inventorySlotButton.gameObject.SetActive(false);
+				if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
+				SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
 			}
 		}
-	}
-
-	private bool EitherCurrentSlotsAreSelected()
-	{
-		if ((CurrentInventorySlotButton != null && CurrentInventorySlotButton.IsSelected)
-		|| (CurrentWeaponSlotButton != null && CurrentWeaponSlotButton.IsSelected))
+		public override void HandleMoveDown()
 		{
-			return true;
-		}
-		else return false;
-	}
-
-	public override void HandleMoveLeft()
-	{
-		// if (ActiveContainer == "WeaponSlots") return;
-		// SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-	}
-	public override void HandleMoveRight()
-	{
-		// if (ActiveContainer == "Inventory") return;
-		// SetSelectedInventorySlotButton(0);
-	}
-	public override void HandleMoveUp()
-	{
-		if (ActiveContainer == "Inventory")
-		{
-			if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex - 1 + ValidInventorySlotButtons.Count) % ValidInventorySlotButtons.Count;
-			SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
-		}
-		else
-		{
-			if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex - 1 + WeaponSlotButtons.Count) % WeaponSlotButtons.Count;
-			SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-		}
-	}
-	public override void HandleMoveDown()
-	{
-		if (ActiveContainer == "Inventory")
-		{
-			if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex + 1) % ValidInventorySlotButtons.Count;
-			SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
-		}
-		else
-		{
-			if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex + 1) % WeaponSlotButtons.Count;
-			SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-		}
-	}
-
-	public override void HandleSelect()
-	{
-		if (ActiveContainer == "Inventory")
-		{
-			if (CurrentInventorySlotButton.WeaponPrefab == null)
+			if (ActiveContainer == "Inventory")
 			{
-				LoadoutManager.UnequipWeapon(CurrentWeaponSlotButton.WeaponSlot.id);
+				if (EitherCurrentSlotsAreSelected()) CurrentInventorySlotButtonIndex = (CurrentInventorySlotButtonIndex + 1) % ValidInventorySlotButtons.Count;
+				SetSelectedInventorySlotButton(CurrentInventorySlotButtonIndex);
 			}
 			else
 			{
-				LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
+				if (EitherCurrentSlotsAreSelected()) CurrentWeaponSlotButtonIndex = (CurrentWeaponSlotButtonIndex + 1) % WeaponSlotButtons.Count;
+				SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
 			}
-			ClearWeaponSlots();
-			SetWeaponSlots();
-			SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
-			ValidateAllInventorySlotButtons();
 		}
-		else
+
+		public override void HandleSelect()
 		{
-			SetValidInventorySlotButtons(CurrentWeaponSlotButton.SlotType);
-			if (ValidInventorySlotButtons.Count == 0)
+			if (ActiveContainer == "Inventory")
 			{
+				if (CurrentInventorySlotButton.WeaponPrefab == null)
+				{
+					LoadoutManager.UnequipWeapon(CurrentWeaponSlotButton.WeaponSlot.id);
+				}
+				else
+				{
+					LoadoutManager.EquipWeaponToSlot(CurrentInventorySlotButton.WeaponPrefab, CurrentWeaponSlotButton.WeaponSlot.id);
+				}
+				ClearWeaponSlots();
+				SetWeaponSlots();
+				SetSelectedWeaponSlotButton(CurrentWeaponSlotButtonIndex);
 				ValidateAllInventorySlotButtons();
-				return;
-			}
-			SetSelectedInventorySlotButton(0);
-		}
-	}
-
-	private void SetValidInventorySlotButtons(SlotType slotType)
-	{
-		ValidInventorySlotButtons = new List<InventorySlotButton>();
-
-		foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
-		{
-			if (inventorySlotButton.SlotType == SlotType.Dual && (slotType == SlotType.Dual || slotType == SlotType.Single))
-			{
-				inventorySlotButton.Validate();
-				ValidInventorySlotButtons.Add(inventorySlotButton);
-			}
-			else if (inventorySlotButton.SlotType == slotType)
-			{
-				inventorySlotButton.Validate();
-				ValidInventorySlotButtons.Add(inventorySlotButton);
-			}
-			else if (inventorySlotButton.WeaponPrefab == null && !inventorySlotButton.IsEmpty)
-			{
-				inventorySlotButton.Validate();
-				ValidInventorySlotButtons.Add(inventorySlotButton);
 			}
 			else
 			{
-				inventorySlotButton.Invalidate();
+				SetValidInventorySlotButtons(CurrentWeaponSlotButton.SlotType);
+				if (ValidInventorySlotButtons.Count == 0)
+				{
+					ValidateAllInventorySlotButtons();
+					return;
+				}
+				SetSelectedInventorySlotButton(0);
 			}
 		}
-	}
 
-	private void ValidateAllInventorySlotButtons()
-	{
-		foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
+		private void SetValidInventorySlotButtons(SlotType slotType)
 		{
-			inventorySlotButton.Validate();
+			ValidInventorySlotButtons = new List<InventorySlotButton>();
+
+			foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
+			{
+				if (inventorySlotButton.SlotType == SlotType.Dual && (slotType == SlotType.Dual || slotType == SlotType.Single))
+				{
+					inventorySlotButton.Validate();
+					ValidInventorySlotButtons.Add(inventorySlotButton);
+				}
+				else if (inventorySlotButton.SlotType == slotType)
+				{
+					inventorySlotButton.Validate();
+					ValidInventorySlotButtons.Add(inventorySlotButton);
+				}
+				else if (inventorySlotButton.WeaponPrefab == null && !inventorySlotButton.IsEmpty)
+				{
+					inventorySlotButton.Validate();
+					ValidInventorySlotButtons.Add(inventorySlotButton);
+				}
+				else
+				{
+					inventorySlotButton.Invalidate();
+				}
+			}
 		}
-	}
 
-	private void DeselectCurrentButtons()
-	{
-		if (CurrentInventorySlotButton != null) CurrentInventorySlotButton.Deselect();
-		if (CurrentWeaponSlotButton != null) CurrentWeaponSlotButton.Deselect();
-	}
-	public void SetSelectedWeaponSlotButton(int index)
-	{
-		DeselectCurrentButtons();
-		CurrentWeaponSlotButton = WeaponSlotButtons[index];
-		CurrentWeaponSlotButton.Select();
-		CurrentWeaponSlotButtonIndex = index;
-		ActiveContainer = "WeaponSlots";
-	}
-
-	public void SetSelectedInventorySlotButton(int index)
-	{
-		if (ValidInventorySlotButtons.Count == 0) return;
-		DeselectCurrentButtons();
-		CurrentInventorySlotButton = ValidInventorySlotButtons[index];
-		CurrentInventorySlotButton.Select();
-		CurrentInventorySlotButtonIndex = index;
-		ActiveContainer = "Inventory";
-	}
-
-	private void ClearWeaponSlots()
-	{
-		foreach (WeaponSlotButton button in WeaponSlotButtons)
+		private void ValidateAllInventorySlotButtons()
 		{
-			button.Clear();
+			foreach (InventorySlotButton inventorySlotButton in ActiveInventorySlotButtons)
+			{
+				inventorySlotButton.Validate();
+			}
 		}
-	}
 
-	private void ClearInventorySlots()
-	{
-		foreach (InventorySlotButton button in InventorySlotButtons)
+		private void DeselectCurrentButtons()
 		{
-			button.Clear();
+			if (CurrentInventorySlotButton != null) CurrentInventorySlotButton.Deselect();
+			if (CurrentWeaponSlotButton != null) CurrentWeaponSlotButton.Deselect();
+		}
+		public void SetSelectedWeaponSlotButton(int index)
+		{
+			DeselectCurrentButtons();
+			CurrentWeaponSlotButton = WeaponSlotButtons[index];
+			CurrentWeaponSlotButton.Select();
+			CurrentWeaponSlotButtonIndex = index;
+			ActiveContainer = "WeaponSlots";
+		}
+
+		public void SetSelectedInventorySlotButton(int index)
+		{
+			if (ValidInventorySlotButtons.Count == 0) return;
+			DeselectCurrentButtons();
+			CurrentInventorySlotButton = ValidInventorySlotButtons[index];
+			CurrentInventorySlotButton.Select();
+			CurrentInventorySlotButtonIndex = index;
+			ActiveContainer = "Inventory";
+		}
+
+		private void ClearWeaponSlots()
+		{
+			foreach (WeaponSlotButton button in WeaponSlotButtons)
+			{
+				button.Clear();
+			}
+		}
+
+		private void ClearInventorySlots()
+		{
+			foreach (InventorySlotButton button in InventorySlotButtons)
+			{
+				button.Clear();
+			}
 		}
 	}
 }

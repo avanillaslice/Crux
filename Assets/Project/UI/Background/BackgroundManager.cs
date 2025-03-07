@@ -1,54 +1,57 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class BackgroundManager : MonoBehaviour
+namespace Project.UI.Background
 {
-    public static BackgroundManager Inst { get; private set; }
-    public List<MonoBehaviour> controllerScripts; // List of MonoBehaviour scripts
-    public float ScrollSpeedModifier = 1f;
-
-    private List<IBackgroundController> controllers;
-
-    void Awake()
+    public class BackgroundManager : MonoBehaviour
     {
-        if (Inst != null && Inst != this)
-        {
-            Debug.Log("BackgroundManager already exists");
-            Destroy(gameObject);
-            return;  // Ensure no further code execution in this instance
-        }
-        Inst = this;
+        public static BackgroundManager Inst { get; private set; }
+        public List<MonoBehaviour> controllerScripts; // List of MonoBehaviour scripts
+        public float ScrollSpeedModifier = 1f;
 
-        // Convert MonoBehaviour list to IBackgroundController list
-        controllers = new List<IBackgroundController>();
-        foreach (var script in controllerScripts)
+        private List<IBackgroundController> controllers;
+
+        void Awake()
         {
-            if (script is IBackgroundController)
+            if (Inst != null && Inst != this)
             {
-                controllers.Add(script as IBackgroundController);
+                Debug.Log("BackgroundManager already exists");
+                Destroy(gameObject);
+                return;  // Ensure no further code execution in this instance
             }
-            else
+            Inst = this;
+
+            // Convert MonoBehaviour list to IBackgroundController list
+            controllers = new List<IBackgroundController>();
+            foreach (var script in controllerScripts)
             {
-                Debug.LogError("One of the scripts does not implement IBackgroundController interface.");
+                if (script is IBackgroundController)
+                {
+                    controllers.Add(script as IBackgroundController);
+                }
+                else
+                {
+                    Debug.LogError("One of the scripts does not implement IBackgroundController interface.");
+                }
             }
         }
-    }
 
-    private void Start()
-    {
-        foreach (var controller in controllers)
+        private void Start()
         {
-            StartCoroutine(HandleScrolling(controller));
+            foreach (var controller in controllers)
+            {
+                StartCoroutine(HandleScrolling(controller));
+            }
         }
-    }
 
-    private IEnumerator HandleScrolling(IBackgroundController controller)
-    {
-        while (true)
+        private IEnumerator HandleScrolling(IBackgroundController controller)
         {
-            controller.CheckAndAdd();
-            yield return new WaitForSeconds(controller.Duration);
+            while (true)
+            {
+                controller.CheckAndAdd();
+                yield return new WaitForSeconds(controller.Duration);
+            }
         }
     }
 }

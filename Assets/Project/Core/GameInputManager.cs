@@ -1,116 +1,120 @@
+using Project.Ships;
 using UnityEngine;
 
-public class GameInputHandler : MonoBehaviour
+namespace Project.Core
 {
-    public static GameInputHandler Inst { get; private set; }
-    private GameControls controls;
-    public bool WASDEnabled;
-
-    private void Awake()
+    public class GameInputHandler : MonoBehaviour
     {
-        if (Inst != null && Inst != this)
+        public static GameInputHandler Inst { get; private set; }
+        private GameControls controls;
+        public bool WASDEnabled;
+
+        private void Awake()
         {
-            Debug.Log("GameInputHandler already exists");
-            Destroy(gameObject);
-            return;  // Ensure no further code execution in this instance
+            if (Inst != null && Inst != this)
+            {
+                Debug.Log("GameInputHandler already exists");
+                Destroy(gameObject);
+                return;  // Ensure no further code execution in this instance
+            }
+            Inst = this;
+
+            controls = new GameControls();
+            controls.Gameplay.Pause.performed += ctx => TogglePause();
+            controls.Gameplay.PrimaryAttack.performed += ctx => OnPrimaryAttackPerformed();
+            controls.Gameplay.PrimaryAttack.canceled += ctx => OnPrimaryAttackCanceled();
+            controls.Gameplay.SpecialAttack.performed += ctx => OnSpecialAttackPerformed();
+            controls.Gameplay.SpecialAttack.canceled += ctx => OnSpecialAttackCanceled();
+
+            controls.MenuNavigation.MoveUp.performed += ctx => MoveUp();
+            controls.MenuNavigation.MoveDown.performed += ctx => MoveDown();
+            controls.MenuNavigation.MoveLeft.performed += ctx => MoveLeft();
+            controls.MenuNavigation.MoveRight.performed += ctx => MoveRight();
+            controls.MenuNavigation.Select.performed += ctx => Select();
+            controls.MenuNavigation.Back.performed += ctx => Back();
         }
-        Inst = this;
 
-        controls = new GameControls();
-        controls.Gameplay.Pause.performed += ctx => TogglePause();
-        controls.Gameplay.PrimaryAttack.performed += ctx => OnPrimaryAttackPerformed();
-        controls.Gameplay.PrimaryAttack.canceled += ctx => OnPrimaryAttackCanceled();
-        controls.Gameplay.SpecialAttack.performed += ctx => OnSpecialAttackPerformed();
-        controls.Gameplay.SpecialAttack.canceled += ctx => OnSpecialAttackCanceled();
+        public void EnableGameplayControls()
+        {
+            Debug.Log("EnablingGameplayControls");
+            WASDEnabled = true;
+            controls.Gameplay.Enable();
+        }
 
-        controls.MenuNavigation.MoveUp.performed += ctx => MoveUp();
-        controls.MenuNavigation.MoveDown.performed += ctx => MoveDown();
-        controls.MenuNavigation.MoveLeft.performed += ctx => MoveLeft();
-        controls.MenuNavigation.MoveRight.performed += ctx => MoveRight();
-        controls.MenuNavigation.Select.performed += ctx => Select();
-        controls.MenuNavigation.Back.performed += ctx => Back();
-    }
+        public void DisableGameplayControls()
+        {
+            Debug.Log("DisablingGameplayControls");
+            WASDEnabled = false;
+            controls.Gameplay.Disable();
+        }
+        public void EnableMenuNavigationControls()
+        {
+            controls.MenuNavigation.Enable();
+        }
 
-    public void EnableGameplayControls()
-    {
-        Debug.Log("EnablingGameplayControls");
-        WASDEnabled = true;
-        controls.Gameplay.Enable();
-    }
+        public void DisableMenuNavigationControls()
+        {
+            controls.MenuNavigation.Disable();
+        }
 
-    public void DisableGameplayControls()
-    {
-        Debug.Log("DisablingGameplayControls");
-        WASDEnabled = false;
-        controls.Gameplay.Disable();
-    }
-    public void EnableMenuNavigationControls()
-    {
-        controls.MenuNavigation.Enable();
-    }
+        private void TogglePause()
+        {
+            GameManager.TogglePause();
+        }
 
-    public void DisableMenuNavigationControls()
-    {
-        controls.MenuNavigation.Disable();
-    }
+        private void OnPrimaryAttackPerformed()
+        {
+            PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
+            if (playerShip != null) playerShip.EnablePrimaryFire();
+        }
 
-    private void TogglePause()
-    {
-        GameManager.TogglePause();
-    }
+        private void OnPrimaryAttackCanceled()
+        {
+            PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
+            if (playerShip != null) playerShip.DisablePrimaryFire();
+        }
 
-    private void OnPrimaryAttackPerformed()
-    {
-        PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
-        if (playerShip != null) playerShip.EnablePrimaryFire();
-    }
+        private void OnSpecialAttackPerformed()
+        {
+            GameManager.DisableFirstSpecialWeaponUI();
+            PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
+            if (playerShip != null) playerShip.EnableSpecialFire();
+        }
 
-    private void OnPrimaryAttackCanceled()
-    {
-        PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
-        if (playerShip != null) playerShip.DisablePrimaryFire();
-    }
+        private void OnSpecialAttackCanceled()
+        {
+            PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
+            if (playerShip != null) playerShip.DisableSpecialFire();
+        }
 
-    private void OnSpecialAttackPerformed()
-    {
-        GameManager.DisableFirstSpecialWeaponUI();
-        PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
-        if (playerShip != null) playerShip.EnableSpecialFire();
-    }
+        private void MoveUp()
+        {
+            UIManager.Inst.HandleMoveUp();
+        }
 
-    private void OnSpecialAttackCanceled()
-    {
-        PlayerShip playerShip = PlayerManager.Inst.ActivePlayerShip;
-        if (playerShip != null) playerShip.DisableSpecialFire();
-    }
+        private void MoveDown()
+        {
+            UIManager.Inst.HandleMoveDown();
+        }
 
-    private void MoveUp()
-    {
-        UIManager.Inst.HandleMoveUp();
-    }
+        private void MoveLeft()
+        {
+            UIManager.Inst.HandleMoveLeft();
+        }
 
-    private void MoveDown()
-    {
-        UIManager.Inst.HandleMoveDown();
-    }
+        private void MoveRight()
+        {
+            UIManager.Inst.HandleMoveRight();
+        }
 
-    private void MoveLeft()
-    {
-        UIManager.Inst.HandleMoveLeft();
-    }
+        private void Select()
+        {
+            UIManager.Inst.HandleSelect();
+        }
 
-    private void MoveRight()
-    {
-        UIManager.Inst.HandleMoveRight();
-    }
-
-    private void Select()
-    {
-        UIManager.Inst.HandleSelect();
-    }
-
-    private void Back()
-    {
-        UIManager.Inst.HandleBack();
+        private void Back()
+        {
+            UIManager.Inst.HandleBack();
+        }
     }
 }

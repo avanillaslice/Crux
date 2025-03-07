@@ -1,33 +1,37 @@
+using Project.Ships;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Collider2D))]
-public class DroneShieldEffect : ShieldEffectBase
+namespace Project.Combat.Weapons
 {
-    private ShieldDrone ParentShieldDrone;
-
-    public void Initialise(bool isEnemy, ShieldDrone parentShieldDrone)
+    [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Collider2D))]
+    public class DroneShieldEffect : ShieldEffectBase
     {
-        IsEnemyShield = isEnemy;
-        ParentShieldDrone = parentShieldDrone;
-    }
+        private ShieldDrone ParentShieldDrone;
 
-    public override void HandleHit(float damage)
-    {
-        ParentShieldDrone.SubtractCharge(damage);
-    }
-
-    protected override void OnTriggerEnter2D(Collider2D other)
-    {
-        string tag = other.gameObject.tag;
-        if (tag == "Enemy" && !IsEnemyShield)
+        public void Initialise(bool isEnemy, ShieldDrone parentShieldDrone)
         {
-            // Upon collision, destroy enemy if their hp is less than the current charge
-            EnemyShip enemyShip = other.GetComponent<EnemyShip>();
-            if (enemyShip != null)
+            IsEnemyShield = isEnemy;
+            ParentShieldDrone = parentShieldDrone;
+        }
+
+        public override void HandleHit(float damage)
+        {
+            ParentShieldDrone.SubtractCharge(damage);
+        }
+
+        protected override void OnTriggerEnter2D(Collider2D other)
+        {
+            string tag = other.gameObject.tag;
+            if (tag == "Enemy" && !IsEnemyShield)
             {
-                HandleHit(enemyShip.damageOnCollision);
-                enemyShip.Die();
+                // Upon collision, destroy enemy if their hp is less than the current charge
+                EnemyShip enemyShip = other.GetComponent<EnemyShip>();
+                if (enemyShip != null)
+                {
+                    HandleHit(enemyShip.damageOnCollision);
+                    enemyShip.Die();
+                }
             }
         }
     }

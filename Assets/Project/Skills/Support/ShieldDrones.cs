@@ -1,33 +1,37 @@
 using System.Collections.Generic;
+using Project.Ships;
 using UnityEngine;
 
-public class ShieldDrones : DroneSkillBase
+namespace Project.Skills.Support
 {
-    public override string SkillName => "Shield Drones";
-    public override string Description => "Deploys shield drones to protect the ship.";
-    public override int MaxLevel => 3;
-
-    public override Dictionary<int, int> levelEffects => new Dictionary<int, int>
+    public class ShieldDrones : DroneSkillBase
     {
-        { 1, 1 },
-        { 2, 2 },
-        { 3, 3 }
-    };
+        public override string SkillName => "Shield Drones";
+        public override string Description => "Deploys shield drones to protect the ship.";
+        public override int MaxLevel => 3;
 
-    public ShieldDrones(int level) : base(level) { }
+        public override Dictionary<int, int> levelEffects => new Dictionary<int, int>
+        {
+            { 1, 1 },
+            { 2, 2 },
+            { 3, 3 }
+        };
 
-    protected override void SpawnDrone()
-    {
-        if (TargetShip == null) return;
-        DroneShip shieldDrone = TargetShip.SpawnDrone(true);
-        if (shieldDrone != null)
+        public ShieldDrones(int level) : base(level) { }
+
+        protected override void SpawnDrone()
         {
-            ActiveDrones.Add(shieldDrone);
-            shieldDrone.OnDeath += () => HandleDroneDeath(shieldDrone);
-        }
-        else
-        {
-            Debug.LogError("DroneShip component not found on instantiated drone prefab");
+            if (TargetShip == null) return;
+            DroneShip shieldDrone = TargetShip.SpawnDrone(true);
+            if (shieldDrone != null)
+            {
+                ActiveDrones.Add(shieldDrone);
+                shieldDrone.OnDeath += () => HandleDroneDeath(shieldDrone);
+            }
+            else
+            {
+                Debug.LogError("DroneShip component not found on instantiated drone prefab");
+            }
         }
     }
 }
