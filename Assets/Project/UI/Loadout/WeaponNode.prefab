@@ -74,8 +74,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 16777215
+  m_fontColor: {r: 1, g: 1, b: 1, a: 0}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -197,14 +197,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.2784314, b: 0.2784314, a: 0.8784314}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 13ec8011789fd44e7b149b7ee9b34623, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6f6c2d827b5ed454b90a1529cefe9041, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -229,11 +229,21 @@ MonoBehaviour:
   HoverColor: {r: 1, g: 1, b: 1, a: 0.8784314}
   SelectedColor: {r: 0, g: 0.12333298, b: 1, a: 0.8784314}
   ID: {fileID: 4331095104078386519}
+  HorizontalLineDistance: 2
+  DebugConnectionPoints: 0
   XPos: 0
   YPos: 0
   Side: 0
   WeaponNodeSelector: {fileID: 0}
-  State: 0
+  WeaponSlot:
+    id: 0
+    IsEmpty: 1
+    Type: 0
+    WeaponType: 0
+    WeaponIcon: {fileID: 0}
+    WeaponName: 
+    AttachPoints: []
+  IsDrawingLine: 0
 --- !u!114 &3655885635981465789
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,9 +12,6 @@
 *.csproj
 *.sln
 
-# CodeBuddy Files (May need to remove)
-.codebuddy/db/
-
 # Temporary and configuration files
 *.0
 *.md

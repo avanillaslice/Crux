@@ -28,10 +28,11 @@ namespace Project.Core
 			PlayerManager.Inst.BuildInitialSkills();
 			LoadoutManager.InitialiseLoadout();
 			MusicManager.Inst.PlayBackgroundMusic();
-			await PlayerManager.Inst.SpawnPlayerAsync(true); // Wait for the player to arrive
-			GameInputHandler.Inst.EnableGameplayControls();
+			await PlayerManager.Inst.SpawnPlayerAsync(false); // Wait for the player to arrive
+			TransitionToInterStage();
+			// GameInputHandler.Inst.EnableGameplayControls();
 			// StageManager.StartStage(0);
-			HandleStageCompleted();
+			// HandleStageCompleted();
 		}
 
 		public static void TogglePause()
