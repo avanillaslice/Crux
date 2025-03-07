@@ -90,7 +90,7 @@ namespace Project.Ships
             HUDManager.Inst.UpdateHealthBar();
         }
 
-        private void DeactivateShield()
+        public void DeactivateShield()
         {
             ShieldIsActive = false;
             Shield = 0;
@@ -100,7 +100,7 @@ namespace Project.Ships
             renderer.material = DefaultMaterial;
         }
 
-        private void ActivateShield()
+        public void ActivateShield()
         {
             ShieldIsActive = true;
             Renderer renderer = GetComponent<Renderer>();

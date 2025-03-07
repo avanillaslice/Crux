@@ -51,6 +51,7 @@ namespace Project.UI.Loadout
 		void OnEnable()
 		{
 			PlayerManager.Inst.ActivePlayerShip.transform.localScale += new Vector3(1f, 1f, 1f);
+			PlayerManager.Inst.ActivePlayerShip.DeactivateShield();
 			UpdateAvailableWeapons();
 			InitialiseLoadoutUI();
 			SetCursor(WeaponNodes[0]);
@@ -59,7 +60,7 @@ namespace Project.UI.Loadout
 		void OnDisable()
 		{
 			PlayerManager.Inst.ActivePlayerShip.transform.localScale -= new Vector3(1f, 1f, 1f);
-			
+			PlayerManager.Inst.ActivePlayerShip.ActivateShield();
 			// Reset cursor state to avoid lingering visual effects
 			if (WeaponNodeCursor != null)
 			{
@@ -106,7 +107,7 @@ namespace Project.UI.Loadout
 				{
 					AttachPoint attachPoint = weaponSlot.AttachPoints[j];
 					// FetchGameObject for transform position
-					Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y, WeaponUIContainer.transform.position.z); // One unit above player
+					Vector3 posAbovePlayer = new Vector3(attachPoint.transform.position.x, attachPoint.transform.position.y + 0.05f, WeaponUIContainer.transform.position.z); // One unit above player
 					WeaponNode weaponNode = Instantiate(AssetManager.WeaponNodePrefab, posAbovePlayer, Quaternion.identity, WeaponUIContainer.transform).GetComponent<WeaponNode>();
 					weaponNode.Init(attachPoint, weaponSlot, i);
 
