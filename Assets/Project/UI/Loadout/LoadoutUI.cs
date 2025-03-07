@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Project.Combat.Weapons;
 using Project.Core;
@@ -24,6 +25,9 @@ namespace Project.UI.Loadout
 		public WeaponNode WeaponNodeCursor;
 
 		public Dictionary<SlotType, List<WeaponBase>> AvailableWeapons { get; private set; }
+
+		private bool isInitializationComplete = false;
+		private int pendingConnectionLines = 0;
 
 		void Awake()
 		{
@@ -54,7 +58,6 @@ namespace Project.UI.Loadout
 			PlayerManager.Inst.ActivePlayerShip.DeactivateShield();
 			UpdateAvailableWeapons();
 			InitialiseLoadoutUI();
-			SetCursor(WeaponNodes[0]);
 		}
 
 		void OnDisable()
@@ -88,6 +91,90 @@ namespace Project.UI.Loadout
 			}
 			InstantiateWeaponNodeSelectors();
 			LinkNodesToSelectors();
+			
+			// Start the animation sequence
+			StartCoroutine(PlayStartupAnimations());
+		}
+
+		/// <summary>
+		/// Plays the startup animations for the LoadoutUI in sequence.
+		/// First animates each WeaponNode with a delay between them,
+		/// then activates all connection lines simultaneously.
+		/// </summary>
+		private IEnumerator PlayStartupAnimations()
+		{
+			// Reset the initialization state
+			isInitializationComplete = false;
+			pendingConnectionLines = WeaponNodes.Count;
+			
+			// Start an isolated animation sequence for each weapon node
+			foreach (WeaponNode weaponNode in WeaponNodes)
+			{
+				StartCoroutine(PlayNodeAnimation(weaponNode));
+				
+				// Wait for the specified delay before starting the next node's animation sequence
+				yield return new WaitForSeconds(0.35f);
+			}
+		}
+		
+		/// <summary>
+		/// Plays the initialization animation for a single weapon node and then activates its connection line.
+		/// This ensures each node's connection line is activated only after its animation completes.
+		/// </summary>
+		/// <param name="weaponNode">The weapon node to animate</param>
+		private IEnumerator PlayNodeAnimation(WeaponNode weaponNode)
+		{
+			// Get the Animator component from the WeaponNode
+			Animator animator = weaponNode.GetComponent<Animator>();
+			if (animator != null)
+			{
+				// Play the WeaponNodeInit animation
+				animator.Play("WeaponNodeInit");
+				
+				// Wait for the animation to complete
+				// Get the length of the current animation
+				AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+				float animationLength = stateInfo.length;
+				
+				// Wait for the animation to complete
+				yield return new WaitForSeconds(animationLength);
+				
+				// Activate the connection line after the animation completes
+				weaponNode.ActivateConnectionLine();
+				
+				// Start a coroutine to wait for the connection line to finish drawing
+				StartCoroutine(WaitForConnectionLineComplete(weaponNode));
+			}
+			else
+			{
+				Debug.LogWarning("Animator component not found on WeaponNode");
+				// Still activate the connection line even if there's no animator
+				weaponNode.ActivateConnectionLine();
+				
+				// Start a coroutine to wait for the connection line to finish drawing
+				StartCoroutine(WaitForConnectionLineComplete(weaponNode));
+			}
+		}
+
+		// Add a new method to wait for connection lines to complete
+		private IEnumerator WaitForConnectionLineComplete(WeaponNode weaponNode)
+		{
+			// Wait until the weapon node's connection line is no longer drawing
+			// This assumes the WeaponNodeConnection sets IsDrawingLine to false when complete
+			while (weaponNode.IsDrawingLine)
+			{
+				yield return null;
+			}
+			
+			// Decrement the counter of pending connection lines
+			pendingConnectionLines--;
+			
+			// If all connection lines are complete, mark initialization as complete
+			if (pendingConnectionLines <= 0)
+			{
+				isInitializationComplete = true;
+				Debug.Log("Loadout UI initialization complete - interactions now enabled");
+			}
 		}
 
 		// Fetch AttachPoints, Sort by YPOS, Sort into Left/Right/Middle
@@ -345,20 +432,30 @@ namespace Project.UI.Loadout
 
 		public void HandlePointerEnterOnNode(WeaponNode weaponNode)
 		{
-			// Don't change cursor if a node is already selected
-			if (WeaponNodeCursor != null && WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
+			// Set the cursor to this node
 			SetCursor(weaponNode);
+			
+			// Enable hover state
+			WeaponNodeCursor.EnableHover();
 		}
 
 		public void HandlePointerExitOnNode(WeaponNode weaponNode)
 		{
-			// Only disable hover if this is the current cursor and not in selected state
-			if (WeaponNodeCursor != weaponNode || WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
+			// Disable hover state
 			WeaponNodeCursor.DisableHover();
 		}
 
 		public void HandlePointerClickOnNode(WeaponNode weaponNode)
 		{
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
 			// If another node is already selected, ignore clicks on other nodes
 			if (WeaponNodeCursor != null && WeaponNodeCursor != weaponNode && 
 			    WeaponNodeCursor.State == WeaponNode.NodeState.Selected) return;
@@ -372,12 +469,16 @@ namespace Project.UI.Loadout
 
 		public override void HandleSelect()
 		{
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
 			// Forward the select action to the current cursor node
 			WeaponNodeCursor?.HandleSelect();
 		}
 
 		public override void HandleBack()
 		{
+			// HandleBack should work even when initialization is not complete
 			// If a node is selected, deselect it, otherwise handle normal back behavior
 			if (WeaponNodeCursor != null && WeaponNodeCursor.State == WeaponNode.NodeState.Selected) 
 				WeaponNodeCursor.HandleDeselect();
@@ -397,6 +498,9 @@ namespace Project.UI.Loadout
 
 		public override void HandleMoveLeft()
 		{
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
 			if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 			{
 				WeaponNode leftWeaponNode = DetermineAppropriateHorizontalNode(true);
@@ -407,6 +511,9 @@ namespace Project.UI.Loadout
 
 		public override void HandleMoveRight()
 		{
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
 			if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 			{
 				WeaponNode rightWeaponNode = DetermineAppropriateHorizontalNode(true);
@@ -417,6 +524,9 @@ namespace Project.UI.Loadout
 
 		public override void HandleMoveUp()
 		{
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
 			if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 			{
 				WeaponNode aboveWeaponNode = DetermineAppropriateVerticalNode(true);
@@ -432,6 +542,9 @@ namespace Project.UI.Loadout
 
 		public override void HandleMoveDown()
 		{
+			// Ignore interactions until initialization is complete
+			if (!isInitializationComplete) return;
+			
 			if (WeaponNodeCursor.State != WeaponNode.NodeState.Selected)
 			{
 				WeaponNode belowWeaponNode = DetermineAppropriateVerticalNode(false);

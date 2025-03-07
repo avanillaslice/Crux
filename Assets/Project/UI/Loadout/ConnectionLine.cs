@@ -82,6 +82,9 @@ namespace Project.UI.Loadout
             // Ensure the LineRenderer uses world space positions
             lineRenderer.useWorldSpace = true;
             
+            // Set the sorting layer to UI
+            lineRenderer.sortingLayerName = "UI";
+            
             // Set position count to 3 for the two-segment line
             lineRenderer.positionCount = 3;
             
@@ -379,6 +382,9 @@ namespace Project.UI.Loadout
             
             // Ensure the LineRenderer uses world space positions
             branchLineRenderer.useWorldSpace = true;
+            
+            // Set the sorting layer to UI
+            branchLineRenderer.sortingLayerName = "UI";
             
             // Set position count to 2 for a straight line
             branchLineRenderer.positionCount = 2;

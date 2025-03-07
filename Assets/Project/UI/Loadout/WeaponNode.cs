@@ -28,7 +28,6 @@ namespace Project.UI.Loadout
 		[HideInInspector] public RelativeSide Side;
 		[HideInInspector] public WeaponNodeSelector WeaponNodeSelector;
 		[HideInInspector] public NodeState State { get; private set; }
-		private Image ColorComponent;
 		private Color DefaultColor;
 		private List<WeaponNode> LinkedWeaponNodes = new List<WeaponNode>();
 		private AttachPoint AttachPoint;
@@ -50,8 +49,6 @@ namespace Project.UI.Loadout
 		}
 
 		void Awake() {
-			ColorComponent = gameObject.GetComponent<Image>();
-			DefaultColor = ColorComponent.color;
 			State = NodeState.Default;
 		}
 
@@ -84,8 +81,8 @@ namespace Project.UI.Loadout
 			// Create connection line
 			CreateConnectionLine();
 			
-			// Activate the line and keep it permanently drawn
-			connectionLine.ActivateLine();
+			// Connection line will be activated later during the animation sequence
+			// connectionLine.ActivateLine();
 		}
 		
 		private void CreateConnectionLine()
@@ -141,12 +138,30 @@ namespace Project.UI.Loadout
 		public void EnableHover()
 		{
 			if (!Initialised || State == NodeState.Hover || State == NodeState.Selected) return;
+			
+			// Play the hover enable animation
+			Animator animator = GetComponent<Animator>();
+			if (animator != null)
+			{
+				animator.Play("WeaponNodeHoverEnable");
+			}
+			
+			// Set the state after starting the animation
 			SetState(NodeState.Hover);
 		}
 
 		public void DisableHover()
 		{
 			if (!Initialised || State != NodeState.Hover || State == NodeState.Selected) return;
+			
+			// Play the hover disable animation
+			Animator animator = GetComponent<Animator>();
+			if (animator != null)
+			{
+				animator.Play("WeaponNodeHoverDisable");
+			}
+			
+			// Set the state after starting the animation
 			SetState(NodeState.Default);
 		}
 	
@@ -322,16 +337,13 @@ namespace Project.UI.Loadout
 			switch (newState)
 			{
 				case NodeState.Default:
-					ColorComponent.color = DefaultColor;
 					break;
 					
 				case NodeState.Hover:
-					ColorComponent.color = HoverColor;
 					WeaponNodeSelector.EnableHoverState();
 					break;
 					
 				case NodeState.Selected:
-					ColorComponent.color = SelectedColor;
 					// When transitioning to selected, also select linked nodes
 					if (State == NodeState.Hover) {
 						foreach (WeaponNode weaponNode in LinkedWeaponNodes) 
@@ -352,6 +364,36 @@ namespace Project.UI.Loadout
 				Destroy(connectionLine.gameObject);
 				connectionLine = null;
 			}
+		}
+
+		public void ActivateConnectionLine()
+		{
+			if (connectionLine != null)
+			{
+				// Set the flag to indicate that the line is being drawn
+				IsDrawingLine = true;
+				
+				// Activate the connection line
+				connectionLine.ActivateLine();
+				
+				// Start a coroutine to wait for the line drawing to complete
+				StartCoroutine(WaitForLineDrawingComplete());
+			}
+		}
+		
+		private IEnumerator WaitForLineDrawingComplete()
+		{
+			if (connectionLine == null)
+			{
+				IsDrawingLine = false;
+				yield break;
+			}
+			
+			// Wait for the line to be fully drawn (DrawDuration + a small buffer)
+			yield return new WaitForSeconds(connectionLine.DrawDuration + 0.1f);
+			
+			// Set the flag to indicate that the line drawing is complete
+			IsDrawingLine = false;
 		}
 	}
 }
