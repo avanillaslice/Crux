@@ -2,26 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using Project.Core;
 using Project.Ships;
-using Project.UI.Loadout.Controllers;
 using Project.UI.Loadout.Events;
 using Project.UI.Loadout.Factories;
 using Project.UI.Loadout.Model;
 using Project.UI.Loadout.Services;
 using UnityEngine;
 
-namespace Project.UI.Loadout
+namespace Project.UI.Loadout.Controllers
 {
 	/// <summary>
 	/// Main controller for the Loadout UI system.
 	/// </summary>
-	public class LoadoutUI : UIWindowBase
+	public class LoadoutUIController : UIWindowBase
 	{
 		// Singleton instance
-		public static LoadoutUI Inst { get; private set; }
+		public static LoadoutUIController Inst { get; private set; }
 
 		// Inspector
 		[Header("UI References")]
-		[SerializeField] public GameObject WeaponUIContainer;
+		[SerializeField] private GameObject weaponUIContainer;
 
 		[Header("Settings")]
 		[SerializeField] private float weaponNodeSelectorDistance = 3f;
@@ -74,9 +73,6 @@ namespace Project.UI.Loadout
 			// Setup player ship
 			PlayerManager.Inst.ActivePlayerShip.transform.localScale += new Vector3(1f, 1f, 1f);
 			PlayerManager.Inst.ActivePlayerShip.DeactivateShield();
-
-			// Update available weapons
-			LoadoutModel.Instance.UpdateAvailableWeapons();
 
 			// Initialize the UI
 			InitializeLoadoutUI();
@@ -136,17 +132,6 @@ namespace Project.UI.Loadout
 			factoryObj.transform.SetParent(transform);
 			factory = factoryObj.AddComponent<LoadoutFactory>();
 
-			// Set the UI container reference in the factory
-			if (WeaponUIContainer == null)
-			{
-				Debug.LogError("WeaponUIContainer is null in LoadoutUI.CreateControllers");
-			}
-			else
-			{
-				Debug.Log($"Setting UI container: {WeaponUIContainer.name}");
-				factory.SetUIContainer(WeaponUIContainer.transform);
-			}
-
 			// Register controllers with service locator
 			LoadoutServices.Register(animationController);
 			LoadoutServices.Register(inputController);
@@ -159,12 +144,8 @@ namespace Project.UI.Loadout
 		/// </summary>
 		private void InitializeLoadoutUI()
 		{
-			// Check if factory is initialized
-			if (factory == null)
-			{
-				Debug.LogError("Factory is null in LoadoutUI.InitializeLoadoutUI. Creating controllers again.");
-				CreateControllers();
-			}
+			// Update available weapons
+			LoadoutModel.Instance.UpdateAvailableWeapons();
 
 			// Load weapon slots
 			LoadoutModel.Instance.LoadActiveWeaponSlots();
