@@ -221,9 +221,9 @@ GameObject:
   m_Component:
   - component: {fileID: 156695979242798808}
   - component: {fileID: 5569124864983731283}
-  - component: {fileID: 5490760002472253359}
   - component: {fileID: 3655885635981465789}
   - component: {fileID: 5567702788149908278}
+  - component: {fileID: 6545306330569010881}
   m_Layer: 5
   m_Name: WeaponNode
   m_TagString: Untagged
@@ -262,36 +262,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2422969188867149860}
   m_CullTransparentMesh: 1
---- !u!114 &5490760002472253359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2422969188867149860}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a13ca6abeeee804c8f70652d3c18d56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  HoverColor: {r: 1, g: 1, b: 1, a: 0.8784314}
-  SelectedColor: {r: 0, g: 0.12333298, b: 1, a: 0.8784314}
-  ID: {fileID: 4331095104078386519}
-  HorizontalLineDistance: 2
-  DebugConnectionPoints: 0
-  XPos: 0
-  YPos: 0
-  Side: 0
-  WeaponNodeSelector: {fileID: 0}
-  WeaponSlot:
-    id: 0
-    IsEmpty: 1
-    Type: 0
-    WeaponType: 0
-    WeaponIcon: {fileID: 0}
-    WeaponName: 
-    AttachPoints: []
-  IsDrawingLine: 0
 --- !u!114 &3655885635981465789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -309,8 +279,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 5490760002472253359}
-          m_TargetAssemblyTypeName: WeaponNode, Assembly-CSharp
+        - m_Target: {fileID: 6545306330569010881}
+          m_TargetAssemblyTypeName: Project.UI.Loadout.WeaponNode, Assembly-CSharp
           m_MethodName: HandlePointerEnter
           m_Mode: 1
           m_Arguments:
@@ -325,8 +295,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 5490760002472253359}
-          m_TargetAssemblyTypeName: WeaponNode, Assembly-CSharp
+        - m_Target: {fileID: 6545306330569010881}
+          m_TargetAssemblyTypeName: Project.UI.Loadout.WeaponNode, Assembly-CSharp
           m_MethodName: HandlePointerExit
           m_Mode: 1
           m_Arguments:
@@ -341,9 +311,9 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 5490760002472253359}
-          m_TargetAssemblyTypeName: WeaponNode, Assembly-CSharp
-          m_MethodName: HandleSelect
+        - m_Target: {fileID: 6545306330569010881}
+          m_TargetAssemblyTypeName: Project.UI.Loadout.WeaponNode, Assembly-CSharp
+          m_MethodName: HandlePointerClick
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -375,6 +345,23 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6545306330569010881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2422969188867149860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7adf38eb8e50cb9469e79b98b116fd97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  idText: {fileID: 4331095104078386519}
+  horizontalLineDistance: 2
+  debugConnectionPoints: 0
 --- !u!1 &4635261743139703666
 GameObject:
   m_ObjectHideFlags: 0

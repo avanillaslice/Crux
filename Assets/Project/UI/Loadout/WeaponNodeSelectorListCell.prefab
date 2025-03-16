@@ -2023,7 +2023,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2036530917753688155}
   - component: {fileID: 3564944641988220722}
-  - component: {fileID: 3013069873603177380}
+  - component: {fileID: 6129681211800503041}
   - component: {fileID: 5329908350919921202}
   m_Layer: 0
   m_Name: WeaponNodeSelectorListCell
@@ -2066,7 +2066,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5866115874405305843}
   m_CullTransparentMesh: 1
---- !u!114 &3013069873603177380
+--- !u!114 &6129681211800503041
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2075,23 +2075,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 5866115874405305843}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84c8bcf2f775470469ad4f9cbea43edd, type: 3}
+  m_Script: {fileID: 11500000, guid: 5afb17db9df5483449e3a748baeacb51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IconComponent: {fileID: 2237967964779072025}
-  Name: {fileID: 4446949674075693064}
-  Description: {fileID: 5478141678563021649}
-  BackgroundComponents:
-  - {fileID: 2036030540311288440}
-  - {fileID: 5624627774411190804}
-  - {fileID: 1699336500671007156}
+  iconComponent: {fileID: 2237967964779072025}
+  nameText: {fileID: 4446949674075693064}
+  descriptionText: {fileID: 5478141678563021649}
+  backgroundComponentContainer:
+  - {fileID: 3462830220355684531}
+  - {fileID: 8758097873719678098}
+  - {fileID: 7135923382291991750}
+  - {fileID: 5352081799578436116}
+  - {fileID: 7302964553886213782}
   Animator: {fileID: 5329908350919921202}
-  PortTop: {fileID: 0}
-  PortBottom: {fileID: 0}
-  ListIndexText: {fileID: 3296812782055388812}
-  ListId: 0
-  ListPosition: 0
-  WeaponListIndex: 0
+  listIndexText: {fileID: 3296812782055388812}
 --- !u!95 &5329908350919921202
 Animator:
   serializedVersion: 7

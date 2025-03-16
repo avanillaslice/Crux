@@ -444,7 +444,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2036530917753688155}
   - component: {fileID: 3564944641988220722}
-  - component: {fileID: 2681776873609581226}
+  - component: {fileID: 5303814403858465327}
   m_Layer: 5
   m_Name: WeaponNodeSelector
   m_TagString: Untagged
@@ -483,7 +483,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5866115874405305843}
   m_CullTransparentMesh: 1
---- !u!114 &2681776873609581226
+--- !u!114 &5303814403858465327
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -492,17 +492,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 5866115874405305843}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f9a19d283f6a504ba126825f0595e59, type: 3}
+  m_Script: {fileID: 11500000, guid: 5beb9222297f2044caa5ad032b914b48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  List: {fileID: 8075490959336372580}
-  SlotTypeIcon: {fileID: 2882962673721344658}
-  SlotTypeText: {fileID: 1635522352073636115}
+  list: {fileID: 7600179114874984976}
+  slotTypeIcon: {fileID: 8711461102566977717}
+  slotTypeText: {fileID: 1635522352073636115}
   ID: {fileID: 8072201239343623973}
-  LeftPort: {fileID: 5072480724398754002}
-  RightPort: {fileID: 9198962710038211817}
-  TopPort: {fileID: 8467718863747643474}
-  BottomPort: {fileID: 4417232138137132934}
+  leftPort: {fileID: 5072480724398754002}
+  rightPort: {fileID: 9198962710038211817}
+  topPort: {fileID: 8467718863747643474}
+  bottomPort: {fileID: 4417232138137132934}
 --- !u!1 &8191700539733591682
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,7 +638,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3074478589685994928}
-  - component: {fileID: 8075490959336372580}
+  - component: {fileID: 7600179114874984976}
   m_Layer: 5
   m_Name: WeaponNodeSelectorList
   m_TagString: Untagged
@@ -669,7 +669,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 344.7, y: 806.2855}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &8075490959336372580
+--- !u!114 &7600179114874984976
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -678,15 +678,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8470335109189627743}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04d7a2c8121a4e74a988ee96f5275cfb, type: 3}
+  m_Script: {fileID: 11500000, guid: 9099b453923d7854790246a92d21c387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ListId: 0
-  IsScrolling: 0
-  ScrollBuffer: 0
-  State: 0
-  ActiveCell: {fileID: 0}
-  AvailableWeapons: []
 --- !u!1 &9198962710038211817
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,7 +19,7 @@ namespace Project.UI.Loadout
 		[SerializeField] private SpriteRenderer iconComponent;
 		[SerializeField] private TextMeshProUGUI nameText;
 		[SerializeField] private TextMeshProUGUI descriptionText;
-		[SerializeField] private List<Image> backgroundComponents;
+		[SerializeField] private List<GameObject> backgroundComponentContainer;
 		[SerializeField] public Animator Animator;
 		[SerializeField] private TextMeshProUGUI listIndexText;
 
@@ -33,6 +33,7 @@ namespace Project.UI.Loadout
 
 		// Private fields
 		private List<BorderComponent> borderComponents;
+		private List<Image> backgroundComponents;
 		private SpriteRenderer[] spriteRenderers;
 		private Color defaultNameColor;
 		private float defaultNameGlow;
@@ -83,7 +84,7 @@ namespace Project.UI.Loadout
 		void Awake()
 		{
 			spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
-			InitializeBorder();
+			InitializeBackgroundComponents();
 
 			// Set default name color and glow
 			defaultNameColor = nameText.color;
@@ -93,17 +94,20 @@ namespace Project.UI.Loadout
 		/// <summary>
 		/// Initializes the border components.
 		/// </summary>
-		private void InitializeBorder()
+		private void InitializeBackgroundComponents()
 		{
 			borderComponents = new List<BorderComponent>();
-			FindUIBorderComponents(transform);
+			backgroundComponents = new List<Image>();
+			foreach (GameObject child in backgroundComponentContainer) {
+				FindUIBackgroundComponents(child.transform);
+			}
 		}
 
 		/// <summary>
 		/// Recursively finds UI border components in the hierarchy.
 		/// </summary>
 		/// <param name="parent">The parent transform to search</param>
-		private void FindUIBorderComponents(Transform parent)
+		private void FindUIBackgroundComponents(Transform parent)
 		{
 			foreach (Transform child in parent)
 			{
@@ -111,9 +115,11 @@ namespace Project.UI.Loadout
 				{
 					borderComponents.Add(new BorderComponent(child));
 				}
-
-				// Recursively check children
-				FindUIBorderComponents(child);
+				else
+				{
+					Image image = child.GetComponent<Image>();
+					if (image != null) backgroundComponents.Add(image);
+				}
 			}
 		}
 
@@ -126,7 +132,7 @@ namespace Project.UI.Loadout
 			gameObject.transform.localScale = new Vector3(posData.Scale, posData.Scale, gameObject.transform.localScale.z);
 			SetCellOpacity(posData.Opacity);
 
-			if (listIndexText.text == "abc") listIndexText.text = posData.Position.ToString();
+			if (listIndexText != null && listIndexText.text == "abc") listIndexText.text = posData.Position.ToString();
 
 			ListPosition = posData.Position;
 			gameObject.transform.localPosition = new Vector3(gameObject.transform.localPosition.x, posData.YPos, gameObject.transform.localPosition.z);

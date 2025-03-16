@@ -1,4 +1,5 @@
 using Project.UI.Loadout.Events;
+using Project.Core;
 using UnityEngine;
 
 namespace Project.UI.Loadout.Controllers
@@ -8,78 +9,92 @@ namespace Project.UI.Loadout.Controllers
 	/// </summary>
 	public class LoadoutInputController : MonoBehaviour
 	{
-		// Input settings
-		[Header("Input Settings")]
-		[SerializeField] private float inputCooldown = 0.2f;
-
 		// State tracking
 		private bool isInitialized = false;
 		private bool isInputEnabled = true;
-		private float lastInputTime = 0f;
 
 		void OnEnable()
 		{
-			// Subscribe to events
+			// Subscribe to Loadout events
 			LoadoutEvents.OnAllAnimationsComplete += HandleAnimationsComplete;
 			LoadoutEvents.OnLoadoutClosed += HandleLoadoutClosed;
+
+			// Subscribe to input events
+			if (GameInputHandler.Inst != null)
+			{
+				SubscribeToInputEvents();
+				GameInputHandler.Inst.EnableMenuNavigationControls();
+			}
 		}
 
 		void OnDisable()
 		{
-			// Unsubscribe from events
+			// Unsubscribe from Loadout events
 			LoadoutEvents.OnAllAnimationsComplete -= HandleAnimationsComplete;
 			LoadoutEvents.OnLoadoutClosed -= HandleLoadoutClosed;
+
+			// Unsubscribe from input events
+			if (GameInputHandler.Inst != null)
+			{
+				UnsubscribeFromInputEvents();
+				GameInputHandler.Inst.DisableMenuNavigationControls();
+			}
 		}
 
-		void Update()
+		private void SubscribeToInputEvents()
+		{
+			GameInputHandler.Inst.OnMoveUp += HandleMoveUp;
+			GameInputHandler.Inst.OnMoveDown += HandleMoveDown;
+			GameInputHandler.Inst.OnMoveLeft += HandleMoveLeft;
+			GameInputHandler.Inst.OnMoveRight += HandleMoveRight;
+			GameInputHandler.Inst.OnSelect += HandleSelect;
+			GameInputHandler.Inst.OnBack += HandleBack;
+		}
+
+		private void UnsubscribeFromInputEvents()
+		{
+			GameInputHandler.Inst.OnMoveUp -= HandleMoveUp;
+			GameInputHandler.Inst.OnMoveDown -= HandleMoveDown;
+			GameInputHandler.Inst.OnMoveLeft -= HandleMoveLeft;
+			GameInputHandler.Inst.OnMoveRight -= HandleMoveRight;
+			GameInputHandler.Inst.OnSelect -= HandleSelect;
+			GameInputHandler.Inst.OnBack -= HandleBack;
+		}
+
+		private void HandleMoveUp()
 		{
 			if (!isInitialized || !isInputEnabled) return;
+			LoadoutEvents.TriggerNavigationInput(Vector2.up);
+		}
 
-			// Check for input cooldown
-			if (Time.time - lastInputTime < inputCooldown) return;
+		private void HandleMoveDown()
+		{
+			if (!isInitialized || !isInputEnabled) return;
+			LoadoutEvents.TriggerNavigationInput(Vector2.down);
+		}
 
-			// Handle directional input
-			Vector2 direction = Vector2.zero;
+		private void HandleMoveLeft()
+		{
+			if (!isInitialized || !isInputEnabled) return;
+			LoadoutEvents.TriggerNavigationInput(Vector2.left);
+		}
 
-			if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
-			{
-				direction = Vector2.up;
-			}
-			else if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
-			{
-				direction = Vector2.down;
-			}
-			else if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
-			{
-				direction = Vector2.left;
-			}
-			else if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
-			{
-				direction = Vector2.right;
-			}
+		private void HandleMoveRight()
+		{
+			if (!isInitialized || !isInputEnabled) return;
+			LoadoutEvents.TriggerNavigationInput(Vector2.right);
+		}
 
-			if (direction != Vector2.zero)
-			{
-				LoadoutEvents.TriggerNavigationInput(direction);
-				lastInputTime = Time.time;
-				return;
-			}
+		private void HandleSelect()
+		{
+			if (!isInitialized || !isInputEnabled) return;
+			LoadoutEvents.TriggerSelectInput();
+		}
 
-			// Handle select input
-			if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-			{
-				LoadoutEvents.TriggerSelectInput();
-				lastInputTime = Time.time;
-				return;
-			}
-
-			// Handle back input
-			if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
-			{
-				LoadoutEvents.TriggerBackInput();
-				lastInputTime = Time.time;
-				return;
-			}
+		private void HandleBack()
+		{
+			if (!isInitialized || !isInputEnabled) return;
+			LoadoutEvents.TriggerBackInput();
 		}
 
 		/// <summary>
@@ -89,7 +104,6 @@ namespace Project.UI.Loadout.Controllers
 		{
 			isInitialized = false;
 			isInputEnabled = false;
-			lastInputTime = 0f;
 		}
 
 		/// <summary>
